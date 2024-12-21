@@ -86,11 +86,12 @@ class MIoTNetwork:
         '208.67.222.222',   # OpenDNS
         '9.9.9.9',          # Quad9 DNS
     ]
+    DEFAULT_REFRESH_INTERVAL: int = 30
     _main_loop: asyncio.AbstractEventLoop
 
     _refresh_interval: int
-    _refresh_task: asyncio.Task
-    _refresh_timer: asyncio.TimerHandle
+    _refresh_task: Optional[asyncio.Task]
+    _refresh_timer: Optional[asyncio.TimerHandle]
 
     _network_status: bool
     _network_info: dict[str, NetworkInfo]
@@ -108,7 +109,7 @@ class MIoTNetwork:
     ) -> None:
         self._main_loop = loop or asyncio.get_running_loop()
 
-        self._refresh_interval = None
+        self._refresh_interval = self.DEFAULT_REFRESH_INTERVAL
         self._refresh_task = None
         self._refresh_timer = None
 
@@ -138,7 +139,7 @@ class MIoTNetwork:
             self._refresh_timer.cancel()
             self._refresh_timer = None
 
-        self._refresh_interval = None
+        self._refresh_interval = self.DEFAULT_REFRESH_INTERVAL
         self._network_status = False
         self._network_info.clear()
         self._sub_list_network_status.clear()
@@ -244,18 +245,19 @@ class MIoTNetwork:
         self, status: InterfaceStatus, info: NetworkInfo
     ) -> None:
         for handler in self._sub_list_network_info.values():
-            self._main_loop.create_task(handler(status, info))
+            self._main_loop.create_task(handler(status, info))  # type: ignore
 
     async def __update_status_and_info_async(self, timeout: int = 6) -> None:
         try:
             status: bool = await self._main_loop.run_in_executor(
-                None, self.__get_network_status, timeout)
+                None, self.__get_network_status, timeout)  # type: ignore
             infos = await self._main_loop.run_in_executor(
                 None, self.__get_network_info)
 
             if self._network_status != status:
                 for handler in self._sub_list_network_status.values():
-                    self._main_loop.create_task(handler(status))
+                    self._main_loop.create_task(
+                        handler(status))  # type: ignore
                 self._network_status = status
 
             for name in list(self._network_info.keys()):
@@ -273,7 +275,7 @@ class MIoTNetwork:
                     # Remove
                     self.__call_network_info_change(
                         InterfaceStatus.REMOVE,
-                        self._network_info.pop(name, None))
+                        self._network_info.pop(name))
             # Add
             for name, info in infos.items():
                 self._network_info[name] = info
