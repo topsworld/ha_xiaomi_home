@@ -47,7 +47,7 @@ Water heater entities for Xiaomi Home.
 """
 from __future__ import annotations
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -93,7 +93,7 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
     _prop_target_temp: Optional[MIoTSpecProperty]
     _prop_mode: Optional[MIoTSpecProperty]
 
-    _mode_list: Optional[dict[any, any]]
+    _mode_list: Optional[dict[Any, Any]]
 
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
@@ -164,7 +164,7 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
         """Turn the water heater off."""
         await self.set_property_async(prop=self._prop_on, value=False)
 
-    async def async_set_temperature(self, **kwargs: any) -> None:
+    async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set the temperature the water heater should heat water to."""
         await self.set_property_async(
             prop=self._prop_target_temp, value=kwargs[ATTR_TEMPERATURE])

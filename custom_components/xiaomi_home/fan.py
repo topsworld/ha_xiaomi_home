@@ -93,7 +93,7 @@ class Fan(MIoTServiceEntity, FanEntity):
     _speed_min: Optional[int]
     _speed_max: Optional[int]
     _speed_step: Optional[int]
-    _mode_list: Optional[dict[any, any]]
+    _mode_list: Optional[dict[Any, Any]]
 
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData

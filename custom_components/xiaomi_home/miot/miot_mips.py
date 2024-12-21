@@ -58,7 +58,7 @@ import threading
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Callable, Optional, final
+from typing import Any, Callable, Optional, final
 
 from paho.mqtt.client import (
     MQTT_ERR_SUCCESS,
@@ -173,9 +173,9 @@ class MipsCmdType(Enum):
 class MipsCmd:
     """MIoT Pub/Sub command."""
     type_: MipsCmdType
-    data: any
+    data: Any
 
-    def __init__(self, type_: MipsCmdType, data: any) -> None:
+    def __init__(self, type_: MipsCmdType, data: Any) -> None:
         self.type_ = type_
         self.data = data
 
@@ -184,8 +184,8 @@ class MipsCmd:
 class MipsRequest:
     """MIoT Pub/Sub request."""
     mid: int = None
-    on_reply: Callable[[str, any], None] = None
-    on_reply_ctx: any = None
+    on_reply: Callable[[str, Any], None] = None
+    on_reply_ctx: Any = None
     timer: TimeoutHandle = None
 
 
@@ -194,8 +194,8 @@ class MipsRequestData:
     """MIoT Pub/Sub request data."""
     topic: str = None
     payload: str = None
-    on_reply: Callable[[str, any], None] = None
-    on_reply_ctx: any = None
+    on_reply: Callable[[str, Any], None] = None
+    on_reply_ctx: Any = None
     timeout_ms: int = None
 
 
@@ -223,8 +223,8 @@ class MipsApi:
     param2: payload
     param3: handler_ctx
     """
-    handler: Callable[[MipsIncomingApiCall, str, any], None] = None
-    handler_ctx: any = None
+    handler: Callable[[MipsIncomingApiCall, str, Any], None] = None
+    handler_ctx: Any = None
 
 
 class MipsRegApi(MipsApi):
@@ -247,8 +247,8 @@ class MipsBroadcast:
     param 2: msg payload
     param 3: handle_ctx
     """
-    handler: Callable[[str, str, any], None] = None
-    handler_ctx: any = None
+    handler: Callable[[str, str, Any], None] = None
+    handler_ctx: Any = None
 
     def __str__(self) -> str:
         return f'{self.topic}, {id(self.handler)}, {id(self.handler_ctx)}'
@@ -265,7 +265,6 @@ class MipsState:
     """
     str: key
     bool: mips connect state
-    any: ctx
     """
     handler: Callable[[str, bool], asyncio.Future] = None
 
@@ -288,10 +287,10 @@ class MipsDeviceState:
     """handler
     str: did
     MIoTDeviceState: online/offline/disable
-    any: ctx
+    Any: ctx
     """
-    handler: Callable[[str, MIoTDeviceState, any], None] = None
-    handler_ctx: any = None
+    handler: Callable[[str, MIoTDeviceState, Any], None] = None
+    handler_ctx: Any = None
 
 
 class MipsRegDeviceState(MipsDeviceState):
@@ -512,8 +511,8 @@ class MipsClient(ABC):
 
     @final
     def mev_set_timeout(
-        self, timeout_ms: int, handler: Callable[[any], None],
-        handler_ctx: any = None
+        self, timeout_ms: int, handler: Callable[[Any], None],
+        handler_ctx: Any = None
     ) -> Optional[TimeoutHandle]:
         """set timeout.
         NOTICE: Internal function, only mips threads are allowed to call
@@ -534,7 +533,7 @@ class MipsClient(ABC):
 
     @final
     def mev_set_read_handler(
-        self, fd: int, handler: Callable[[any], None], handler_ctx: any
+        self, fd: int, handler: Callable[[Any], None], handler_ctx: Any
     ) -> bool:
         """set read handler.
         NOTICE: Internal function, only mips threads are allowed to call
@@ -546,7 +545,7 @@ class MipsClient(ABC):
 
     @final
     def mev_set_write_handler(
-        self, fd: int, handler: Callable[[any], None], handler_ctx: any
+        self, fd: int, handler: Callable[[Any], None], handler_ctx: Any
     ) -> bool:
         """set write handler.
         NOTICE: Internal function, only mips threads are allowed to call
@@ -604,8 +603,8 @@ class MipsClient(ABC):
 
     @abstractmethod
     def sub_prop(
-        self, did: str, handler: Callable[[dict, any], None],
-        siid: int = None, piid: int = None, handler_ctx: any = None
+        self, did: str, handler: Callable[[dict, Any], None],
+        siid: int = None, piid: int = None, handler_ctx: Any = None
     ) -> bool: ...
 
     @abstractmethod
@@ -615,8 +614,8 @@ class MipsClient(ABC):
 
     @abstractmethod
     def sub_event(
-        self, did: str, handler: Callable[[dict, any], None],
-        siid: int = None, eiid: int = None, handler_ctx: any = None
+        self, did: str, handler: Callable[[dict, Any], None],
+        siid: int = None, eiid: int = None, handler_ctx: Any = None
     ) -> bool: ...
 
     @abstractmethod
@@ -632,11 +631,11 @@ class MipsClient(ABC):
     @abstractmethod
     async def get_prop_async(
         self, did: str, siid: int, piid: int, timeout_ms: int = 10000
-    ) -> any: ...
+    ) -> Any: ...
 
     @abstractmethod
     async def set_prop_async(
-        self, did: str, siid: int, piid: int, value: any,
+        self, did: str, siid: int, piid: int, value: Any,
         timeout_ms: int = 10000
     ) -> bool: ...
 
@@ -709,7 +708,7 @@ class MipsClient(ABC):
         return False
 
     @final
-    def _mips_send_cmd(self, type_: MipsCmdType, data: any) -> bool:
+    def _mips_send_cmd(self, type_: MipsCmdType, data: Any) -> bool:
         if self._mips_queue is None or self._cmd_event_fd is None:
             raise MIoTMipsError('send mips cmd disable')
         # Put data to queue
@@ -723,7 +722,7 @@ class MipsClient(ABC):
         if threading.current_thread() is not self._mips_thread:
             raise MIoTMipsError('illegal call')
 
-    def __mips_cmd_read_handler(self, ctx: any) -> None:
+    def __mips_cmd_read_handler(self, ctx: Any) -> None:
         fd_value = os.eventfd_read(self._cmd_event_fd)
         if fd_value == 0:
             return
@@ -763,20 +762,20 @@ class MipsClient(ABC):
                 if self._on_mips_cmd:
                     self._on_mips_cmd(mips_cmd=mips_cmd)
 
-    def __mqtt_read_handler(self, ctx: any) -> None:
+    def __mqtt_read_handler(self, ctx: Any) -> None:
         self.__mqtt_loop_handler(ctx=ctx)
 
-    def __mqtt_write_handler(self, ctx: any) -> None:
+    def __mqtt_write_handler(self, ctx: Any) -> None:
         self.mev_set_write_handler(self._mqtt_fd, None, None)
         self.__mqtt_loop_handler(ctx=ctx)
 
-    def __mqtt_timer_handler(self, ctx: any) -> None:
+    def __mqtt_timer_handler(self, ctx: Any) -> None:
         self.__mqtt_loop_handler(ctx=ctx)
         if self._mqtt:
             self._mqtt_timer = self.mev_set_timeout(
                 self.MQTT_INTERVAL_MS, self.__mqtt_timer_handler, None)
 
-    def __mqtt_loop_handler(self, ctx: any) -> None:
+    def __mqtt_loop_handler(self, ctx: Any) -> None:
         try:
             if self._mqtt:
                 self._mqtt.loop_read()
@@ -896,7 +895,7 @@ class MipsClient(ABC):
         self._mips_reconnect_timer = self.mev_set_timeout(
             interval, self.__mips_connect, None)
 
-    def __mips_sub_internal_pending_handler(self, ctx: any) -> None:
+    def __mips_sub_internal_pending_handler(self, ctx: Any) -> None:
         subbed_count = 1
         for topic in list(self._mips_sub_pending_map.keys()):
             if subbed_count > self.MIPS_SUB_PATCH:
@@ -923,7 +922,7 @@ class MipsClient(ABC):
         else:
             self._mips_sub_pending_timer = None
 
-    def __mips_connect(self, ctx: any = None) -> None:
+    def __mips_connect(self, ctx: Any = None) -> None:
         result = MQTT_ERR_UNKNOWN
         if self._mips_reconnect_timer:
             self.mev_clear_timeout(self._mips_reconnect_timer)
@@ -1034,8 +1033,8 @@ class MipsCloudClient(MipsClient):
 
     @final
     def sub_prop(
-        self, did: str, handler: Callable[[dict, any], None],
-        siid: int = None, piid: int = None, handler_ctx: any = None
+        self, did: str, handler: Callable[[dict, Any], None],
+        siid: int = None, piid: int = None, handler_ctx: Any = None
     ) -> bool:
         if not isinstance(did, str) or handler is None:
             raise MIoTMipsError('invalid params')
@@ -1044,7 +1043,7 @@ class MipsCloudClient(MipsClient):
             f'device/{did}/up/properties_changed/'
             f'{"#" if siid is None or piid is None else f"{siid}/{piid}"}')
 
-        def on_prop_msg(topic: str, payload: str, ctx: any) -> bool:
+        def on_prop_msg(topic: str, payload: str, ctx: Any) -> bool:
             try:
                 msg: dict = json.loads(payload)
             except json.JSONDecodeError:
@@ -1077,8 +1076,8 @@ class MipsCloudClient(MipsClient):
 
     @final
     def sub_event(
-        self, did: str, handler: Callable[[dict, any], None],
-        siid: int = None, eiid: int = None, handler_ctx: any = None
+        self, did: str, handler: Callable[[dict, Any], None],
+        siid: int = None, eiid: int = None, handler_ctx: Any = None
     ) -> bool:
         if not isinstance(did, str) or handler is None:
             raise MIoTMipsError('invalid params')
@@ -1087,7 +1086,7 @@ class MipsCloudClient(MipsClient):
             f'device/{did}/up/event_occured/'
             f'{"#" if siid is None or eiid is None else f"{siid}/{eiid}"}')
 
-        def on_event_msg(topic: str, payload: str, ctx: any) -> bool:
+        def on_event_msg(topic: str, payload: str, ctx: Any) -> bool:
             try:
                 msg: dict = json.loads(payload)
             except json.JSONDecodeError:
@@ -1122,15 +1121,15 @@ class MipsCloudClient(MipsClient):
 
     @final
     def sub_device_state(
-        self, did: str, handler: Callable[[str, MIoTDeviceState, any], None],
-        handler_ctx: any = None
+        self, did: str, handler: Callable[[str, MIoTDeviceState, Any], None],
+        handler_ctx: Any = None
     ) -> bool:
         """subscribe online state."""
         if not isinstance(did, str) or handler is None:
             raise MIoTMipsError('invalid params')
         topic: str = f'device/{did}/state/#'
 
-        def on_state_msg(topic: str, payload: str, ctx: any) -> None:
+        def on_state_msg(topic: str, payload: str, ctx: Any) -> None:
             msg: dict = json.loads(payload)
             # {"device_id":"xxxx","device_name":"米家智能插座3   ","event":"online",
             # "model": "cuco.plug.v3","timestamp":1709001070828,"uid":xxxx}
@@ -1163,11 +1162,11 @@ class MipsCloudClient(MipsClient):
 
     async def get_prop_async(
         self, did: str, siid: int, piid: int,  timeout_ms: int = 10000
-    ) -> any:
+    ) -> Any:
         raise NotImplementedError('please call in http client')
 
     async def set_prop_async(
-        self, did: str, siid: int, piid: int, value: any,
+        self, did: str, siid: int, piid: int, value: Any,
         timeout_ms: int = 10000
     ) -> bool:
         raise NotImplementedError('please call in http client')
@@ -1199,8 +1198,8 @@ class MipsCloudClient(MipsClient):
                 self._mips_unsub_internal(topic=unreg_bc.topic)
 
     def __reg_broadcast(
-        self, topic: str, handler: Callable[[str, str, any], None],
-        handler_ctx: any = None
+        self, topic: str, handler: Callable[[str, str, Any], None],
+        handler_ctx: Any = None
     ) -> bool:
         return self._mips_send_cmd(
             type_=MipsCmdType.REG_BROADCAST,
@@ -1259,7 +1258,7 @@ class MipsLocalClient(MipsClient):
     _device_state_sub_map: dict[str, MipsDeviceState]
     _get_prop_queue: dict[str, list]
     _get_prop_timer: asyncio.TimerHandle
-    _on_dev_list_changed: Callable[[any, list[str]], asyncio.Future]
+    _on_dev_list_changed: Callable[[Any, list[str]], asyncio.Future]
 
     def __init__(
         self, did: str, host: str, group_id: str,
@@ -1347,14 +1346,14 @@ class MipsLocalClient(MipsClient):
 
     @final
     def sub_prop(
-        self, did: str, handler: Callable[[dict, any], None],
-        siid: int = None, piid: int = None, handler_ctx: any = None
+        self, did: str, handler: Callable[[dict, Any], None],
+        siid: int = None, piid: int = None, handler_ctx: Any = None
     ) -> bool:
         topic: str = (
             f'appMsg/notify/iot/{did}/property/'
             f'{"#" if siid is None or piid is None else f"{siid}.{piid}"}')
 
-        def on_prop_msg(topic: str, payload: str, ctx: any):
+        def on_prop_msg(topic: str, payload: str, ctx: Any):
             msg: dict = json.loads(payload)
             if (
                 msg is None
@@ -1380,14 +1379,14 @@ class MipsLocalClient(MipsClient):
 
     @final
     def sub_event(
-        self, did: str, handler: Callable[[dict, any], None],
-        siid: int = None, eiid: int = None, handler_ctx: any = None
+        self, did: str, handler: Callable[[dict, Any], None],
+        siid: int = None, eiid: int = None, handler_ctx: Any = None
     ) -> bool:
         topic: str = (
             f'appMsg/notify/iot/{did}/event/'
             f'{"#" if siid is None or eiid is None else f"{siid}.{eiid}"}')
 
-        def on_event_msg(topic: str, payload: str, ctx: any):
+        def on_event_msg(topic: str, payload: str, ctx: Any):
             msg: dict = json.loads(payload)
             if (
                 msg is None
@@ -1414,7 +1413,7 @@ class MipsLocalClient(MipsClient):
     @final
     async def get_prop_safe_async(
         self, did: str, siid: int, piid: int, timeout_ms: int = 10000
-    ) -> any:
+    ) -> Any:
         self._get_prop_queue.setdefault(did, [])
         fut: asyncio.Future = self.main_loop.create_future()
         self._get_prop_queue[did].append({
@@ -1434,7 +1433,7 @@ class MipsLocalClient(MipsClient):
     @final
     async def get_prop_async(
         self, did: str, siid: int, piid: int, timeout_ms: int = 10000
-    ) -> any:
+    ) -> Any:
         result_obj = await self.__request_async(
             topic='proxy/get',
             payload=json.dumps({
@@ -1449,7 +1448,7 @@ class MipsLocalClient(MipsClient):
 
     @final
     async def set_prop_async(
-        self, did: str, siid: int, piid: int, value: any,
+        self, did: str, siid: int, piid: int, value: Any,
         timeout_ms: int = 10000
     ) -> dict:
         payload_obj: dict = {
@@ -1580,13 +1579,13 @@ class MipsLocalClient(MipsClient):
 
     @final
     @property
-    def on_dev_list_changed(self) -> Callable[[any, list[str]], asyncio.Future]:
+    def on_dev_list_changed(self) -> Callable[[Any, list[str]], asyncio.Future]:
         return self._on_dev_list_changed
 
     @final
     @on_dev_list_changed.setter
     def on_dev_list_changed(
-        self, func: Callable[[any, list[str]], asyncio.Future]
+        self, func: Callable[[Any, list[str]], asyncio.Future]
     ) -> None:
         """run in main loop."""
         self._on_dev_list_changed = func
@@ -1731,8 +1730,8 @@ class MipsLocalClient(MipsClient):
 
     def __request(
             self, topic: str, payload: str,
-            on_reply: Callable[[str, any], None],
-            on_reply_ctx: any = None, timeout_ms: int = 10000
+            on_reply: Callable[[str, Any], None],
+            on_reply_ctx: Any = None, timeout_ms: int = 10000
     ) -> bool:
         if topic is None or payload is None or on_reply is None:
             raise MIoTMipsError('invalid params')
@@ -1745,8 +1744,8 @@ class MipsLocalClient(MipsClient):
         return self._mips_send_cmd(type_=MipsCmdType.CALL_API, data=req_data)
 
     def __reg_broadcast(
-        self, topic: str, handler: Callable[[str, str, any], None],
-        handler_ctx: any
+        self, topic: str, handler: Callable[[str, str, Any], None],
+        handler_ctx: Any
     ) -> bool:
         return self._mips_send_cmd(
             type_=MipsCmdType.REG_BROADCAST,
@@ -1764,7 +1763,7 @@ class MipsLocalClient(MipsClient):
     ) -> dict:
         fut_handler: asyncio.Future = self.main_loop.create_future()
 
-        def on_msg_reply(payload: str, ctx: any):
+        def on_msg_reply(payload: str, ctx: Any):
             fut: asyncio.Future = ctx
             if fut:
                 self.main_loop.call_soon_threadsafe(fut.set_result, payload)

@@ -47,7 +47,7 @@ Humidifier entities for Xiaomi Home.
 """
 from __future__ import annotations
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -97,7 +97,7 @@ class Humidifier(MIoTServiceEntity, HumidifierEntity):
     _prop_target_humidity: Optional[MIoTSpecProperty]
     _prop_humidity: Optional[MIoTSpecProperty]
 
-    _mode_list: dict[any, any]
+    _mode_list: dict[Any, Any]
 
     def __init__(
         self, miot_device: MIoTDevice,  entity_data: MIoTEntityData

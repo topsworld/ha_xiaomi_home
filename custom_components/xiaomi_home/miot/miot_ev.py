@@ -49,7 +49,7 @@ import selectors
 import heapq
 import time
 import traceback
-from typing import Callable, TypeVar
+from typing import Any, Callable, TypeVar
 import logging
 import threading
 
@@ -64,17 +64,17 @@ TimeoutHandle = TypeVar('TimeoutHandle')
 class MIoTFdHandler:
     """File descriptor handler."""
     fd: int
-    read_handler: Callable[[any], None]
-    read_handler_ctx: any
-    write_handler: Callable[[any], None]
-    write_handler_ctx: any
+    read_handler: Callable[[Any], None]
+    read_handler_ctx: Any
+    write_handler: Callable[[Any], None]
+    write_handler_ctx: Any
 
     def __init__(
             self, fd: int,
-            read_handler: Callable[[any], None] = None,
-            read_handler_ctx: any = None,
-            write_handler: Callable[[any], None] = None,
-            write_handler_ctx: any = None
+            read_handler: Callable[[Any], None] = None,
+            read_handler_ctx: Any = None,
+            write_handler: Callable[[Any], None] = None,
+            write_handler_ctx: Any = None
     ) -> None:
         self.fd = fd
         self.read_handler = read_handler
@@ -87,13 +87,13 @@ class MIoTTimeout:
     """Timeout handler."""
     key: TimeoutHandle
     target: int
-    handler: Callable[[any], None]
-    handler_ctx: any
+    handler: Callable[[Any], None]
+    handler_ctx: Any
 
     def __init__(
             self, key: str = None, target: int = None,
-            handler: Callable[[any], None] = None,
-            handler_ctx: any = None
+            handler: Callable[[Any], None] = None,
+            handler_ctx: Any = None
     ) -> None:
         self.key = key
         self.target = target
@@ -185,8 +185,8 @@ class MIoTEventLoop:
             self._timer_handlers = {}
 
     def set_timeout(
-        self, timeout_ms: int, handler: Callable[[any], None],
-        handler_ctx: any = None
+        self, timeout_ms: int, handler: Callable[[Any], None],
+        handler_ctx: Any = None
     ) -> TimeoutHandle:
         """Set a timer."""
         if timeout_ms is None or handler is None:
@@ -211,7 +211,7 @@ class MIoTEventLoop:
             heapq.heapify(self._timer_heap)
 
     def set_read_handler(
-        self, fd: int, handler: Callable[[any], None], handler_ctx: any = None
+        self, fd: int, handler: Callable[[Any], None], handler_ctx: Any = None
     ) -> bool:
         """Set a read handler for a file descriptor.
 
@@ -222,7 +222,7 @@ class MIoTEventLoop:
             fd, is_read=True, handler=handler, handler_ctx=handler_ctx)
 
     def set_write_handler(
-        self, fd: int, handler: Callable[[any], None], handler_ctx: any = None
+        self, fd: int, handler: Callable[[Any], None], handler_ctx: Any = None
     ) -> bool:
         """Set a write handler for a file descriptor.
 
@@ -233,8 +233,8 @@ class MIoTEventLoop:
             fd, is_read=False, handler=handler, handler_ctx=handler_ctx)
 
     def __set_handler(
-        self, fd, is_read: bool, handler: Callable[[any], None],
-        handler_ctx: any = None
+        self, fd, is_read: bool, handler: Callable[[Any], None],
+        handler_ctx: Any = None
     ) -> bool:
         """Set a handler."""
         if fd is None:

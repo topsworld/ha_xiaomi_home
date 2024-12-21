@@ -46,6 +46,7 @@ off Xiaomi or its affiliates' products.
 Event entities for Xiaomi Home.
 """
 from __future__ import annotations
+from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -84,6 +85,6 @@ class Event(MIoTEventEntity, EventEntity):
         # Set device_class
         self._attr_device_class = spec.device_class
 
-    def on_event_occurred(self, name: str, arguments: list[dict[int, any]]):
+    def on_event_occurred(self, name: str, arguments: list[dict[int, Any]]):
         """An event is occurred."""
         self._trigger_event(event_type=name, event_attributes=arguments)

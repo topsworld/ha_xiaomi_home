@@ -1,7 +1,52 @@
 # -*- coding: utf-8 -*-
-"""MIoT client instance."""
+"""
+Copyright (C) 2024 Xiaomi Corporation.
+
+The ownership and intellectual property rights of Xiaomi Home Assistant
+Integration and related Xiaomi cloud service API interface provided under this
+license, including source code and object code (collectively, "Licensed Work"),
+are owned by Xiaomi. Subject to the terms and conditions of this License, Xiaomi
+hereby grants you a personal, limited, non-exclusive, non-transferable,
+non-sublicensable, and royalty-free license to reproduce, use, modify, and
+distribute the Licensed Work only for your use of Home Assistant for
+non-commercial purposes. For the avoidance of doubt, Xiaomi does not authorize
+you to use the Licensed Work for any other purpose, including but not limited
+to use Licensed Work to develop applications (APP), Web services, and other
+forms of software.
+
+You may reproduce and distribute copies of the Licensed Work, with or without
+modifications, whether in source or object form, provided that you must give
+any other recipients of the Licensed Work a copy of this License and retain all
+copyright and disclaimers.
+
+Xiaomi provides the Licensed Work on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied, including, without
+limitation, any warranties, undertakes, or conditions of TITLE, NO ERROR OR
+OMISSION, CONTINUITY, RELIABILITY, NON-INFRINGEMENT, MERCHANTABILITY, or
+FITNESS FOR A PARTICULAR PURPOSE. In any event, you are solely responsible
+for any direct, indirect, special, incidental, or consequential damages or
+losses arising from the use or inability to use the Licensed Work.
+
+Xiaomi reserves all rights not expressly granted to you in this License.
+Except for the rights expressly granted by Xiaomi under this License, Xiaomi
+does not authorize you in any form to use the trademarks, copyrights, or other
+forms of intellectual property rights of Xiaomi and its affiliates, including,
+without limitation, without obtaining other written permission from Xiaomi, you
+shall not use "Xiaomi", "Mijia" and other words related to Xiaomi or words that
+may make the public associate with Xiaomi in any form to publicize or promote
+the software or hardware devices that use the Licensed Work.
+
+Xiaomi has the right to immediately terminate all your authorization under this
+License in the event:
+1. You assert patent invalidation, litigation, or other claims against patents
+or other intellectual property rights of Xiaomi or its affiliates; or,
+2. You make, have made, manufacture, sell, or offer to sell products that knock
+off Xiaomi or its affiliates' products.
+
+MIoT client instance.
+"""
 from copy import deepcopy
-from typing import Callable, Optional, final
+from typing import Any, Callable, Optional, final
 import asyncio
 import json
 import logging
@@ -36,9 +81,9 @@ _LOGGER = logging.getLogger(__name__)
 @dataclass
 class MIoTClientSub:
     """MIoT client subscription."""
-    topic: str = None
-    handler: Callable[[dict, any], None] = None
-    handler_ctx: any = None
+    topic: Optional[str]
+    handler: Callable[[dict, Any], None]
+    handler_ctx: Any = None
 
     def __str__(self) -> str:
         return f'{self.topic}, {id(self.handler)}, {id(self.handler_ctx)}'
@@ -526,7 +571,7 @@ class MIoTClient:
         return False
 
     async def set_prop_async(
-        self, did: str, siid: int, piid: int, value: any
+        self, did: str, siid: int, piid: int, value: Any
     ) -> bool:
         if did not in self._device_list_cache:
             raise MIoTClientError(f'did not exist, {did}')
@@ -612,7 +657,7 @@ class MIoTClient:
             0.2, lambda: self._main_loop.create_task(
                 self.__refresh_props_handler()))
 
-    async def get_prop_async(self, did: str, siid: int, piid: int) -> any:
+    async def get_prop_async(self, did: str, siid: int, piid: int) -> Any:
         if did not in self._device_list_cache:
             raise MIoTClientError(f'did not exist, {did}')
 
@@ -717,8 +762,8 @@ class MIoTClient:
         return None
 
     def sub_prop(
-        self, did: str, handler: Callable[[dict, any], None],
-        siid: int = None, piid: int = None, handler_ctx: any = None
+        self, did: str, handler: Callable[[dict, Any], None],
+        siid: int = None, piid: int = None, handler_ctx: Any = None
     ) -> bool:
         if did not in self._device_list_cache:
             raise MIoTClientError(f'did not exist, {did}')
@@ -741,8 +786,8 @@ class MIoTClient:
         return True
 
     def sub_event(
-        self, did: str, handler: Callable[[dict, any], None],
-        siid: int = None, eiid: int = None, handler_ctx: any = None
+        self, did: str, handler: Callable[[dict, Any], None],
+        siid: int = None, eiid: int = None, handler_ctx: Any = None
     ) -> bool:
         if did not in self._device_list_cache:
             raise MIoTClientError(f'did not exist, {did}')
@@ -764,8 +809,8 @@ class MIoTClient:
         return True
 
     def sub_device_state(
-        self, did: str, handler: Callable[[str, MIoTDeviceState, any], None],
-        handler_ctx: any = None
+        self, did: str, handler: Callable[[str, MIoTDeviceState, Any], None],
+        handler_ctx: Any = None
     ) -> bool:
         """Call callback handler in main loop"""
         if did not in self._device_list_cache:
@@ -1060,7 +1105,7 @@ class MIoTClient:
 
     @final
     def __on_cloud_device_state_changed(
-        self, did: str, state: MIoTDeviceState, ctx: any
+        self, did: str, state: MIoTDeviceState, ctx: Any
     ) -> None:
         _LOGGER.info('cloud device state changed, %s, %s', did, state)
         cloud_device = self._device_list_cloud.get(did, None)
@@ -1110,7 +1155,7 @@ class MIoTClient:
 
     @final
     async def __on_lan_device_state_changed(
-        self, did: str, state: dict, ctx: any
+        self, did: str, state: dict, ctx: Any
     ) -> None:
         _LOGGER.info('lan device state changed, %s, %s', did, state)
         lan_state_new: bool = state.get('online', False)
@@ -1146,7 +1191,7 @@ class MIoTClient:
         self.__request_show_devices_changed_notify()
 
     @final
-    def __on_prop_msg(self, params: dict, ctx: any) -> None:
+    def __on_prop_msg(self, params: dict, ctx: Any) -> None:
         """params MUST contain did, siid, piid, value"""
         # BLE device has no online/offline msg
         try:
@@ -1158,7 +1203,7 @@ class MIoTClient:
             _LOGGER.error('on prop msg error, %s, %s', params, err)
 
     @final
-    def __on_event_msg(self, params: dict, ctx: any) -> None:
+    def __on_event_msg(self, params: dict, ctx: Any) -> None:
         try:
             subs: list[MIoTClientSub] = list(self._sub_tree.iter_match(
                 f'{params["did"]}/e/{params["siid"]}/{params["eiid"]}'))

@@ -51,7 +51,7 @@ import json
 import logging
 import re
 import time
-from typing import Optional
+from typing import Any, Optional
 from urllib.parse import urlencode
 import aiohttp
 
@@ -581,7 +581,7 @@ class MIoTHttpClient:
         self, home_ids: list[str] = None
     ) -> dict[str, dict]:
         homeinfos = await self.get_homeinfos_async()
-        homes: dict[str, dict[str, any]] = {}
+        homes: dict[str, dict[str, Any]] = {}
         devices: dict[str, dict] = {}
         for device_type in ['home_list', 'share_home_list']:
             homes.setdefault(device_type, {})
@@ -661,7 +661,7 @@ class MIoTHttpClient:
             raise MIoTHttpError('invalid response result')
         return res_obj['result']
 
-    async def __get_prop_async(self, did: str, siid: int, piid: int) -> any:
+    async def __get_prop_async(self, did: str, siid: int, piid: int) -> Any:
         results = await self.get_props_async(
             params=[{'did': did, 'siid': siid, 'piid': piid}])
         if not results:
@@ -722,7 +722,7 @@ class MIoTHttpClient:
 
     async def get_prop_async(
         self, did: str, siid: int, piid: int, immediately: bool = False
-    ) -> any:
+    ) -> Any:
         if immediately:
             return await self.__get_prop_async(did, siid, piid)
         key: str = f'{did}.{siid}.{piid}'

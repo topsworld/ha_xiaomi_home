@@ -47,7 +47,7 @@ Climate entities for Xiaomi Home.
 """
 from __future__ import annotations
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -415,7 +415,7 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
                 return SWING_OFF
         return None
 
-    def __ac_state_changed(self, prop: MIoTSpecProperty, value: any) -> None:
+    def __ac_state_changed(self, prop: MIoTSpecProperty, value: Any) -> None:
         del prop
         if not isinstance(value, str):
             _LOGGER.error(

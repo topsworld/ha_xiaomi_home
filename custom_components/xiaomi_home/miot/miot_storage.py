@@ -56,7 +56,7 @@ import hashlib
 from datetime import datetime, timezone
 from enum import Enum, auto
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Optional, Union
 import logging
 from urllib.request import Request, urlopen
 from cryptography.hazmat.primitives import serialization
@@ -419,7 +419,7 @@ class MIoTStorage:
         return await fut
 
     def update_user_config(
-        self, uid: str, cloud_server: str, config: Optional[dict[str, any]],
+        self, uid: str, cloud_server: str, config: Optional[dict[str, Any]],
         replace: bool = False
     ) -> bool:
         if config is not None and len(config) == 0:
@@ -443,7 +443,7 @@ class MIoTStorage:
             domain=config_domain, name=config_name, data=local_config)
 
     async def update_user_config_async(
-        self, uid: str, cloud_server: str, config: Optional[dict[str, any]],
+        self, uid: str, cloud_server: str, config: Optional[dict[str, Any]],
         replace: bool = False
     ) -> bool:
         """Update user configuration.
@@ -480,7 +480,7 @@ class MIoTStorage:
 
     def load_user_config(
         self, uid: str, cloud_server: str, keys: Optional[list[str]] = None
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         if keys is not None and len(keys) == 0:
             # Do nothing
             return {}
@@ -494,7 +494,7 @@ class MIoTStorage:
 
     async def load_user_config_async(
         self, uid: str, cloud_server: str, keys: Optional[list[str]] = None
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Load user configuration.
 
         Args:
@@ -503,7 +503,7 @@ class MIoTStorage:
                 query key list, return all config item if keys is None
 
         Returns:
-            dict[str, any]: query result
+            dict[str, Any]: query result
         """
         if keys is not None and len(keys) == 0:
             # Do nothing
