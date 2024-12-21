@@ -49,7 +49,7 @@ import selectors
 import heapq
 import time
 import traceback
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, NewType, Optional
 import logging
 import threading
 
@@ -58,22 +58,22 @@ from .miot_error import MIoTEvError
 
 _LOGGER = logging.getLogger(__name__)
 
-TimeoutHandle = TypeVar('TimeoutHandle')
+TimeoutHandle = NewType('TimeoutHandle', str)
 
 
 class MIoTFdHandler:
     """File descriptor handler."""
     fd: int
-    read_handler: Callable[[Any], None]
+    read_handler: Optional[Callable[[Any], None]]
     read_handler_ctx: Any
-    write_handler: Callable[[Any], None]
+    write_handler: Optional[Callable[[Any], None]]
     write_handler_ctx: Any
 
     def __init__(
             self, fd: int,
-            read_handler: Callable[[Any], None] = None,
+            read_handler: Optional[Callable[[Any], None]] = None,
             read_handler_ctx: Any = None,
-            write_handler: Callable[[Any], None] = None,
+            write_handler: Optional[Callable[[Any], None]] = None,
             write_handler_ctx: Any = None
     ) -> None:
         self.fd = fd
@@ -87,15 +87,15 @@ class MIoTTimeout:
     """Timeout handler."""
     key: TimeoutHandle
     target: int
-    handler: Callable[[Any], None]
+    handler: Optional[Callable[[Any], None]]
     handler_ctx: Any
 
     def __init__(
-            self, key: str = None, target: int = None,
-            handler: Callable[[Any], None] = None,
+            self, key: str, target: int,
+            handler: Optional[Callable[[Any], None]] = None,
             handler_ctx: Any = None
     ) -> None:
-        self.key = key
+        self.key = TimeoutHandle(key)
         self.target = target
         self.handler = handler
         self.handler_ctx = handler_ctx
@@ -128,7 +128,7 @@ class MIoTEventLoop:
 
     def loop_forever(self) -> None:
         """Run an event loop in current thread."""
-        next_timeout: int
+        next_timeout: Optional[int]
         while True:
             next_timeout = 0
             # Handle timer
@@ -179,7 +179,7 @@ class MIoTEventLoop:
         """Stop the event loop."""
         if self._poll_fd:
             self._poll_fd.close()
-            self._poll_fd = None
+            self._poll_fd = None  # type: ignore
             self._fd_handlers = {}
             self._timer_heap = []
             self._timer_handlers = {}
@@ -191,11 +191,12 @@ class MIoTEventLoop:
         """Set a timer."""
         if timeout_ms is None or handler is None:
             raise MIoTEvError('invalid params')
-        new_timeout: MIoTTimeout = MIoTTimeout()
-        new_timeout.key = self.__get_next_timeout_handle
-        new_timeout.target = self.__get_monotonic_ms + timeout_ms
-        new_timeout.handler = handler
-        new_timeout.handler_ctx = handler_ctx
+        new_timeout: MIoTTimeout = MIoTTimeout(
+            key=self.__get_next_timeout_handle,
+            target=self.__get_monotonic_ms + timeout_ms,
+            handler=handler,
+            handler_ctx=handler_ctx
+        )
         heapq.heappush(self._timer_heap, new_timeout)
         self._timer_handlers[new_timeout.key] = new_timeout
         return new_timeout.key
@@ -204,7 +205,8 @@ class MIoTEventLoop:
         """Stop and remove the timer."""
         if timer_key is None:
             return
-        timer: MIoTTimeout = self._timer_handlers.pop(timer_key, None)
+        timer: Optional[MIoTTimeout] = self._timer_handlers.pop(
+            timer_key, None)
         if timer:
             self._timer_heap = list(self._timer_heap)
             self._timer_heap.remove(timer)
@@ -218,7 +220,7 @@ class MIoTEventLoop:
         Returns:
             bool: True, success. False, failed.
         """
-        self.__set_handler(
+        return self.__set_handler(
             fd, is_read=True, handler=handler, handler_ctx=handler_ctx)
 
     def set_write_handler(
@@ -229,7 +231,7 @@ class MIoTEventLoop:
         Returns:
             bool: True, success. False, failed.
         """
-        self.__set_handler(
+        return self.__set_handler(
             fd, is_read=False, handler=handler, handler_ctx=handler_ctx)
 
     def __set_handler(
