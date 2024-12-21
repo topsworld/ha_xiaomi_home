@@ -97,7 +97,7 @@ class MIoTOauthClient:
         self._session = aiohttp.ClientSession()
 
     def __del__(self):
-        self._session.close()
+        self._main_loop.create_task(self._session.close())
 
     def set_redirect_url(self, redirect_url: str) -> None:
         if not isinstance(redirect_url, str) or redirect_url.strip() == '':
@@ -253,7 +253,7 @@ class MIoTHttpClient:
         self._session = aiohttp.ClientSession()
 
     def __del__(self):
-        self._session.close()
+        self._main_loop.create_task(self._session.close())
 
     def update_http_header(
         self, cloud_server: Optional[str] = None,
