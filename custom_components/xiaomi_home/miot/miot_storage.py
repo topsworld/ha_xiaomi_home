@@ -93,10 +93,10 @@ class MIoTStorage:
 
     User data will be stored in the `.storage` directory of Home Assistant.
     """
-    _main_loop: asyncio.AbstractEventLoop = None
+    _main_loop: asyncio.AbstractEventLoop
     _file_future: dict[str, tuple[MIoTStorageType, asyncio.Future]]
 
-    _root_path: str = None
+    _root_path: str
 
     def __init__(
         self, root_path: str,
@@ -127,7 +127,7 @@ class MIoTStorage:
 
     def __load(
         self, full_path: str, type_: type = bytes, with_hash_check: bool = True
-    ) -> Union[bytes, str, dict, list, None]:
+    ) -> Any:
         if not os.path.exists(full_path):
             _LOGGER.debug('load error, file does not exist, %s', full_path)
             return None
@@ -140,7 +140,7 @@ class MIoTStorage:
                 if r_data is None:
                     _LOGGER.error('load error, empty file, %s', full_path)
                     return None
-                data_bytes: bytes = None
+                data_bytes: bytes
                 # Hash check
                 if with_hash_check:
                     if len(r_data) <= 32:
@@ -193,8 +193,8 @@ class MIoTStorage:
         return await fut
 
     def __save(
-        self, full_path: str, data: Union[bytes, str, dict, list, None],
-        cover: bool = True, with_hash: bool = True
+        self, full_path: str, data: Any, cover: bool = True,
+        with_hash: bool = True
     ) -> bool:
         if data is None:
             _LOGGER.error('save error, save data is None')
@@ -210,7 +210,7 @@ class MIoTStorage:
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
         try:
             type_: type = type(data)
-            w_bytes: bytes = None
+            w_bytes: bytes
             if type_ == bytes:
                 w_bytes = data
             elif type_ == str:
@@ -436,8 +436,9 @@ class MIoTStorage:
             # Replace config file
             return self.save(
                 domain=config_domain, name=config_name, data=config)
-        local_config = (self.load(domain=config_domain,
-                        name=config_name, type_=dict)) or {}
+        local_config: dict = (self.load(
+            domain=config_domain, name=config_name, type_=dict
+        )) or {}  # type: ignore
         local_config.update(config)
         return self.save(
             domain=config_domain, name=config_name, data=local_config)
@@ -472,8 +473,9 @@ class MIoTStorage:
             # Replace config file
             return await self.save_async(
                 domain=config_domain, name=config_name, data=config)
-        local_config = (await self.load_async(
-            domain=config_domain, name=config_name, type_=dict)) or {}
+        local_config: dict = (await self.load_async(
+            domain=config_domain, name=config_name, type_=dict
+        )) or {}  # type: ignore
         local_config.update(config)
         return await self.save_async(
             domain=config_domain, name=config_name, data=local_config)
@@ -486,8 +488,9 @@ class MIoTStorage:
             return {}
         config_domain = 'miot_config'
         config_name = f'{uid}_{cloud_server}'
-        local_config = (self.load(domain=config_domain,
-                        name=config_name, type_=dict)) or {}
+        local_config: dict = (self.load(
+            domain=config_domain, name=config_name, type_=dict
+        )) or {}  # type: ignore
         if keys is None:
             return local_config
         return {key: local_config.get(key, None) for key in keys}
@@ -510,8 +513,9 @@ class MIoTStorage:
             return {}
         config_domain = 'miot_config'
         config_name = f'{uid}_{cloud_server}'
-        local_config = (await self.load_async(
-            domain=config_domain, name=config_name, type_=dict)) or {}
+        local_config: dict = (await self.load_async(
+            domain=config_domain, name=config_name, type_=dict)
+        ) or {}  # type: ignore
         if keys is None:
             return local_config
         return {
@@ -519,7 +523,8 @@ class MIoTStorage:
             if key in local_config}
 
     def gen_storage_path(
-        self, domain: str = None, name_with_suffix: str = None
+        self, domain: Optional[str] = None,
+        name_with_suffix: Optional[str] = None
     ) -> str:
         """Generate file path."""
         result = self._root_path
@@ -609,7 +614,6 @@ class MIoTCert:
         if cert_data is None:
             return 0
         # Check user cert
-        user_cert: x509.Certificate = None
         try:
             user_cert = x509.load_pem_x509_certificate(
                 cert_data, default_backend())
@@ -668,8 +672,11 @@ class MIoTCert:
                 x509.NameAttribute(
                     NameOID.COMMON_NAME, f'mips.{self._uid}.{did_hash}.2'),
             ]))
+
         csr = builder.sign(
-            private_key, algorithm=None, backend=default_backend())
+            private_key,  # type: ignore
+            algorithm=None,
+            backend=default_backend())
         return csr.public_bytes(serialization.Encoding.PEM).decode('utf-8')
 
     async def load_user_key_async(self) -> Optional[str]:
@@ -726,20 +733,21 @@ class SpecMultiLang:
     MULTI_LANG_FILE = 'specs/multi_lang.json'
     _main_loop: asyncio.AbstractEventLoop
     _lang: str
-    _data: Optional[dict[str, dict]]
+    _data: dict[str, dict]
+    _init_done: bool
 
     def __init__(
         self, lang: str, loop: Optional[asyncio.AbstractEventLoop] = None
     ) -> None:
         self._main_loop = loop or asyncio.get_event_loop()
         self._lang = lang
-        self._data = None
+        self._data = {}
 
     async def init_async(self) -> None:
-        if isinstance(self._data, dict):
+        if not self._init_done:
             return
+        self._init_done = True
         multi_lang_data = None
-        self._data = {}
         try:
             multi_lang_data = await self._main_loop.run_in_executor(
                 None, load_json_file,
@@ -763,8 +771,8 @@ class SpecMultiLang:
                     return
         self._data = multi_lang_data
 
-    async def deinit_async(self) -> str:
-        self._data = None
+    async def deinit_async(self) -> None:
+        self._data = {}
 
     async def translate_async(self, urn_key: str) -> dict[str, str]:
         """MUST call init_async() first."""
@@ -780,21 +788,23 @@ class SpecBoolTranslation:
     BOOL_TRANS_FILE = 'specs/bool_trans.json'
     _main_loop: asyncio.AbstractEventLoop
     _lang: str
-    _data: Optional[dict[str, dict]]
-    _data_default: dict[str, dict]
+    _data: dict[str, list]
+    _data_default: list[dict]
+    _init_done: bool
 
     def __init__(
         self, lang: str, loop: Optional[asyncio.AbstractEventLoop] = None
     ) -> None:
         self._main_loop = loop or asyncio.get_event_loop()
         self._lang = lang
-        self._data = None
+        self._data = {}
+        self._init_done = False
 
     async def init_async(self) -> None:
-        if isinstance(self._data, dict):
+        if not self._init_done:
             return
+        self._init_done = True
         data = None
-        self._data = {}
         try:
             data = await self._main_loop.run_in_executor(
                 None, load_json_file,
@@ -841,10 +851,11 @@ class SpecBoolTranslation:
                 ]
 
     async def deinit_async(self) -> None:
-        self._data = None
-        self._data_default = None
+        self._data = {}
+        self._data_default = []
+        self._init_done = False
 
-    async def translate_async(self, urn: str) -> list[dict[bool, str]]:
+    async def translate_async(self, urn: str) -> list[dict]:
         """
         MUST call init_async() before calling this method.
         [
@@ -864,17 +875,18 @@ class SpecFilter:
     _main_loop: asyncio.AbstractEventLoop
     _data: dict[str, dict[str, set]]
     _cache: Optional[dict]
+    _init_done: bool
 
     def __init__(self, loop: Optional[asyncio.AbstractEventLoop]) -> None:
         self._main_loop = loop or asyncio.get_event_loop()
-        self._data = None
+        self._data = {}
         self._cache = None
 
     async def init_async(self) -> None:
-        if isinstance(self._data, dict):
+        if not self._init_done:
             return
+        self._init_done = True
         filter_data = None
-        self._data = {}
         try:
             filter_data = await self._main_loop.run_in_executor(
                 None, load_json_file,
@@ -900,7 +912,7 @@ class SpecFilter:
 
     async def deinit_async(self) -> None:
         self._cache = None
-        self._data = None
+        self._data = {}
 
     def filter_spec(self, urn_key: str) -> None:
         """MUST call init_async() first."""
@@ -976,14 +988,13 @@ class DeviceManufacturer:
     ) -> None:
         self._main_loop = loop or asyncio.get_event_loop()
         self._storage = storage
-        self._data = None
+        self._data = {}
 
     async def init_async(self) -> None:
         if self._data:
             return
-        data_cache: dict = None
-        data_cache = await self._storage.load_async(
-            domain=self.DOMAIN, name='manufacturer', type_=dict)
+        data_cache: dict = await self._storage.load_async(
+            domain=self.DOMAIN, name='manufacturer', type_=dict)  # type: ignore
         if (
             isinstance(data_cache, dict)
             and 'data' in data_cache
@@ -1011,20 +1022,20 @@ class DeviceManufacturer:
                 _LOGGER.error('load manufacturer data failed')
 
     async def deinit_async(self) -> None:
-        self._data = None
+        self._data = {}
 
     def get_name(self, short_name: str) -> str:
         if not self._data or not short_name or short_name not in self._data:
             return short_name
         return self._data[short_name].get('name', None) or short_name
 
-    def __get_manufacturer_data(self) -> dict:
+    def __get_manufacturer_data(self) -> Optional[dict]:
         try:
             request = Request(
                 'https://cdn.cnbj1.fds.api.mi-img.com/res-conf/xiaomi-home/'
                 'manufacturer.json',
                 method='GET')
-            content: bytes = None
+            content: Optional[bytes] = None
             with urlopen(request) as response:
                 content = response.read()
             return (
