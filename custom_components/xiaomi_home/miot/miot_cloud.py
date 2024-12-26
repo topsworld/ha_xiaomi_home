@@ -708,7 +708,7 @@ class MIoTHttpClient:
             key = f'{result["did"]}.{result["siid"]}.{result["piid"]}'
             prop_obj = self._get_prop_list.pop(key, None)
             if prop_obj is None:
-                _LOGGER.error('get prop error, key not exists, %s', result)
+                _LOGGER.info('get prop error, key not exists, %s', result)
                 continue
             prop_obj['fut'].set_result(result['value'])
             props_req.remove(key)
@@ -719,7 +719,7 @@ class MIoTHttpClient:
                 continue
             prop_obj['fut'].set_result(None)
         if props_req:
-            _LOGGER.error(
+            _LOGGER.info(
                 'get prop from cloud failed, %s, %s', len(key), props_req)
 
         if self._get_prop_list:
