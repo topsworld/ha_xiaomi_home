@@ -122,10 +122,10 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     _auth_info: dict
     _nick_name: str
     _home_selected: dict
+    _devices_filter: dict
     _home_info_buffer: dict
     _home_list_show: dict
     _device_list_sorted: dict
-    _device_list_filter: dict
 
     _cloud_server: str
     _oauth_redirect_url_full: str
@@ -630,7 +630,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             room_list_in: list = user_input.get('room_list', [])
             if room_list_in:
                 if user_input.get(
-                        'room_filter_mode', 'include') == 'include':
+                        'room_filter_mode', 'exclude') == 'include':
                     include_items['room_id'] = room_list_in
                 else:
                     exclude_items['room_id'] = room_list_in
@@ -638,7 +638,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             type_list_in: list = user_input.get('type_list', [])
             if type_list_in:
                 if user_input.get(
-                        'type_filter_mode', 'include') == 'include':
+                        'type_filter_mode', 'exclude') == 'include':
                     include_items['connect_type'] = type_list_in
                 else:
                     exclude_items['connect_type'] = type_list_in
@@ -646,7 +646,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             model_list_in: list = user_input.get('model_list', [])
             if model_list_in:
                 if user_input.get(
-                        'model_filter_mode', 'include') == 'include':
+                        'model_filter_mode', 'exclude') == 'include':
                     include_items['model'] = model_list_in
                 else:
                     exclude_items['model'] = model_list_in
@@ -654,7 +654,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             device_list_in: list = user_input.get('device_list', [])
             if device_list_in:
                 if user_input.get(
-                        'devices_filter_mode', 'include') == 'include':
+                        'devices_filter_mode', 'exclude') == 'include':
                     include_items['did'] = device_list_in
                 else:
                     exclude_items['did'] = device_list_in
@@ -663,10 +663,8 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 logic_or=(user_input.get('statistics_logic', 'or') == 'or'),
                 item_in=include_items, item_ex=exclude_items)
             if not device_filter_list:
-                raise AbortFlow(
-                    reason='config_flow_error',
-                    description_placeholders={
-                        'error': 'invalid devices_filter'})
+                return await self.__display_devices_filter_form(
+                    reason='no_filter_devices')
             self._device_list_sorted = dict(sorted(
                 device_filter_list.items(), key=lambda item:
                     item[1].get('home_id', '')+item[1].get('room_id', '')))
@@ -677,11 +675,25 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     data=self._device_list_sorted):
                 return await self.__display_devices_filter_form(
                     reason='no_devices_selected')
+            self._devices_filter = {
+                'room_list': {
+                    'items': room_list_in,
+                    'mode': user_input.get('room_filter_mode', 'exclude')},
+                'type_list': {
+                    'items': type_list_in,
+                    'mode': user_input.get('type_filter_mode', 'exclude')},
+                'model_list': {
+                    'items': model_list_in,
+                    'mode': user_input.get('model_filter_mode', 'exclude')},
+                'device_list': {
+                    'items': device_list_in,
+                    'mode': user_input.get('devices_filter_mode', 'exclude')},
+                'statistics_logic': user_input.get('statistics_logic', 'or'),
+            }
             return await self.config_flow_done()
         return await self.__display_devices_filter_form(reason='')
 
     async def __display_devices_filter_form(self, reason: str):
-
         tip_devices: str = self._miot_i18n.translate(
             key='config.other.devices')  # type: ignore
         tip_without_room: str = self._miot_i18n.translate(
@@ -771,6 +783,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 'oauth_redirect_url': self._oauth_redirect_url_full,
                 'ctrl_mode': self._ctrl_mode,
                 'home_selected': self._home_selected,
+                'devices_filter': self._devices_filter,
                 'area_name_rule': self._area_name_rule,
                 'action_debug': self._action_debug,
                 'hide_non_standard_entities':
@@ -813,6 +826,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     _ctrl_mode: str
     _nick_name: str
     _home_selected_list: list
+    _devices_filter: dict
     _action_debug: bool
     _hide_non_standard_entities: bool
     _display_devs_notify: list[str]
@@ -865,6 +879,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             'display_devices_changed_notify', ['add', 'del', 'offline'])
         self._home_selected_list = list(
             self._entry_data['home_selected'].keys())
+        self._devices_filter = self._entry_data.get('devices_filter', {})
 
         self._oauth_redirect_url_full = ''
         self._auth_info = {}
@@ -1307,48 +1322,61 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             include_items: dict = {}
             exclude_items: dict = {}
             room_list_in: list = user_input.get('room_list', [])
+            room_filter_mode: str = user_input.get(
+                'room_filter_mode', 'exclude')
             if room_list_in:
-                if user_input.get(
-                        'room_filter_mode', 'include') == 'include':
+                if room_filter_mode == 'include':
                     include_items['room_id'] = room_list_in
                 else:
                     exclude_items['room_id'] = room_list_in
             # Connect Type filter
             type_list_in: list = user_input.get('type_list', [])
+            type_filter_mode: str = user_input.get(
+                'type_filter_mode', 'exclude')
             if type_list_in:
-                if user_input.get(
-                        'type_filter_mode', 'include') == 'include':
+                if type_filter_mode == 'include':
                     include_items['connect_type'] = type_list_in
                 else:
                     exclude_items['connect_type'] = type_list_in
             # Model filter
             model_list_in: list = user_input.get('model_list', [])
+            model_filter_mode: str = user_input.get(
+                'model_filter_mode', 'exclude')
             if model_list_in:
-                if user_input.get(
-                        'model_filter_mode', 'include') == 'include':
+                if model_filter_mode == 'include':
                     include_items['model'] = model_list_in
                 else:
                     exclude_items['model'] = model_list_in
             # Device filter
             device_list_in: list = user_input.get('device_list', [])
+            device_filter_mode: str = user_input.get(
+                'devices_filter_mode', 'exclude')
             if device_list_in:
-                if user_input.get(
-                        'devices_filter_mode', 'include') == 'include':
+                if device_filter_mode == 'include':
                     include_items['did'] = device_list_in
                 else:
                     exclude_items['did'] = device_list_in
+            statistics_logic: str = user_input.get('statistics_logic', 'or')
             device_filter_list = _handle_devices_filter(
                 devices=self._device_list_sorted,
-                logic_or=(user_input.get('statistics_logic', 'or') == 'or'),
+                logic_or=(statistics_logic == 'or'),
                 item_in=include_items, item_ex=exclude_items)
             if not device_filter_list:
-                raise AbortFlow(
-                    reason='config_flow_error',
-                    description_placeholders={
-                        'error': 'invalid devices_filter'})
+                return await self.__display_devices_filter_form(
+                    reason='no_filter_devices')
             self._device_list_sorted = dict(sorted(
                 device_filter_list.items(), key=lambda item:
                     item[1].get('home_id', '')+item[1].get('room_id', '')))
+            self._devices_filter = {
+                'room_list': {
+                    'items': room_list_in, 'mode': room_filter_mode},
+                'type_list': {
+                    'items': type_list_in, 'mode': type_filter_mode},
+                'model_list': {
+                    'items': model_list_in, 'mode': model_filter_mode},
+                'device_list': {
+                    'items': device_list_in, 'mode': device_filter_mode},
+                'statistics_logic': statistics_logic}
             return await self.update_devices_done_async()
         return await self.__display_devices_filter_form(reason='')
 
@@ -1401,25 +1429,48 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             step_id='devices_filter',
             data_schema=vol.Schema({
                 vol.Required(
-                    'room_filter_mode', default='exclude'  # type: ignore
+                    'room_filter_mode', default=self._devices_filter.get(
+                        'room_list', {}).get('mode', 'exclude')  # type: ignore
                 ): vol.In(trans_filter_mode),
-                vol.Optional('room_list'): cv.multi_select(room_list),
+                vol.Optional('room_list', default=[
+                    room_id for room_id in self._devices_filter.get(
+                        'room_list', {}).get('items', [])
+                    if room_id in room_list]  # type: ignore
+                ): cv.multi_select(room_list),
                 vol.Required(
-                    'type_filter_mode', default='exclude'  # type: ignore
+                    'type_filter_mode', default=self._devices_filter.get(
+                        'type_list', {}).get('mode', 'exclude')  # type: ignore
                 ): vol.In(trans_filter_mode),
-                vol.Optional('type_list'): cv.multi_select(type_list),
+                vol.Optional('type_list', default=[
+                    type_ for type_ in self._devices_filter.get(
+                        'type_list', {}).get('items', [])
+                    if type_ in type_list]  # type: ignore
+                ): cv.multi_select(type_list),
                 vol.Required(
-                    'model_filter_mode', default='exclude'  # type: ignore
+                    'model_filter_mode',
+                    default=self._devices_filter.get('model_list', {}).get(
+                        'mode', 'exclude')  # type: ignore
                 ): vol.In(trans_filter_mode),
-                vol.Optional('model_list'): cv.multi_select(dict(sorted(
+                vol.Optional('model_list', default=[
+                    model for model in self._devices_filter.get(
+                        'model_list', {}).get('items', [])
+                    if model in model_list]  # type: ignore
+                ): cv.multi_select(dict(sorted(
                     model_list.items(), key=lambda item: item[0]))),
                 vol.Required(
-                    'devices_filter_mode', default='exclude'  # type: ignore
+                    'devices_filter_mode', default=self._devices_filter.get(
+                        'device_list', {}).get(
+                            'mode', 'exclude')  # type: ignore
                 ):  vol.In(trans_filter_mode),
-                vol.Optional('device_list'): cv.multi_select(dict(sorted(
+                vol.Optional('device_list', default=[
+                    did for did in self._devices_filter.get(
+                        'device_list', {}).get('items', [])
+                    if did in device_list]  # type: ignore
+                ): cv.multi_select(dict(sorted(
                     device_list.items(), key=lambda device: device[1]))),
                 vol.Required(
-                    'statistics_logic', default='or'  # type: ignore
+                    'statistics_logic', default=self._devices_filter.get(
+                        'statistics_logic', 'or')
                 ): vol.In(trans_statistics_logic),
             }),
             errors={'base': reason},
@@ -1590,6 +1641,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if self._update_devices:
             self._entry_data['ctrl_mode'] = self._ctrl_mode
             self._entry_data['home_selected'] = self._home_selected
+            self._entry_data['devices_filter'] = self._devices_filter
             if not await self._miot_storage.save_async(
                     domain='miot_devices',
                     name=f'{self._uid}_{self._cloud_server}',

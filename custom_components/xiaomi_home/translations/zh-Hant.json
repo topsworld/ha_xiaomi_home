@@ -68,7 +68,8 @@
             "mdns_discovery_error": "本地設備發現服務異常。",
             "get_cert_error": "獲取中樞證書失敗。",
             "no_family_selected": "未選擇家庭。",
-            "no_devices": "選擇的家庭中沒有設備。請選擇有設備的家庭，而後繼續。",
+            "no_devices": "選擇的家庭中沒有設備。請選擇有設備的家庭，然後繼續。",
+            "no_filter_devices": "篩選設備為空。請選擇有效的篩選條件，然後繼續。",
             "no_central_device": "【中樞網關模式】需要 Home Assistant 所在的局域網中存在可用的小米中樞網關。請檢查選擇的家庭是否符合該要求。"
         },
         "abort": {
@@ -168,7 +169,8 @@
             "get_homeinfo_error": "獲取家庭信息失敗。",
             "get_cert_error": "獲取中樞證書失敗。",
             "no_family_selected": "未選擇家庭。",
-            "no_devices": "選擇的家庭中沒有設備，請選擇有設備的家庭，而後繼續。",
+            "no_devices": "選擇的家庭中沒有設備。請選擇有設備的家庭，然後繼續。",
+            "no_filter_devices": "篩選設備為空。請選擇有效的篩選條件，然後繼續。",
             "no_central_device": "【中樞網關模式】需要 Home Assistant 所在的局域網中存在可用的小米中樞網關。請檢查選擇的家庭是否符合該要求。",
             "mdns_discovery_error": "本地設備發現服務異常。",
             "update_config_error": "配置信息更新失敗。",

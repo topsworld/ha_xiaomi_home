@@ -68,7 +68,8 @@
             "mdns_discovery_error": "本地设备发现服务异常。",
             "get_cert_error": "获取中枢证书失败。",
             "no_family_selected": "未选择家庭。",
-            "no_devices": "选择的家庭中没有设备。请选择有设备的家庭，而后继续。",
+            "no_devices": "选择的家庭中没有设备。请选择有设备的家庭，然后继续。",
+            "no_filter_devices": "筛选设备为空。请选择有效的筛选条件，然后继续。",
             "no_central_device": "【中枢网关模式】需要 Home Assistant 所在的局域网中存在可用的小米中枢网关。请检查选择的家庭是否符合该要求。"
         },
         "abort": {
@@ -168,7 +169,8 @@
             "get_homeinfo_error": "获取家庭信息失败。",
             "get_cert_error": "获取中枢证书失败。",
             "no_family_selected": "未选择家庭。",
-            "no_devices": "选择的家庭中没有设备，请选择有设备的家庭，而后继续。",
+            "no_devices": "选择的家庭中没有设备，请选择有设备的家庭，然后继续。",
+            "no_filter_devices": "筛选设备为空。请选择有效的筛选条件，然后继续。",
             "no_central_device": "【中枢网关模式】需要 Home Assistant 所在的局域网中存在可用的小米中枢网关。请检查选择的家庭是否符合该要求。",
             "mdns_discovery_error": "本地设备发现服务异常。",
             "update_config_error": "配置信息更新失败。",

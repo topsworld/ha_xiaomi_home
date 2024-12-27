@@ -68,7 +68,8 @@
             "mdns_discovery_error": "Exceção no serviço de descoberta de dispositivos locais.",
             "get_cert_error": "Falha ao obter o certificado do gateway central.",
             "no_family_selected": "Nenhuma casa selecionada.",
-            "no_devices": "A casa selecionada não possui nenhum dispositivo. Por favor, escolha uma casa que contenha dispositivos e continue.",
+            "no_devices": "Não há dispositivos na casa selecionada. Por favor, selecione uma casa com dispositivos e continue.",
+            "no_filter_devices": "Os dispositivos filtrados estão vazios. Por favor, selecione critérios de filtro válidos e continue.",
             "no_central_device": "[Modo Gateway Central] requer um gateway central Xiaomi disponível na rede local onde o Home Assistant está. Verifique se a casa selecionada atende a esse requisito."
         },
         "abort": {
@@ -167,7 +168,8 @@
             "get_token_error": "Falha ao obter as informações de autorização de login (token OAuth).",
             "get_homeinfo_error": "Falha ao obter as informações da casa.",
             "get_cert_error": "Falha ao obter o certificado do gateway central.",
-            "no_devices": "A casa selecionada não possui nenhum dispositivo. Por favor, escolha uma casa com dispositivos e continue.",
+            "no_devices": "Não há dispositivos na casa selecionada. Por favor, selecione uma casa com dispositivos e continue.",
+            "no_filter_devices": "Os dispositivos filtrados estão vazios. Por favor, selecione critérios de filtro válidos e continue.",
             "no_family_selected": "Nenhuma casa selecionada.",
             "no_central_device": "[Modo Gateway Central] requer um gateway central Xiaomi disponível na rede local onde o Home Assistant está. Verifique se a casa selecionada atende a esse requisito.",
             "mdns_discovery_error": "Exceção no serviço de descoberta de dispositivos locais.",

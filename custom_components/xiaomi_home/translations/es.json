@@ -68,7 +68,8 @@
             "mdns_discovery_error": "Error en el servicio de descubrimiento de dispositivos locales.",
             "get_cert_error": "Error al obtener el certificado de la puerta de enlace.",
             "no_family_selected": "No se ha seleccionado ningún hogar.",
-            "no_devices": "No hay dispositivos en el hogar seleccionado. Seleccione un hogar con dispositivos y continúe.",
+            "no_devices": "No hay dispositivos en el hogar seleccionado. Por favor, seleccione un hogar con dispositivos y continúe.",
+            "no_filter_devices": "Los dispositivos filtrados están vacíos. Por favor, seleccione criterios de filtro válidos y continúe.",
             "no_central_device": "【Modo de puerta de enlace central】Se requiere una puerta de enlace Xiaomi disponible en la red local donde se encuentra Home Assistant. Verifique si el hogar seleccionado cumple con este requisito."
         },
         "abort": {
@@ -168,7 +169,8 @@
             "get_homeinfo_error": "Error al obtener la información del hogar.",
             "get_cert_error": "Error al obtener el certificado de la puerta de enlace.",
             "no_family_selected": "No se ha seleccionado ningún hogar.",
-            "no_devices": "No hay dispositivos en el hogar seleccionado. Seleccione un hogar con dispositivos y continúe.",
+            "no_devices": "No hay dispositivos en el hogar seleccionado. Por favor, seleccione un hogar con dispositivos y continúe.",
+            "no_filter_devices": "Los dispositivos filtrados están vacíos. Por favor, seleccione criterios de filtro válidos y continúe.",
             "no_central_device": "【Modo de puerta de enlace central】Se requiere una puerta de enlace Xiaomi disponible en la red local donde se encuentra Home Assistant. Verifique si el hogar seleccionado cumple con este requisito.",
             "mdns_discovery_error": "Error en el servicio de descubrimiento de dispositivos locales.",
             "update_config_error": "Error al actualizar la información de configuración.",

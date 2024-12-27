@@ -68,7 +68,8 @@
             "mdns_discovery_error": "Local device discovery service exception.",
             "get_cert_error": "Failed to retrieve the central hub gateway certificate.",
             "no_family_selected": "No home selected.",
-            "no_devices": "The selected home does not have any devices. Please choose a home containing devices and continue.",
+            "no_devices": "There are no devices in the selected home. Please select a home with devices and continue.",
+            "no_filter_devices": "Filtered devices are empty. Please select valid filter criteria and continue.",
             "no_central_device": "[Central Hub Gateway Mode] requires a Xiaomi central hub gateway available in the local network where Home Assistant exists. Please check if the selected home meets the requirement."
         },
         "abort": {
@@ -167,7 +168,8 @@
             "get_token_error": "Failed to retrieve login authorization information (OAuth token).",
             "get_homeinfo_error": "Failed to retrieve home information.",
             "get_cert_error": "Failed to retrieve the central hub gateway certificate.",
-            "no_devices": "The selected home does not have any devices. Please choose a home containing devices and continue.",
+            "no_devices": "There are no devices in the selected home. Please select a home with devices and continue.",
+            "no_filter_devices": "Filtered devices are empty. Please select valid filter criteria and continue.",
             "no_family_selected": "No home selected.",
             "no_central_device": "[Central Hub Gateway Mode] requires a Xiaomi central hub gateway available in the local network where Home Assistant exists. Please check if the selected home meets the requirement.",
             "mdns_discovery_error": "Local device discovery service exception.",

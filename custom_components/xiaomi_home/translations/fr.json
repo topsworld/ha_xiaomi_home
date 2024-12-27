@@ -68,7 +68,8 @@
             "mdns_discovery_error": "Le service de découverte de périphériques locaux est anormal.",
             "get_cert_error": "Échec de l'obtention du certificat de la passerelle.",
             "no_family_selected": "Aucune maison sélectionnée.",
-            "no_devices": "Il n'y a pas d'appareil dans la maison sélectionnée. Veuillez sélectionner une maison avec des appareils avant de continuer.",
+            "no_devices": "Il n'y a pas d'appareils dans la maison sélectionnée. Veuillez sélectionner une maison avec des appareils et continuer.",
+            "no_filter_devices": "Les appareils filtrés sont vides. Veuillez sélectionner des critères de filtre valides et continuer.",
             "no_central_device": "Le mode gateway central a besoin d'un Xiaomi Gateway disponible dans le réseau local où se trouve Home Assistant. Veuillez vérifier si la maison sélectionnée répond à cette exigence."
         },
         "abort": {
@@ -168,7 +169,8 @@
             "get_homeinfo_error": "Impossible d'obtenir les informations de la maison.",
             "get_cert_error": "Impossible d'obtenir le certificat central.",
             "no_family_selected": "Aucune maison sélectionnée.",
-            "no_devices": "Aucun périphérique dans la maison sélectionnée. Veuillez sélectionner une maison avec des périphériques et continuer.",
+            "no_devices": "Il n'y a pas d'appareils dans la maison sélectionnée. Veuillez sélectionner une maison avec des appareils et continuer.",
+            "no_filter_devices": "Les appareils filtrés sont vides. Veuillez sélectionner des critères de filtre valides et continuer.",
             "no_central_device": "Le mode passerelle centrale nécessite une passerelle Xiaomi disponible dans le réseau local où est installé Home Assistant. Veuillez vérifier que la maison sélectionnée répond à cette exigence.",
             "mdns_discovery_error": "Service de découverte de périphérique local en panne.",
             "update_config_error": "Échec de la mise à jour des informations de configuration.",

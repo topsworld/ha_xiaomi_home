@@ -68,7 +68,8 @@
             "mdns_discovery_error": "Lokaler Geräteerkennungsdienst ist nicht verfügbar.",
             "get_cert_error": "Fehler beim Abrufen des Gateway-Zertifikats.",
             "no_family_selected": "Keine Familie ausgewählt.",
-            "no_devices": "In der ausgewählten Familie sind keine Geräte enthalten. Bitte wählen Sie eine Familie mit Geräten aus und fahren Sie fort.",
+            "no_devices": "Im ausgewählten Haushalt sind keine Geräte vorhanden. Bitte wählen Sie einen Haushalt mit Geräten aus und fahren Sie fort.",
+            "no_filter_devices": "Gefilterte Geräte sind leer. Bitte wählen Sie gültige Filterkriterien aus und fahren Sie fort.",
             "no_central_device": "Im Modus \"Xiaomi Central Hub Gateway\" muss ein verfügbares Xiaomi Central Hub Gateway im lokalen Netzwerk von Home Assistant vorhanden sein. Stellen Sie sicher, dass die ausgewählte Familie diese Anforderungen erfüllt."
         },
         "abort": {
@@ -168,7 +169,8 @@
             "get_homeinfo_error": "Fehler beim Abrufen von Home-Informationen.",
             "get_cert_error": "Fehler beim Abrufen des Zentralzertifikats.",
             "no_family_selected": "Keine Familie ausgewählt.",
-            "no_devices": "In der ausgewählten Familie sind keine Geräte vorhanden. Bitte wählen Sie eine Familie mit Geräten und fahren Sie dann fort.",
+            "no_devices": "Im ausgewählten Haushalt sind keine Geräte vorhanden. Bitte wählen Sie einen Haushalt mit Geräten aus und fahren Sie fort.",
+            "no_filter_devices": "Gefilterte Geräte sind leer. Bitte wählen Sie gültige Filterkriterien aus und fahren Sie fort.",
             "no_central_device": "Der Modus \"Zentral Gateway\" erfordert ein verfügbares Xiaomi-Zentral-Gateway im lokalen Netzwerk, in dem Home Assistant installiert ist. Überprüfen Sie, ob die ausgewählte Familie diese Anforderung erfüllt.",
             "mdns_discovery_error": "Lokaler Geräteerkennungsdienstfehler.",
             "update_config_error": "Fehler beim Aktualisieren der Konfigurationsinformationen.",

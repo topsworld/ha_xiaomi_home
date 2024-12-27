@@ -68,7 +68,8 @@
             "mdns_discovery_error": "Lokaal apparaatsontdekkingsservice-exceptie.",
             "get_cert_error": "Mislukt bij het ophalen van het certificaat van de centrale hubgateway.",
             "no_family_selected": "Geen huis geselecteerd.",
-            "no_devices": "Het geselecteerde huis heeft geen apparaten. Kies a.u.b. een huis met apparaten en ga verder.",
+            "no_devices": "Er zijn geen apparaten in het geselecteerde huis. Selecteer een huis met apparaten en ga verder.",
+            "no_filter_devices": "Gefilterde apparaten zijn leeg. Selecteer geldige filtercriteria en ga verder.",
             "no_central_device": "[Centrale Hub Gateway Modus] vereist een beschikbare Xiaomi centrale hubgateway in het lokale netwerk waar Home Assistant zich bevindt. Controleer of het geselecteerde huis aan deze vereiste voldoet."
         },
         "abort": {
@@ -167,7 +168,8 @@
             "get_token_error": "Mislukt bij het ophalen van inlogautorisatie-informatie (OAuth-token).",
             "get_homeinfo_error": "Mislukt bij het ophalen van huisinformatie.",
             "get_cert_error": "Mislukt bij het ophalen van het certificaat van de centrale hubgateway.",
-            "no_devices": "Het geselecteerde huis heeft geen apparaten. Kies a.u.b. een huis met apparaten en ga verder.",
+            "no_devices": "Er zijn geen apparaten in het geselecteerde huis. Selecteer een huis met apparaten en ga verder.",
+            "no_filter_devices": "Gefilterde apparaten zijn leeg. Selecteer geldige filtercriteria en ga verder.",
             "no_family_selected": "Geen huis geselecteerd.",
             "no_central_device": "[Centrale Hub Gateway Modus] vereist een beschikbare Xiaomi centrale hubgateway in het lokale netwerk waar Home Assistant zich bevindt. Controleer of het geselecteerde huis aan deze vereiste voldoet.",
             "mdns_discovery_error": "Lokaal apparaatsontdekkingsservice-exceptie.",
