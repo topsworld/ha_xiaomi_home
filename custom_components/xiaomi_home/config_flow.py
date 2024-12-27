@@ -673,8 +673,12 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     domain='miot_devices',
                     name=f'{self._uid}_{self._cloud_server}',
                     data=self._device_list_sorted):
-                return await self.__display_devices_filter_form(
-                    reason='no_devices_selected')
+                _LOGGER.error(
+                    'save devices async failed, %s, %s',
+                    self._uid, self._cloud_server)
+                raise AbortFlow(
+                    reason='storage_error', description_placeholders={
+                        'error': 'save user devices error'})
             self._devices_filter = {
                 'room_list': {
                     'items': room_list_in,
