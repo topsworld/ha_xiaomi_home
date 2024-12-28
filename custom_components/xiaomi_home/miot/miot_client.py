@@ -1851,15 +1851,6 @@ async def get_miot_instance_async(
         loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
         if loop is None:
             raise MIoTClientError('loop is None')
-        # MIoT network
-        network: Optional[MIoTNetwork] = hass.data[DOMAIN].get(
-            'miot_network', None)
-        if not network:
-            network = MIoTNetwork(loop=loop)
-            hass.data[DOMAIN]['miot_network'] = network
-            await network.init_async(
-                refresh_interval=NETWORK_REFRESH_INTERVAL)
-            _LOGGER.info('create miot_network instance')
         # MIoT storage
         storage: Optional[MIoTStorage] = hass.data[DOMAIN].get(
             'miot_storage', None)
@@ -1868,12 +1859,29 @@ async def get_miot_instance_async(
                 root_path=entry_data['storage_path'], loop=loop)
             hass.data[DOMAIN]['miot_storage'] = storage
             _LOGGER.info('create miot_storage instance')
+        global_config: dict = await storage.load_user_config_async(
+            uid='global_config', cloud_server='all',
+            keys=['network_detect_addr', 'net_interfaces', 'enable_subscribe'])
+        # MIoT network
+        network_detect_addr: dict = global_config.get(
+            'network_detect_addr', {})
+        network: Optional[MIoTNetwork] = hass.data[DOMAIN].get(
+            'miot_network', None)
+        if not network:
+            network = MIoTNetwork(
+                ip_addr_list=network_detect_addr.get('ip', []),
+                http_addr_list=network_detect_addr.get('http', []),
+                refresh_interval=NETWORK_REFRESH_INTERVAL,
+                loop=loop)
+            hass.data[DOMAIN]['miot_network'] = network
+            await network.init_async()
+            _LOGGER.info('create miot_network instance')
         # MIoT service
         mips_service: Optional[MipsService] = hass.data[DOMAIN].get(
             'mips_service', None)
         if not mips_service:
             aiozc = await zeroconf.async_get_async_instance(hass)
-            mips_service: MipsService = MipsService(aiozc=aiozc, loop=loop)
+            mips_service = MipsService(aiozc=aiozc, loop=loop)
             hass.data[DOMAIN]['mips_service'] = mips_service
             await mips_service.init_async()
             _LOGGER.info('create mips_service instance')
@@ -1881,15 +1889,11 @@ async def get_miot_instance_async(
         miot_lan: Optional[MIoTLan] = hass.data[DOMAIN].get(
             'miot_lan', None)
         if not miot_lan:
-            lan_config = (await storage.load_user_config_async(
-                uid='global_config',
-                cloud_server='all',
-                keys=['net_interfaces', 'enable_subscribe'])) or {}
             miot_lan = MIoTLan(
-                net_ifs=lan_config.get('net_interfaces', []),
+                net_ifs=global_config.get('net_interfaces', []),
                 network=network,
                 mips_service=mips_service,
-                enable_subscribe=lan_config.get('enable_subscribe', False),
+                enable_subscribe=global_config.get('enable_subscribe', False),
                 loop=loop)
             hass.data[DOMAIN]['miot_lan'] = miot_lan
             _LOGGER.info('create miot_lan instance')
