@@ -51,7 +51,7 @@ import ipaddress
 import json
 import secrets
 import traceback
-from typing import Optional, Set
+from typing import Optional, Set, Tuple
 from urllib.parse import urlparse
 from aiohttp import web
 from aiohttp.hdrs import METH_GET
@@ -255,36 +255,11 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._cc_network_detect_addr = user_input.get(
                 'network_detect_addr', self._cc_network_detect_addr)
 
-            ip_list: list[str] = []
-            url_list: list[str] = []
-            if self._cc_network_detect_addr:
-                invalid_list: list[str] = []
-                for addr in self._cc_network_detect_addr.split(','):
-                    addr = addr.strip()
-                    if not addr:
-                        continue
-                    # pylint: disable=broad-exception-caught
-                    try:
-                        ipaddress.ip_address(addr)
-                        ip_list.append(addr)
-                        continue
-                    except Exception:
-                        pass
-                    try:
-                        result = urlparse(addr)
-                        if (
-                            result.netloc
-                            and result.scheme.startswith('http')
-                        ):
-                            url_list.append(addr)
-                            continue
-                    except Exception:
-                        pass
-                    invalid_list.append(addr)
-                if invalid_list:
-                    return await self.__show_auth_config_form(
-                        reason='invalid_network_addr')
-            network_detect_addr: dict = {}
+            ip_list, url_list, invalid_list = _handle_network_detect_addr(
+                addr_str=self._cc_network_detect_addr)
+            if invalid_list:
+                return await self.__show_auth_config_form(
+                    reason='invalid_network_addr')
             if ip_list or url_list:
                 if ip_list and not await self._miot_network.ping_multi_async(
                         ip_list=ip_list):
@@ -294,13 +269,12 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         url_list=url_list):
                     return await self.__show_auth_config_form(
                         reason='invalid_http_addr')
-                network_detect_addr = {
-                    'ip': ip_list, 'url': url_list}
             else:
                 if not await self._miot_network.get_network_status_async():
                     return await self.__show_auth_config_form(
                         reason='invalid_default_addr')
-                network_detect_addr = {'ip': [], 'url': []}
+            network_detect_addr = {
+                'ip': ip_list, 'url': url_list}
             if await self._miot_storage.update_user_config_async(
                 uid='global_config', cloud_server='all', config={
                     'network_detect_addr': network_detect_addr}):
@@ -1692,36 +1666,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._cc_network_detect_addr = user_input.get(
             'network_detect_addr', self._cc_network_detect_addr)
 
-        ip_list: list[str] = []
-        url_list: list[str] = []
-        if self._cc_network_detect_addr:
-            invalid_list: list[str] = []
-            for addr in self._cc_network_detect_addr.split(','):
-                addr = addr.strip()
-                if not addr:
-                    continue
-                # pylint: disable=broad-exception-caught
-                try:
-                    ipaddress.ip_address(addr)
-                    ip_list.append(addr)
-                    continue
-                except Exception:
-                    pass
-                try:
-                    result = urlparse(addr)
-                    if (
-                        result.netloc
-                        and result.scheme.startswith('http')
-                    ):
-                        url_list.append(addr)
-                        continue
-                except Exception:
-                    pass
-                invalid_list.append(addr)
-            if invalid_list:
-                return await self.__show_network_detect_config_form(
-                    reason='invalid_network_addr')
-        network_detect_addr: dict = {}
+        ip_list, url_list, invalid_list = _handle_network_detect_addr(
+            addr_str=self._cc_network_detect_addr)
+        if invalid_list:
+            return await self.__show_network_detect_config_form(
+                reason='invalid_network_addr')
         if ip_list or url_list:
             if ip_list and not await self._miot_network.ping_multi_async(
                     ip_list=ip_list):
@@ -1731,13 +1680,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     url_list=url_list):
                 return await self.__show_network_detect_config_form(
                     reason='invalid_http_addr')
-            network_detect_addr = {
-                'ip': ip_list, 'url': url_list}
         else:
             if not await self._miot_network.get_network_status_async():
                 return await self.__show_network_detect_config_form(
                     reason='invalid_default_addr')
-            network_detect_addr = {'ip': [], 'url': []}
+        network_detect_addr: dict = {'ip': ip_list, 'url': url_list}
 
         if await self._miot_storage.update_user_config_async(
             uid='global_config', cloud_server='all', config={
@@ -1932,3 +1879,35 @@ def _handle_devices_filter(
         return {}
     return {
         did: info for did, info in devices.items() if did in include_set}
+
+
+def _handle_network_detect_addr(
+    addr_str: str
+) -> Tuple[list[str], list[str], list[str]]:
+    ip_list: list[str] = []
+    url_list: list[str] = []
+    invalid_list: list[str] = []
+    if addr_str:
+        for addr in addr_str.split(','):
+            addr = addr.strip()
+            if not addr:
+                continue
+            # pylint: disable=broad-exception-caught
+            try:
+                ipaddress.ip_address(addr)
+                ip_list.append(addr)
+                continue
+            except Exception:
+                pass
+            try:
+                result = urlparse(addr)
+                if (
+                    result.netloc
+                    and result.scheme.startswith('http')
+                ):
+                    url_list.append(addr)
+                    continue
+            except Exception:
+                pass
+            invalid_list.append(addr)
+    return ip_list, url_list, invalid_list
