@@ -108,7 +108,8 @@
                     "hide_non_standard_entities": "Hide non-standard created entities",
                     "display_devices_changed_notify": "Display device status change notifications",
                     "update_trans_rules": "Update entity conversion rules",
-                    "update_lan_ctrl_config": "Update LAN control configuration"
+                    "update_lan_ctrl_config": "Update LAN control configuration",
+                    "network_detect_config": "Network Detection Configuration"
                 }
             },
             "update_user_info": {

@@ -108,7 +108,8 @@
                     "hide_non_standard_entities": "Ocultar entidades não padrão",
                     "display_devices_changed_notify": "Exibir notificações de mudança de status do dispositivo",
                     "update_trans_rules": "Atualizar regras de conversão de entidades",
-                    "update_lan_ctrl_config": "Atualizar configuração de controlo LAN"
+                    "update_lan_ctrl_config": "Atualizar configuração de controlo LAN",
+                    "network_detect_config": "Configuração de detecção de rede"
                 }
             },
             "update_user_info": {

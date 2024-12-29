@@ -108,7 +108,8 @@
                     "hide_non_standard_entities": "Verberg niet-standaard gemaakte entiteiten",
                     "display_devices_changed_notify": "Apparaatstatuswijzigingen weergeven",
                     "update_trans_rules": "Werk entiteitsconversieregels bij",
-                    "update_lan_ctrl_config": "Werk LAN controleconfiguratie bij"
+                    "update_lan_ctrl_config": "Werk LAN controleconfiguratie bij",
+                    "network_detect_config": "Netwerkdetectieconfiguratie"
                 }
             },
             "update_user_info": {

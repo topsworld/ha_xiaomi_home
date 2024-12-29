@@ -108,7 +108,8 @@
                     "hide_non_standard_entities": "Скрыть нестандартные сущности",
                     "display_devices_changed_notify": "Отображать уведомления о изменении состояния устройства",
                     "update_trans_rules": "Обновить правила преобразования сущностей",
-                    "update_lan_ctrl_config": "Обновить конфигурацию управления LAN"
+                    "update_lan_ctrl_config": "Обновить конфигурацию управления LAN",
+                    "network_detect_config": "Конфигурация Обнаружения Сети"
                 }
             },
             "update_user_info": {

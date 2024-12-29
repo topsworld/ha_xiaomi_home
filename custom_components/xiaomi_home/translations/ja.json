@@ -108,7 +108,8 @@
                     "hide_non_standard_entities": "非標準生成エンティティを非表示にする",
                     "display_devices_changed_notify": "デバイスの状態変化通知を表示",
                     "update_trans_rules": "エンティティ変換ルールを更新する",
-                    "update_lan_ctrl_config": "LAN制御構成を更新する"
+                    "update_lan_ctrl_config": "LAN制御構成を更新する",
+                    "network_detect_config": "ネットワーク検出設定"
                 }
             },
             "update_user_info": {

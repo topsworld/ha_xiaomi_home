@@ -108,7 +108,8 @@
                     "hide_non_standard_entities": "隱藏非標準生成實體",
                     "display_devices_changed_notify": "顯示設備狀態變化通知",
                     "update_trans_rules": "更新實體轉換規則",
-                    "update_lan_ctrl_config": "更新局域網控制配置"
+                    "update_lan_ctrl_config": "更新局域網控制配置",
+                    "network_detect_config": "網絡檢測配置"
                 }
             },
             "update_user_info": {
