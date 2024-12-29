@@ -1870,7 +1870,7 @@ async def get_miot_instance_async(
         if not network:
             network = MIoTNetwork(
                 ip_addr_list=network_detect_addr.get('ip', []),
-                http_addr_list=network_detect_addr.get('http', []),
+                url_addr_list=network_detect_addr.get('url', []),
                 refresh_interval=NETWORK_REFRESH_INTERVAL,
                 loop=loop)
             hass.data[DOMAIN]['miot_network'] = network

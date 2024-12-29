@@ -83,7 +83,7 @@ class MIoTNetwork:
         '8.8.8.8',          # Google Public DNS
         '9.9.9.9'           # Quad9
     ]
-    _HTTP_ADDRESS_LIST: list[str] = [
+    _URL_ADDRESS_LIST: list[str] = [
         'https://www.bing.com',
         'https://www.google.com',
         'https://www.baidu.com'
@@ -94,7 +94,7 @@ class MIoTNetwork:
     _main_loop: asyncio.AbstractEventLoop
 
     _ip_addr_map: dict[str, float]
-    _http_addr_list: dict[str, float]
+    _url_addr_list: dict[str, float]
     _http_session: aiohttp.ClientSession
 
     _refresh_interval: int
@@ -113,7 +113,7 @@ class MIoTNetwork:
     def __init__(
         self,
         ip_addr_list: Optional[list[str]] = None,
-        http_addr_list: Optional[list[str]] = None,
+        url_addr_list: Optional[list[str]] = None,
         refresh_interval: Optional[int] = None,
         loop: Optional[asyncio.AbstractEventLoop] = None
     ) -> None:
@@ -122,8 +122,8 @@ class MIoTNetwork:
             ip: self._DETECT_TIMEOUT for ip in
             ip_addr_list or self._IP_ADDRESS_LIST}
         self._http_addr_map = {
-            http: self._DETECT_TIMEOUT for http in
-            http_addr_list or self._HTTP_ADDRESS_LIST}
+            url: self._DETECT_TIMEOUT for url in
+            url_addr_list or self._URL_ADDRESS_LIST}
         self._http_session = aiohttp.ClientSession()
         self._refresh_interval = refresh_interval or self._REFRESH_INTERVAL
 
@@ -171,14 +171,22 @@ class MIoTNetwork:
     async def update_addr_list_async(
         self,
         ip_addr_list: Optional[list[str]] = None,
-        http_addr_list: Optional[list[str]] = None,
+        url_addr_list: Optional[list[str]] = None,
     ) -> None:
-        if ip_addr_list:
-            self._ip_addr_map = {
-                ip: self._DETECT_TIMEOUT for ip in ip_addr_list}
-        if http_addr_list:
-            self._http_addr_map = {
-                http: self._DETECT_TIMEOUT for http in http_addr_list}
+        new_ip_map: dict = {}
+        for ip in ip_addr_list or self._IP_ADDRESS_LIST:
+            if ip in self._ip_addr_map:
+                new_ip_map[ip] = self._ip_addr_map[ip]
+            else:
+                new_ip_map[ip] = self._DETECT_TIMEOUT
+        self._ip_addr_map = new_ip_map
+        new_url_map: dict = {}
+        for url in url_addr_list or self._URL_ADDRESS_LIST:
+            if url in self._http_addr_map:
+                new_url_map[url] = self._http_addr_map[url]
+            else:
+                new_url_map[url] = self._DETECT_TIMEOUT
+        self._http_addr_map = new_url_map
 
     def sub_network_status(
         self, key: str, handler: Callable[[bool], Coroutine]
@@ -210,18 +218,18 @@ class MIoTNetwork:
                     ip_ts = ts
             if (
                 ip_ts < self._DETECT_TIMEOUT
-                and self.ping_multi_async(ip_list=[ip_addr])
+                and await self.ping_multi_async(ip_list=[ip_addr])
             ):
                 return True
-            http_addr: str = ''
-            http_ts: float = self._DETECT_TIMEOUT
+            url_addr: str = ''
+            url_ts: float = self._DETECT_TIMEOUT
             for http, ts in self._http_addr_map.items():
-                if ts < http_ts:
-                    http_addr = http
-                    http_ts = ts
+                if ts < url_ts:
+                    url_addr = http
+                    url_ts = ts
             if (
-                http_ts < self._DETECT_TIMEOUT
-                and await self.http_multi_async(url_list=[http_addr])
+                url_ts < self._DETECT_TIMEOUT
+                and await self.http_multi_async(url_list=[url_addr])
             ):
                 return True
             # Detect all addresses
@@ -293,9 +301,8 @@ class MIoTNetwork:
         start_ts: float = self._main_loop.time()
         try:
             async with self._http_session.get(
-                    url, timeout=self._DETECT_TIMEOUT) as response:
-                if response.status == 200:
-                    return self._main_loop.time() - start_ts
+                    url, timeout=self._DETECT_TIMEOUT):
+                return self._main_loop.time() - start_ts
         except Exception:  # pylint: disable=broad-exception-caught
             pass
         return self._DETECT_TIMEOUT

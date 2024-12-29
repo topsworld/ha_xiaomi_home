@@ -11,11 +11,12 @@
             },
             "auth_config": {
                 "title": "Configuração básica",
-                "description": "### Região de Login\r\nSelecione a região da sua conta Xiaomi. Você pode encontrá-la no aplicativo Xiaomi Home > Perfil (localizado no menu inferior) > Configurações adicionais > Sobre o Xiaomi Home.\r\n### Idioma\r\nSelecione o idioma dos nomes dos dispositivos e entidades. Algumas frases sem tradução serão exibidas em inglês.\r\n### URL de Redirecionamento OAuth2\r\nO endereço de redirecionamento da autenticação OAuth2 é **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. O Home Assistant precisa estar na mesma rede local que o terminal atual (por exemplo, o computador pessoal) e o terminal precisa acessar a página inicial do Home Assistant através desse endereço. Caso contrário, a autenticação de login pode falhar.\r\n### Observações\r\n- Para usuários com centenas ou mais dispositivos Mi Home, a adição inicial da integração levará algum tempo. Seja paciente.\r\n- Se o Home Assistant estiver sendo executado em um ambiente Docker, certifique-se de que o modo de rede do Docker esteja definido como host, caso contrário a funcionalidade de controle local pode não funcionar corretamente.\r\n- A funcionalidade de controle local da integração tem algumas dependências. Por favor, leia o README atentamente.",
+                "description": "### Região de Login\r\nSelecione a região da sua conta Xiaomi. Você pode encontrá-la no aplicativo Xiaomi Home > Perfil (localizado no menu inferior) > Configurações adicionais > Sobre o Xiaomi Home.\r\n### Idioma\r\nSelecione o idioma dos nomes dos dispositivos e entidades. Algumas frases sem tradução serão exibidas em inglês.\r\n### URL de Redirecionamento OAuth2\r\nO endereço de redirecionamento da autenticação OAuth2 é **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. O Home Assistant precisa estar na mesma rede local que o terminal atual (por exemplo, o computador pessoal) e o terminal precisa acessar a página inicial do Home Assistant através desse endereço. Caso contrário, a autenticação de login pode falhar.\r\n### Endereço de Detecção de Rede\r\nUsado para verificar se a rede está funcionando corretamente. Se não for definido, o endereço padrão do sistema será usado. Se a verificação do endereço padrão falhar, você pode tentar inserir um endereço personalizado.\r\n- Você pode inserir vários endereços de detecção, separados por vírgulas, como `8.8.8.8,https://www.bing.com`\r\n- Se for um endereço IP, a detecção será feita via ping. Se for um endereço HTTP(s), a detecção será feita via solicitação HTTP GET.\r\n- **Esta configuração é global e as alterações afetarão outras instâncias de integração. Modifique com cautela.**\r\n### Observações\r\n- Para usuários com centenas ou mais dispositivos Mi Home, a adição inicial da integração levará algum tempo. Seja paciente.\r\n- Se o Home Assistant estiver sendo executado em um ambiente Docker, certifique-se de que o modo de rede do Docker esteja definido como host, caso contrário a funcionalidade de controle local pode não funcionar corretamente.\r\n- A funcionalidade de controle local da integração tem algumas dependências. Por favor, leia o README atentamente.",
                 "data": {
                     "cloud_server": "Região de Login",
                     "integration_language": "Idioma",
-                    "oauth_redirect_url": "URL de Redirecionamento OAuth2"
+                    "oauth_redirect_url": "URL de Redirecionamento OAuth2",
+                    "network_detect_addr": "Endereço de Detecção de Rede"
                 }
             },
             "oauth_error": {
@@ -70,7 +71,11 @@
             "no_family_selected": "Nenhuma casa selecionada.",
             "no_devices": "Não há dispositivos na casa selecionada. Por favor, selecione uma casa com dispositivos e continue.",
             "no_filter_devices": "Os dispositivos filtrados estão vazios. Por favor, selecione critérios de filtro válidos e continue.",
-            "no_central_device": "[Modo Gateway Central] requer um gateway central Xiaomi disponível na rede local onde o Home Assistant está. Verifique se a casa selecionada atende a esse requisito."
+            "no_central_device": "[Modo Gateway Central] requer um gateway central Xiaomi disponível na rede local onde o Home Assistant está. Verifique se a casa selecionada atende a esse requisito.",
+            "invalid_network_addr": "Endereço IP ou HTTP inválido detectado, por favor insira um endereço válido.",
+            "invalid_ip_addr": "Endereço IP inacessível detectado, por favor insira um endereço IP válido.",
+            "invalid_http_addr": "Endereço HTTP inacessível detectado, por favor insira um endereço HTTP válido.",
+            "invalid_default_addr": "O endereço de detecção de rede padrão está inacessível, por favor verifique a configuração da rede ou use um endereço de detecção de rede personalizado."
         },
         "abort": {
             "network_connect_error": "Configuração falhou. A conexão de rede está anormal. Verifique a configuração de rede do equipamento.",
@@ -152,6 +157,13 @@
                     "enable_subscribe": "Habilitar assinatura LAN"
                 }
             },
+            "network_detect_config": {
+                "title": "Configuração de Detecção de Rede",
+                "description": "## Introdução ao Uso\r\n### Endereço de Detecção de Rede\r\nUsado para verificar se a rede está funcionando corretamente. Se não for definido, o endereço padrão do sistema será usado. Se a verificação do endereço padrão falhar, você pode tentar inserir um endereço personalizado.\r\n- Você pode inserir vários endereços de detecção, separados por vírgulas, como `8.8.8.8,https://www.bing.com`\r\n- Se for um endereço IP, a detecção será feita via ping. Se for um endereço HTTP(s), a detecção será feita via solicitação HTTP GET.\r\n- **Esta configuração é global e as alterações afetarão outras instâncias de integração. Modifique com cautela.**",
+                "data": {
+                    "network_detect_addr": "Endereço de Detecção de Rede"
+                }
+            },
             "config_confirm": {
                 "title": "Confirmar Configuração",
                 "description": "Olá **{nick_name}**, confirme as informações da configuração mais recente e depois clique em ENVIAR.\r\nA integração será recarregada com a configuração atualizada.\r\n\r\nIdioma da Integração:\t{lang_new}\r\nApelido:\t{nick_name_new}\r\nModo de depuração para ação:\t{action_debug}\r\nOcultar entidades não padrão criadas:\t{hide_non_standard_entities}\r\nExibir notificações de mudança de status do dispositivo:\t{display_devices_changed_notify}\r\nAlterações de Dispositivos:\tAdicionar **{devices_add}** dispositivos, Remover **{devices_remove}** dispositivos\r\nAlteração nas Regras de Transformação:\tUm total de **{trans_rules_count}** regras, e **{trans_rules_count_success}** regras atualizadas",
@@ -174,7 +186,11 @@
             "no_central_device": "[Modo Gateway Central] requer um gateway central Xiaomi disponível na rede local onde o Home Assistant está. Verifique se a casa selecionada atende a esse requisito.",
             "mdns_discovery_error": "Exceção no serviço de descoberta de dispositivos locais.",
             "update_config_error": "Falha ao atualizar as informações de configuração.",
-            "not_confirm": "As alterações não foram confirmadas. Por favor, confirme a mudança antes de enviar."
+            "not_confirm": "As alterações não foram confirmadas. Por favor, confirme a mudança antes de enviar.",
+            "invalid_network_addr": "Endereço IP ou HTTP inválido detectado, por favor insira um endereço válido.",
+            "invalid_ip_addr": "Endereço IP inacessível detectado, por favor insira um endereço IP válido.",
+            "invalid_http_addr": "Endereço HTTP inacessível detectado, por favor insira um endereço HTTP válido.",
+            "invalid_default_addr": "O endereço de detecção de rede padrão está inacessível, por favor verifique a configuração da rede ou use um endereço de detecção de rede personalizado."
         },
         "abort": {
             "network_connect_error": "Configuração falhou. A conexão de rede está anormal. Verifique a configuração da rede do equipamento.",
