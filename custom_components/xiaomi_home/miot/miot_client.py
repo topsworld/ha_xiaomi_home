@@ -1558,7 +1558,7 @@ class MIoTClient:
                     None)
                 self.__on_prop_msg(params=result, ctx=None)
             if request_list:
-                _LOGGER.error(
+                _LOGGER.info(
                     'refresh props failed, cloud, %s',
                     list(request_list.keys()))
                 request_list = None
@@ -1614,7 +1614,7 @@ class MIoTClient:
             succeed_once = True
         if succeed_once:
             return True
-        _LOGGER.error(
+        _LOGGER.info(
             'refresh props failed, gw, %s', list(request_list.keys()))
         # Add failed request back to the list
         self._refresh_props_list.update(request_list)
@@ -1657,7 +1657,7 @@ class MIoTClient:
             succeed_once = True
         if succeed_once:
             return True
-        _LOGGER.error(
+        _LOGGER.info(
             'refresh props failed, lan, %s', list(request_list.keys()))
         # Add failed request back to the list
         self._refresh_props_list.update(request_list)
@@ -1689,10 +1689,10 @@ class MIoTClient:
             if self._refresh_props_timer:
                 self._refresh_props_timer.cancel()
                 self._refresh_props_timer = None
-            _LOGGER.error('refresh props failed, retry count exceed')
+            _LOGGER.info('refresh props failed, retry count exceed')
             return
         self._refresh_props_retry_count += 1
-        _LOGGER.error(
+        _LOGGER.info(
             'refresh props failed, retry, %s', self._refresh_props_retry_count)
         self._refresh_props_timer = self._main_loop.call_later(
             3, lambda: self._main_loop.create_task(
