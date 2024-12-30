@@ -167,9 +167,10 @@
             },
             "network_detect_config": {
                 "title": "Integrated Network Configuration",
-                "description": "## Usage Introduction\r\n### Network Detection Address\r\nUsed to check if the network is functioning properly. If not set, the system default address will be used. If the default address check fails, you can try entering a custom address.\r\n- You can enter multiple detection addresses, separated by commas, such as `8.8.8.8,https://www.bing.com`\r\n- If it is an IP address, detection will be done via ping. If it is an HTTP(s) address, detection will be done via HTTP GET request.\r\n- If you want to restore the system default detection address, please enter a comma `,` and click 'Next'.\r\n- **This configuration is global, and changes will affect other integration instances. Please modify with caution.**",
+                "description": "## Usage Introduction\r\n### Network Detection Address\r\nUsed to check if the network is functioning properly. If not set, the system default address will be used. If the default address check fails, you can try entering a custom address.\r\n- You can enter multiple detection addresses, separated by commas, such as `8.8.8.8,https://www.bing.com`\r\n- If it is an IP address, detection will be done via ping. If it is an HTTP(s) address, detection will be done via HTTP GET request.\r\n- If you want to restore the system default detection address, please enter a comma `,` and click 'Next'.\r\n- **This configuration is global, and changes will affect other integration instances. Please modify with caution.**\r\n### Check Network Dependencies\r\nCheck the following network dependencies one by one to see if they are accessible. If the related addresses are not accessible, it will cause integration issues.\r\n- OAuth2 Authentication Address: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Xiaomi HTTP API Address: `https://{cloud_server}.ha.api.io.mi.com/app/v2/ha/oauth/get_token`.\r\n- Xiaomi SPEC API Address: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Xiaomi MQTT Broker Address: `mqtts://{cloud_server}-ha.mqtt.io.mi.com`.",
                 "data": {
-                    "network_detect_addr": "Network Detection Address"
+                    "network_detect_addr": "Network Detection Address",
+                    "check_network_deps": "Check Network Dependencies"
                 }
             },
             "config_confirm": {
@@ -198,7 +199,10 @@
             "invalid_network_addr": "Invalid IP address or HTTP address detected, please enter a valid address.",
             "invalid_ip_addr": "Unreachable IP address detected, please enter a valid IP address.",
             "invalid_http_addr": "Unreachable HTTP address detected, please enter a valid HTTP address.",
-            "invalid_default_addr": "Default network detection address is unreachable, please check network configuration or use a custom network detection address."
+            "invalid_default_addr": "Default network detection address is unreachable, please check network configuration or use a custom network detection address.",
+            "unreachable_oauth2_host": "Unable to reach OAuth2 authentication address, please check network configuration.",
+            "unreachable_http_host": "Unable to reach Xiaomi HTTP API address, please check network configuration.",
+            "unreachable_spec_host": "Unable to reach Xiaomi SPEC API address, please check network configuration."
         },
         "abort": {
             "network_connect_error": "Configuration failed. The network connection is abnormal. Please check the equipment network configuration.",

@@ -75,7 +75,9 @@ from .miot.const import (
     DEFAULT_CTRL_MODE,
     DEFAULT_INTEGRATION_LANGUAGE,
     DEFAULT_NICK_NAME,
+    DEFAULT_OAUTH2_API_HOST,
     DOMAIN,
+    OAUTH2_AUTH_URL,
     OAUTH2_CLIENT_ID,
     CLOUD_SERVERS,
     OAUTH_REDIRECT_URL,
@@ -928,6 +930,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     _update_trans_rules: bool
     _opt_lan_ctrl_cfg: bool
     _opt_network_detect_cfg: bool
+    _opt_check_network_deps: bool
 
     _trans_rules_count: int
     _trans_rules_count_success: int
@@ -983,6 +986,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._update_trans_rules = False
         self._opt_lan_ctrl_cfg = False
         self._opt_network_detect_cfg = False
+        self._opt_check_network_deps = False
         self._trans_rules_count = 0
         self._trans_rules_count_success = 0
 
@@ -1727,6 +1731,32 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 'update network_detect_addr, %s', network_detect_addr)
         await self._miot_network.update_addr_list_async(
             ip_addr_list=ip_list, url_addr_list=url_list)
+        self._opt_check_network_deps = user_input.get(
+            'check_network_deps', False)
+        if self._opt_check_network_deps:
+            # OAuth2
+            if self._miot_network.http_multi_async(
+                    url_list=[OAUTH2_AUTH_URL]):
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_oauth2_host')
+            # HTTP API
+            http_host = DEFAULT_OAUTH2_API_HOST
+            if self._cloud_server != DEFAULT_CLOUD_SERVER:
+                http_host = f'{self._cloud_server}.{http_host}'
+            if not self._miot_network.http_multi_async(
+                    url_list=[
+                        f'https://{http_host}/app/v2/ha/oauth/get_token']):
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_http_host')
+            # SPEC API
+            if not self._miot_network.http_multi_async(
+                    url_list=[
+                        'https://miot-spec.org/miot-spec-v2/template/list/'
+                        'device']):
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_spec_host')
+            # MQTT Broker
+
         return await self.async_step_config_confirm()
 
     async def __show_network_detect_config_form(self, reason: str):
@@ -1743,8 +1773,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     'network_detect_addr',
                     default=self._cc_network_detect_addr  # type: ignore
                 ): str,
+                vol.Optional(
+                    'check_network_deps',
+                    default=self._opt_check_network_deps  # type: ignore
+                ): bool,
             }),
             errors={'base': reason},
+            description_placeholders={'cloud_server': self._cloud_server},
             last_step=False
         )
 
