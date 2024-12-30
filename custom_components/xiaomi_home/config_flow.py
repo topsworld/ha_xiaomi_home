@@ -142,6 +142,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     _cc_task_oauth: Optional[asyncio.Task[None]]
     _cc_config_rc: Optional[str]
     _cc_fut_oauth_code: Optional[asyncio.Future]
+    _opt_check_network_deps: bool
 
     def __init__(self) -> None:
         self._main_loop = asyncio.get_running_loop()
@@ -173,6 +174,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._cc_task_oauth = None
         self._cc_config_rc = None
         self._cc_fut_oauth_code = None
+        self._opt_check_network_deps = False
 
     async def async_step_user(
         self, user_input: Optional[dict] = None
@@ -319,7 +321,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return await self.__show_network_detect_config_form(
                     reason='invalid_default_addr')
         network_detect_addr: dict = {'ip': ip_list, 'url': url_list}
-
+        # Save
         if await self._miot_storage.update_user_config_async(
             uid='global_config', cloud_server='all', config={
                 'network_detect_addr': network_detect_addr}):
@@ -327,6 +329,49 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 'update network_detect_addr, %s', network_detect_addr)
         await self._miot_network.update_addr_list_async(
             ip_addr_list=ip_list, url_addr_list=url_list)
+        # Check network deps
+        self._opt_check_network_deps = user_input.get(
+            'check_network_deps', self._opt_check_network_deps)
+        if self._opt_check_network_deps:
+            # OAuth2
+            if not await self._miot_network.http_multi_async(
+                    url_list=[OAUTH2_AUTH_URL]):
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_oauth2_host')
+            # HTTP API
+            http_host = DEFAULT_OAUTH2_API_HOST
+            if self._cloud_server != DEFAULT_CLOUD_SERVER:
+                http_host = f'{self._cloud_server}.{http_host}'
+            if not await self._miot_network.http_multi_async(
+                    url_list=[
+                        f'https://{http_host}/app/v2/ha/oauth/get_token']):
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_http_host')
+            # SPEC API
+            if not await self._miot_network.http_multi_async(
+                    url_list=[
+                        'https://miot-spec.org/miot-spec-v2/template/list/'
+                        'device']):
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_spec_host')
+            # MQTT Broker
+            # pylint: disable=import-outside-toplevel
+            try:
+                from paho.mqtt import client
+                from paho.mqtt.enums import MQTTErrorCode
+                mqtt_client = client.Client(
+                    client_id=f'ha.{self._uid}',
+                    protocol=client.MQTTv5)
+                if mqtt_client.connect(
+                        host=f'{self._cloud_server}-ha.mqtt.io.mi.com',
+                        port=8883) != MQTTErrorCode.MQTT_ERR_SUCCESS:
+                    raise RuntimeError('mqtt connect error')
+                mqtt_client.disconnect()
+            except Exception as err:  # pylint: disable=broad-exception-caught
+                _LOGGER.error('try connect mqtt broker error, %s', err)
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_mqtt_broker')
+
         return await self.async_step_oauth()
 
     async def __show_network_detect_config_form(self, reason: str):
@@ -339,12 +384,18 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id='network_detect_config',
             data_schema=vol.Schema({
-                vol.Optional(
+                vol.Required(
                     'network_detect_addr',
                     default=self._cc_network_detect_addr  # type: ignore
                 ): str,
+                vol.Required(
+                    'check_network_deps',
+                    default=self._opt_check_network_deps  # type: ignore
+                ): bool,
             }),
             errors={'base': reason},
+            description_placeholders={
+                'cloud_server': self._cloud_server},
             last_step=False
         )
 
@@ -1723,7 +1774,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 return await self.__show_network_detect_config_form(
                     reason='invalid_default_addr')
         network_detect_addr: dict = {'ip': ip_list, 'url': url_list}
-
+        # Save
         if await self._miot_storage.update_user_config_async(
             uid='global_config', cloud_server='all', config={
                 'network_detect_addr': network_detect_addr}):
@@ -1731,11 +1782,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 'update network_detect_addr, %s', network_detect_addr)
         await self._miot_network.update_addr_list_async(
             ip_addr_list=ip_list, url_addr_list=url_list)
+        # Check network deps
         self._opt_check_network_deps = user_input.get(
             'check_network_deps', False)
         if self._opt_check_network_deps:
             # OAuth2
-            if not self._miot_network.http_multi_async(
+            if not await self._miot_network.http_multi_async(
                     url_list=[OAUTH2_AUTH_URL]):
                 return await self.__show_network_detect_config_form(
                     reason='unreachable_oauth2_host')
@@ -1743,13 +1795,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             http_host = DEFAULT_OAUTH2_API_HOST
             if self._cloud_server != DEFAULT_CLOUD_SERVER:
                 http_host = f'{self._cloud_server}.{http_host}'
-            if not self._miot_network.http_multi_async(
+            if not await self._miot_network.http_multi_async(
                     url_list=[
                         f'https://{http_host}/app/v2/ha/oauth/get_token']):
                 return await self.__show_network_detect_config_form(
                     reason='unreachable_http_host')
             # SPEC API
-            if not self._miot_network.http_multi_async(
+            if not await self._miot_network.http_multi_async(
                     url_list=[
                         'https://miot-spec.org/miot-spec-v2/template/list/'
                         'device']):
@@ -1758,16 +1810,16 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # MQTT Broker
             # pylint: disable=import-outside-toplevel
             try:
-                from paho.mqtt import client as mqtt
-                mqtt_client = mqtt.Client(
+                from paho.mqtt import client
+                from paho.mqtt.enums import MQTTErrorCode
+                mqtt_client = client.Client(
                     client_id=f'ha.{self._uid}',
-                    protocol=mqtt.MQTTv5)
+                    protocol=client.MQTTv5)
                 if mqtt_client.connect(
                         host=f'{self._cloud_server}-ha.mqtt.io.mi.com',
-                        port=8883) != 0:
+                        port=8883) != MQTTErrorCode.MQTT_ERR_SUCCESS:
                     raise RuntimeError('mqtt connect error')
                 mqtt_client.disconnect()
-                del mqtt_client
             except Exception as err:  # pylint: disable=broad-exception-caught
                 _LOGGER.error('try connect mqtt broker error, %s', err)
                 return await self.__show_network_detect_config_form(
@@ -1785,11 +1837,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id='network_detect_config',
             data_schema=vol.Schema({
-                vol.Optional(
+                vol.Required(
                     'network_detect_addr',
                     default=self._cc_network_detect_addr  # type: ignore
                 ): str,
-                vol.Optional(
+                vol.Required(
                     'check_network_deps',
                     default=self._opt_check_network_deps  # type: ignore
                 ): bool,

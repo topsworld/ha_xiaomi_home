@@ -21,9 +21,10 @@
             },
             "network_detect_config": {
                 "title": "Geïntegreerde Netwerkconfiguratie",
-                "description": "## Gebruiksinstructie\r\n### Netwerkdetectieadres\r\nWordt gebruikt om te controleren of het netwerk correct functioneert. Als dit niet is ingesteld, wordt het standaardadres van het systeem gebruikt. Als de standaardadrescontrole mislukt, kunt u proberen een aangepast adres in te voeren.\r\n- U kunt meerdere detectieadressen invoeren, gescheiden door komma's, zoals `8.8.8.8,https://www.bing.com`\r\n- Als het een IP-adres is, wordt de detectie uitgevoerd via ping. Als het een HTTP(s)-adres is, wordt de detectie uitgevoerd via een HTTP GET-verzoek.\r\n- Als u het standaarddetectieadres van het systeem wilt herstellen, voert u een komma `,` in en klikt u op 'Volgende'.\r\n- **Deze configuratie is globaal en wijzigingen zullen andere integratie-instanties beïnvloeden. Wijzig met voorzichtigheid.**",
+                "description": "## Gebruiksinstructie\r\n### Netwerkdetectieadres\r\nWordt gebruikt om te controleren of het netwerk correct functioneert. Als dit niet is ingesteld, wordt het standaardadres van het systeem gebruikt. Als de standaardadrescontrole mislukt, kunt u proberen een aangepast adres in te voeren.\r\n- U kunt meerdere detectieadressen invoeren, gescheiden door komma's, zoals `8.8.8.8,https://www.bing.com`\r\n- Als het een IP-adres is, wordt de detectie uitgevoerd via ping. Als het een HTTP(s)-adres is, wordt de detectie uitgevoerd via een HTTP GET-verzoek.\r\n- Als u het standaarddetectieadres van het systeem wilt herstellen, voert u een komma `,` in en klikt u op 'Volgende'.\r\n- **Deze configuratie is globaal en wijzigingen zullen andere integratie-instanties beïnvloeden. Wijzig met voorzichtigheid.**\r\n### Controleer Netwerkafhankelijkheden\r\nControleer een voor een de volgende netwerkafhankelijkheden om te zien of ze toegankelijk zijn. Als de gerelateerde adressen niet toegankelijk zijn, zal dit integratieproblemen veroorzaken.\r\n- OAuth2-authenticatieadres: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Xiaomi HTTP API-adres: `https://{cloud_server}.ha.api.io.mi.com/app/v2/ha/oauth/get_token`.\r\n- Xiaomi SPEC API-adres: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Xiaomi MQTT Broker-adres: `mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`.",
                 "data": {
-                    "network_detect_addr": "Netwerkdetectieadres"
+                    "network_detect_addr": "Netwerkdetectieadres",
+                    "check_network_deps": "Controleer Netwerkafhankelijkheden"
                 }
             },
             "oauth_error": {
@@ -82,7 +83,11 @@
             "invalid_network_addr": "Ongeldig IP-adres of HTTP-adres gedetecteerd, voer een geldig adres in.",
             "invalid_ip_addr": "Onbereikbaar IP-adres gedetecteerd, voer een geldig IP-adres in.",
             "invalid_http_addr": "Onbereikbaar HTTP-adres gedetecteerd, voer een geldig HTTP-adres in.",
-            "invalid_default_addr": "Standaard netwerkdetectieadres is onbereikbaar, controleer de netwerkconfiguratie of gebruik een aangepast netwerkdetectieadres."
+            "invalid_default_addr": "Standaard netwerkdetectieadres is onbereikbaar, controleer de netwerkconfiguratie of gebruik een aangepast netwerkdetectieadres.",
+            "unreachable_oauth2_host": "Kan OAuth2-authenticatieadres niet bereiken, controleer de netwerkconfiguratie.",
+            "unreachable_http_host": "Kan Xiaomi HTTP API-adres niet bereiken, controleer de netwerkconfiguratie.",
+            "unreachable_spec_host": "Kan Xiaomi SPEC API-adres niet bereiken, controleer de netwerkconfiguratie.",
+            "unreachable_mqtt_broker": "Kan Xiaomi MQTT Broker-adres niet bereiken, controleer de netwerkconfiguratie."
         },
         "abort": {
             "network_connect_error": "Configuratie mislukt. De netwerkverbinding is abnormaal. Controleer de netwerkinstellingen van de apparatuur.",
