@@ -107,7 +107,6 @@ class MIoTNetwork:
     _sub_list_network_status: dict[str, Callable[[bool], Coroutine]]
     _sub_list_network_info: dict[str, Callable[[
         InterfaceStatus, NetworkInfo], Coroutine]]
-
     _done_event: asyncio.Event
 
     def __init__(
