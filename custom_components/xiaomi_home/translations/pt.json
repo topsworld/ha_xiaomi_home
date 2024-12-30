@@ -11,11 +11,18 @@
             },
             "auth_config": {
                 "title": "Configuração Básica",
-                "description": "### Região de Login\r\nSelecione a região da sua conta Xiaomi. Pode encontrá-la na aplicação Xiaomi Home > Perfil (menu inferior) > Configurações adicionais > Sobre o Xiaomi Home.\r\n### Idioma\r\nSelecione o idioma para os nomes de dispositivos e entidades. Algumas frases sem tradução serão apresentadas em inglês.\r\n### URL de Redirecionamento OAuth2\r\nO endereço de redirecionamento para a autenticação OAuth2 é **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. O Home Assistant deve estar na mesma rede local que o terminal atual (por exemplo, o computador pessoal) e esse terminal deve conseguir aceder à página inicial do Home Assistant através deste endereço. Caso contrário, a autenticação de login pode falhar.\r\n### Endereço de Detecção de Rede\r\nUsado para verificar se a rede está funcionando corretamente. Se não for definido, o endereço padrão do sistema será usado. Se a verificação do endereço padrão falhar, você pode tentar inserir um endereço personalizado.\r\n- Você pode inserir vários endereços de detecção, separados por vírgulas, como `8.8.8.8,https://www.bing.com`\r\n- Se for um endereço IP, a detecção será feita via ping. Se for um endereço HTTP(s), a detecção será feita via solicitação HTTP GET.\r\n- **Esta configuração é global e as alterações afetarão outras instâncias de integração. Modifique com cautela.**\r\n### Notas\r\n- Para utilizadores com centenas (ou mais) de dispositivos Mi Home, a adição inicial da integração demorará algum tempo. Seja paciente.\r\n- Se o Home Assistant estiver a ser executado num ambiente Docker, assegure-se de que o modo de rede do Docker está configurado como host; caso contrário, a funcionalidade de controlo local pode não funcionar corretamente.\r\n- A funcionalidade de controlo local da integração tem algumas dependências. Leia cuidadosamente o README.",
+                "description": "### Região de Login\r\nSelecione a região da sua conta Xiaomi. Pode encontrá-la na aplicação Xiaomi Home > Perfil (menu inferior) > Configurações adicionais > Sobre o Xiaomi Home.\r\n### Idioma\r\nSelecione o idioma para os nomes de dispositivos e entidades. Algumas frases sem tradução serão apresentadas em inglês.\r\n### URL de Redirecionamento OAuth2\r\nO endereço de redirecionamento para a autenticação OAuth2 é **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. O Home Assistant deve estar na mesma rede local que o terminal atual (por exemplo, o computador pessoal) e esse terminal deve conseguir aceder à página inicial do Home Assistant através deste endereço. Caso contrário, a autenticação de login pode falhar.\r\n### Configuração de Rede Integrada\r\nVerifique se a rede local está funcionando corretamente e se os recursos de rede relacionados estão acessíveis. **Recomenda-se selecionar isso ao adicionar pela primeira vez.**\r\n### Notas\r\n- Para utilizadores com centenas (ou mais) de dispositivos Mi Home, a adição inicial da integração demorará algum tempo. Seja paciente.\r\n- Se o Home Assistant estiver a ser executado num ambiente Docker, assegure-se de que o modo de rede do Docker está configurado como host; caso contrário, a funcionalidade de controlo local pode não funcionar corretamente.\r\n- A funcionalidade de controlo local da integração tem algumas dependências. Leia cuidadosamente o README.",
                 "data": {
                     "cloud_server": "Região de Login",
                     "integration_language": "Idioma",
                     "oauth_redirect_url": "URL de Redirecionamento OAuth2",
+                    "network_detect_config": "Configuração de Rede Integrada"
+                }
+            },
+            "network_detect_config": {
+                "title": "Configuração de Rede Integrada",
+                "description": "## Introdução ao Uso\r\n### Endereço de Detecção de Rede\r\nUsado para verificar se a rede está funcionando corretamente. Se não for definido, o endereço padrão do sistema será usado. Se a verificação do endereço padrão falhar, você pode tentar inserir um endereço personalizado.\r\n- Você pode inserir vários endereços de detecção, separados por vírgulas, como `8.8.8.8,https://www.bing.com`\r\n- Se for um endereço IP, a detecção será feita via ping. Se for um endereço HTTP(s), a detecção será feita via solicitação HTTP GET.\r\n- **Esta configuração é global e as alterações afetarão outras instâncias de integração. Modifique com cautela.**",
+                "data": {
                     "network_detect_addr": "Endereço de Detecção de Rede"
                 }
             },
@@ -109,7 +116,7 @@
                     "display_devices_changed_notify": "Exibir notificações de mudança de status do dispositivo",
                     "update_trans_rules": "Atualizar regras de conversão de entidades",
                     "update_lan_ctrl_config": "Atualizar configuração de controlo LAN",
-                    "network_detect_config": "Configuração de detecção de rede"
+                    "network_detect_config": "Configuração de Rede Integrada"
                 }
             },
             "update_user_info": {
@@ -159,7 +166,7 @@
                 }
             },
             "network_detect_config": {
-                "title": "Configuração de Detecção de Rede",
+                "title": "Configuração de Rede Integrada",
                 "description": "## Introdução ao Uso\r\n### Endereço de Detecção de Rede\r\nUsado para verificar se a rede está funcionando corretamente. Se não for definido, o endereço padrão do sistema será usado. Se a verificação do endereço padrão falhar, você pode tentar inserir um endereço personalizado.\r\n- Você pode inserir vários endereços de detecção, separados por vírgulas, como `8.8.8.8,https://www.bing.com`\r\n- Se for um endereço IP, a detecção será feita via ping. Se for um endereço HTTP(s), a detecção será feita via solicitação HTTP GET.\r\n- **Esta configuração é global e as alterações afetarão outras instâncias de integração. Modifique com cautela.**",
                 "data": {
                     "network_detect_addr": "Endereço de Detecção de Rede"

@@ -11,11 +11,18 @@
             },
             "auth_config": {
                 "title": "Configuración básica",
-                "description": "### Región de inicio de sesión\r\nSeleccione la región donde se encuentra su cuenta de Xiaomi. Puede consultar esta información en `Xiaomi Home APP > Yo (ubicado en el menú inferior) > Más ajustes > Acerca de Xiaomi Home`.\r\n### Idioma\r\nSeleccione el idioma utilizado para los nombres de los dispositivos y entidades. Las partes de las frases que no están traducidas se mostrarán en inglés.\r\n### Dirección de redireccionamiento de autenticación de OAuth2\r\nLa dirección de redireccionamiento de autenticación de OAuth2 es **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. Home Assistant debe estar en la misma red local que el terminal de operación actual (por ejemplo, una computadora personal) y el terminal de operación debe poder acceder a la página de inicio de Home Assistant a través de esta dirección, de lo contrario, la autenticación de inicio de sesión podría fallar.\r\n### Dirección de Detección de Red\r\nSe utiliza para verificar si la red funciona correctamente. Si no se establece, se utilizará la dirección predeterminada del sistema. Si la verificación de la dirección predeterminada falla, puede intentar ingresar una dirección personalizada.\r\n- Puede ingresar varias direcciones de detección, separadas por comas, como `8.8.8.8,https://www.bing.com`\r\n- Si es una dirección IP, la detección se realizará mediante ping. Si es una dirección HTTP(s), la detección se realizará mediante una solicitud HTTP GET.\r\n- **Esta configuración es global y los cambios afectarán a otras instancias de integración. Modifique con precaución.**\r\n### Nota\r\n- Para los usuarios con cientos o más dispositivos Mi Home, la adición inicial de la integración tomará algún tiempo. Por favor, sea paciente.\r\n- Si Home Assistant se está ejecutando en un entorno Docker, asegúrese de que el modo de red de Docker esté configurado en host, de lo contrario, la funcionalidad de control local puede no funcionar correctamente.\r\n- La funcionalidad de control local de la integración tiene algunas dependencias. Por favor, lea el README cuidadosamente.",
+                "description": "### Región de inicio de sesión\r\nSeleccione la región donde se encuentra su cuenta de Xiaomi. Puede consultar esta información en `Xiaomi Home APP > Yo (ubicado en el menú inferior) > Más ajustes > Acerca de Xiaomi Home`.\r\n### Idioma\r\nSeleccione el idioma utilizado para los nombres de los dispositivos y entidades. Las partes de las frases que no están traducidas se mostrarán en inglés.\r\n### Dirección de redireccionamiento de autenticación de OAuth2\r\nLa dirección de redireccionamiento de autenticación de OAuth2 es **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. Home Assistant debe estar en la misma red local que el terminal de operación actual (por ejemplo, una computadora personal) y el terminal de operación debe poder acceder a la página de inicio de Home Assistant a través de esta dirección, de lo contrario, la autenticación de inicio de sesión podría fallar.\r\n### Configuración de Red Integrada\r\nVerifique si la red local funciona correctamente y si los recursos de red relacionados son accesibles. **Se recomienda seleccionar esto al agregar por primera vez.**\r\n### Nota\r\n- Para los usuarios con cientos o más dispositivos Mi Home, la adición inicial de la integración tomará algún tiempo. Por favor, sea paciente.\r\n- Si Home Assistant se está ejecutando en un entorno Docker, asegúrese de que el modo de red de Docker esté configurado en host, de lo contrario, la funcionalidad de control local puede no funcionar correctamente.\r\n- La funcionalidad de control local de la integración tiene algunas dependencias. Por favor, lea el README cuidadosamente.",
                 "data": {
                     "cloud_server": "Región de inicio de sesión",
                     "integration_language": "Idioma",
                     "oauth_redirect_url": "Dirección de redireccionamiento de autenticación de OAuth2",
+                    "network_detect_config": "Configuración de Red Integrada"
+                }
+            },
+            "network_detect_config": {
+                "title": "Configuración de Red Integrada",
+                "description": "## Introducción al Uso\r\n### Dirección de Detección de Red\r\nSe utiliza para verificar si la red funciona correctamente. Si no se establece, se utilizará la dirección predeterminada del sistema. Si la verificación de la dirección predeterminada falla, puede intentar ingresar una dirección personalizada.\r\n- Puede ingresar varias direcciones de detección, separadas por comas, como `8.8.8.8,https://www.bing.com`\r\n- Si es una dirección IP, la detección se realizará mediante ping. Si es una dirección HTTP(s), la detección se realizará mediante una solicitud HTTP GET.\r\n- **Esta configuración es global y los cambios afectarán a otras instancias de integración. Modifique con precaución.**",
+                "data": {
                     "network_detect_addr": "Dirección de Detección de Red"
                 }
             },
@@ -109,7 +116,7 @@
                     "display_devices_changed_notify": "Mostrar notificaciones de cambio de estado del dispositivo",
                     "update_trans_rules": "Actualizar reglas de conversión de entidad",
                     "update_lan_ctrl_config": "Actualizar configuración de control LAN",
-                    "network_detect_config": "Configuración de Detección de Red"
+                    "network_detect_config": "Configuración de Red Integrada"
                 }
             },
             "update_user_info": {
@@ -159,7 +166,7 @@
                 }
             },
             "network_detect_config": {
-                "title": "Configuración de Detección de Red",
+                "title": "Configuración de Red Integrada",
                 "description": "## Introducción al Uso\r\n### Dirección de Detección de Red\r\nSe utiliza para verificar si la red funciona correctamente. Si no se establece, se utilizará la dirección predeterminada del sistema. Si la verificación de la dirección predeterminada falla, puede intentar ingresar una dirección personalizada.\r\n- Puede ingresar varias direcciones de detección, separadas por comas, como `8.8.8.8,https://www.bing.com`\r\n- Si es una dirección IP, la detección se realizará mediante ping. Si es una dirección HTTP(s), la detección se realizará mediante una solicitud HTTP GET.\r\n- **Esta configuración es global y los cambios afectarán a otras instancias de integración. Modifique con precaución.**",
                 "data": {
                     "network_detect_addr": "Dirección de Detección de Red"

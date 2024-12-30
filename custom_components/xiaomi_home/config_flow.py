@@ -252,36 +252,9 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 webhook_id=self._virtual_did)
             self._oauth_redirect_url_full = (
                 f'{user_input.get("oauth_redirect_url")}{webhook_path}')
-            self._cc_network_detect_addr = user_input.get(
-                'network_detect_addr', self._cc_network_detect_addr)
 
-            ip_list, url_list, invalid_list = _handle_network_detect_addr(
-                addr_str=self._cc_network_detect_addr)
-            if invalid_list:
-                return await self.__show_auth_config_form(
-                    reason='invalid_network_addr')
-            if ip_list or url_list:
-                if ip_list and not await self._miot_network.ping_multi_async(
-                        ip_list=ip_list):
-                    return await self.__show_auth_config_form(
-                        reason='invalid_ip_addr')
-                if url_list and not await self._miot_network.http_multi_async(
-                        url_list=url_list):
-                    return await self.__show_auth_config_form(
-                        reason='invalid_http_addr')
-            else:
-                if not await self._miot_network.get_network_status_async():
-                    return await self.__show_auth_config_form(
-                        reason='invalid_default_addr')
-            network_detect_addr = {
-                'ip': ip_list, 'url': url_list}
-            if await self._miot_storage.update_user_config_async(
-                uid='global_config', cloud_server='all', config={
-                    'network_detect_addr': network_detect_addr}):
-                _LOGGER.info(
-                    'update network_detect_addr, %s', network_detect_addr)
-            await self._miot_network.update_addr_list_async(
-                ip_addr_list=ip_list, url_addr_list=url_list)
+            if user_input.get('network_detect_config', False):
+                return await self.async_step_network_detect_config()
             return await self.async_step_oauth(user_input)
         return await self.__show_auth_config_form('')
 
@@ -308,13 +281,69 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     'oauth_redirect_url',
                     default=OAUTH_REDIRECT_URL  # type: ignore
                 ): vol.In([OAUTH_REDIRECT_URL]),
+                vol.Required(
+                    'network_detect_config',
+                    default=False  # type: ignore
+                ): bool,
+            }),
+            errors={'base': reason},
+            last_step=False,
+        )
+
+    async def async_step_network_detect_config(
+        self, user_input: Optional[dict] = None
+    ):
+        if not user_input:
+            return await self.__show_network_detect_config_form(reason='')
+        self._cc_network_detect_addr = user_input.get(
+            'network_detect_addr', self._cc_network_detect_addr)
+
+        ip_list, url_list, invalid_list = _handle_network_detect_addr(
+            addr_str=self._cc_network_detect_addr)
+        if invalid_list:
+            return await self.__show_network_detect_config_form(
+                reason='invalid_network_addr')
+        if ip_list or url_list:
+            if ip_list and not await self._miot_network.ping_multi_async(
+                    ip_list=ip_list):
+                return await self.__show_network_detect_config_form(
+                    reason='invalid_ip_addr')
+            if url_list and not await self._miot_network.http_multi_async(
+                    url_list=url_list):
+                return await self.__show_network_detect_config_form(
+                    reason='invalid_http_addr')
+        else:
+            if not await self._miot_network.get_network_status_async():
+                return await self.__show_network_detect_config_form(
+                    reason='invalid_default_addr')
+        network_detect_addr: dict = {'ip': ip_list, 'url': url_list}
+
+        if await self._miot_storage.update_user_config_async(
+            uid='global_config', cloud_server='all', config={
+                'network_detect_addr': network_detect_addr}):
+            _LOGGER.info(
+                'update network_detect_addr, %s', network_detect_addr)
+        await self._miot_network.update_addr_list_async(
+            ip_addr_list=ip_list, url_addr_list=url_list)
+        return await self.async_step_oauth()
+
+    async def __show_network_detect_config_form(self, reason: str):
+        if not self._cc_network_detect_addr:
+            addr_list: dict = (await self._miot_storage.load_user_config_async(
+                'global_config', 'all', ['network_detect_addr'])).get(
+                    'network_detect_addr', {})
+            self._cc_network_detect_addr = ','.join(
+                addr_list.get('ip', [])+addr_list.get('url', []))
+        return self.async_show_form(
+            step_id='network_detect_config',
+            data_schema=vol.Schema({
                 vol.Optional(
                     'network_detect_addr',
                     default=self._cc_network_detect_addr  # type: ignore
                 ): str,
             }),
             errors={'base': reason},
-            last_step=False,
+            last_step=False
         )
 
     async def async_step_oauth(
