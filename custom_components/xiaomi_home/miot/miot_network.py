@@ -135,8 +135,6 @@ class MIoTNetwork:
         self._sub_list_network_status = {}
         self._sub_list_network_info = {}
 
-        self._ping_address_priority = 0
-
         self._done_event = asyncio.Event()
 
     async def init_async(self) -> bool:
