@@ -1735,7 +1735,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             'check_network_deps', False)
         if self._opt_check_network_deps:
             # OAuth2
-            if self._miot_network.http_multi_async(
+            if not self._miot_network.http_multi_async(
                     url_list=[OAUTH2_AUTH_URL]):
                 return await self.__show_network_detect_config_form(
                     reason='unreachable_oauth2_host')
