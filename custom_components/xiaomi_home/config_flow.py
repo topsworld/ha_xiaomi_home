@@ -690,7 +690,8 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     'display_devices_changed_notify',
                     default=self._display_devices_changed_notify  # type: ignore
                 ): cv.multi_select(
-                    self._miot_i18n.translate(key='config.device_state')),
+                    self._miot_i18n.translate(
+                        key='config.device_state')),  # type: ignore
             }),
             last_step=False,
         )
@@ -1228,7 +1229,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         'display_devices_changed_notify',
                         default=self._display_devs_notify  # type: ignore
                     ): cv.multi_select(
-                        self._miot_i18n.translate('config.device_state')),
+                        self._miot_i18n.translate(
+                            'config.device_state')),  # type: ignore
                     vol.Required(
                         'update_lan_ctrl_config',
                         default=self._opt_lan_ctrl_cfg  # type: ignore
@@ -1753,7 +1755,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             disable_text = self._miot_i18n.translate(
                 key='config.option_status.disable')
             trans_devs_display: dict = self._miot_i18n.translate(
-                key='config.device_state')
+                key='config.device_state')  # type: ignore
             return self.async_show_form(
                 step_id='config_confirm',
                 data_schema=vol.Schema({
