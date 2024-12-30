@@ -111,7 +111,7 @@
             },
             "config_options": {
                 "title": "Configuration Options",
-                "description": "### Hello, {nick_name}\r\n\r\nXiaomi ID: {uid}\r\nCurrent Login Region: {cloud_server}\r\n\r\nPlease select the options you need to configure, then click NEXT.",
+                "description": "### Hello, {nick_name}\r\n\r\nXiaomi ID: {uid}\r\nCurrent Login Region: {cloud_server}\r\nIntegration Instance ID: {instance_id}\r\n\r\nPlease select the options you need to configure, then click NEXT.",
                 "data": {
                     "integration_language": "Integration Language",
                     "update_user_info": "Update user information",

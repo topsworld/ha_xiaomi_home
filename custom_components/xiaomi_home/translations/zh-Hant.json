@@ -111,7 +111,7 @@
             },
             "config_options": {
                 "title": "配置選項",
-                "description": "### {nick_name} 您好！\r\n\r\n小米帳號ID：{uid}\r\n當前登錄區域：{cloud_server}\r\n\r\n請勾選需要重新配置的選項，然後點擊“下一步”。",
+                "description": "### {nick_name} 您好！\r\n\r\n小米帳號ID：{uid}\r\n當前登錄區域：{cloud_server}\r\n集成實例ID：{instance_id}\r\n\r\n請勾選需要重新配置的選項，然後點擊“下一步”。",
                 "data": {
                     "integration_language": "集成語言",
                     "update_user_info": "更新用戶信息",

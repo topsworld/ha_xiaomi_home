@@ -1307,7 +1307,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 description_placeholders={
                     'nick_name': self._nick_name,
                     'uid': self._uid,
-                    'cloud_server': CLOUD_SERVERS[self._cloud_server]
+                    'cloud_server': CLOUD_SERVERS[self._cloud_server],
+                    'instance_id': f'ha.{self._entry_data["uuid"]}'
                 },
                 last_step=False,
             )

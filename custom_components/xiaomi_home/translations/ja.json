@@ -111,7 +111,7 @@
             },
             "config_options": {
                 "title": "設定オプション",
-                "description": "### {nick_name} さん、こんにちは！\r\n\r\nXiaomi アカウントID：{uid}\r\n現在のログインエリア：{cloud_server}\r\n\r\n必要な構成オプションを選択して、[次へ] をクリックしてください。",
+                "description": "### {nick_name} さん、こんにちは！\r\n\r\nXiaomi アカウントID：{uid}\r\n現在のログインエリア：{cloud_server}\r\n統合インスタンスID: {instance_id}\r\n\r\n必要な構成オプションを選択して、[次へ] をクリックしてください。",
                 "data": {
                     "integration_language": "統合言語",
                     "update_user_info": "ユーザー情報を更新する",

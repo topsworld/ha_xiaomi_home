@@ -111,7 +111,7 @@
             },
             "config_options": {
                 "title": "Configuratie-opties",
-                "description": "### Hallo, {nick_name}\r\n\r\nXiaomi ID: {uid}\r\nHuidige inlogregio: {cloud_server}\r\n\r\nKies de opties die u wilt configureren en klik vervolgens op VOLGENDE.",
+                "description": "### Hallo, {nick_name}\r\n\r\nXiaomi ID: {uid}\r\nHuidige inlogregio: {cloud_server}\r\nIntegratie-instantie-ID: {instance_id}\r\n\r\nKies de opties die u wilt configureren en klik vervolgens op VOLGENDE.",
                 "data": {
                     "integration_language": "Integratietaal",
                     "update_user_info": "Werk gebruikersinformatie bij",

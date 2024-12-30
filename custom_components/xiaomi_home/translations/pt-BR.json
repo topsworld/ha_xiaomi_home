@@ -111,7 +111,7 @@
             },
             "config_options": {
                 "title": "Opções de Configuração",
-                "description": "### Olá, {nick_name}\r\n\r\nID Xiaomi: {uid}\r\nRegião de Login Atual: {cloud_server}\r\n\r\nSelecione as opções que você deseja configurar e clique em AVANÇAR.",
+                "description": "### Olá, {nick_name}\r\n\r\nID Xiaomi: {uid}\r\nRegião de Login Atual: {cloud_server}\r\nID da Instância de Integração: {instance_id}\r\n\r\nSelecione as opções que você deseja configurar e clique em AVANÇAR.",
                 "data": {
                     "integration_language": "Idioma da Integração",
                     "update_user_info": "Atualizar informações do usuário",

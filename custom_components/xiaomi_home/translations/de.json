@@ -111,7 +111,7 @@
             },
             "config_options": {
                 "title": "Konfigurationsoptionen",
-                "description": "### Hallo {nick_name}!\r\n\r\nXiaomi Home-Konto-ID: {uid}\r\nAktuelles Anmeldegebiet: {cloud_server}\r\n\r\nWählen Sie die Optionen aus, die Sie erneut konfigurieren möchten, und klicken Sie dann auf \"Weiter\".",
+                "description": "### Hallo {nick_name}!\r\n\r\nXiaomi Home-Konto-ID: {uid}\r\nAktuelles Anmeldegebiet: {cloud_server}\r\nIntegrationsinstanz-ID: {instance_id}\r\n\r\nWählen Sie die Optionen aus, die Sie erneut konfigurieren möchten, und klicken Sie dann auf \"Weiter\".",
                 "data": {
                     "integration_language": "Integrationsprache",
                     "update_user_info": "Benutzerinformationen aktualisieren",
