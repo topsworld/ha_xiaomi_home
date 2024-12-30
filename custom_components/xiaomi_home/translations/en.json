@@ -21,7 +21,7 @@
             },
             "network_detect_config": {
                 "title": "Integrated Network Configuration",
-                "description": "## Usage Introduction\r\n### Network Detection Address\r\nUsed to check if the network is functioning properly. If not set, the system default address will be used. If the default address check fails, you can try entering a custom address.\r\n- You can enter multiple detection addresses, separated by commas, such as `8.8.8.8,https://www.bing.com`\r\n- If it is an IP address, detection will be done via ping. If it is an HTTP(s) address, detection will be done via HTTP GET request.\r\n- **This configuration is global, and changes will affect other integration instances. Please modify with caution.**",
+                "description": "## Usage Introduction\r\n### Network Detection Address\r\nUsed to check if the network is functioning properly. If not set, the system default address will be used. If the default address check fails, you can try entering a custom address.\r\n- You can enter multiple detection addresses, separated by commas, such as `8.8.8.8,https://www.bing.com`\r\n- If it is an IP address, detection will be done via ping. If it is an HTTP(s) address, detection will be done via HTTP GET request.\r\n- If you want to restore the system default detection address, please enter a comma `,` and click 'Next'.\r\n- **This configuration is global, and changes will affect other integration instances. Please modify with caution.**",
                 "data": {
                     "network_detect_addr": "Network Detection Address"
                 }
@@ -167,7 +167,7 @@
             },
             "network_detect_config": {
                 "title": "Integrated Network Configuration",
-                "description": "## Usage Introduction\r\n### Network Detection Address\r\nUsed to check if the network is functioning properly. If not set, the system default address will be used. If the default address check fails, you can try entering a custom address.\r\n- You can enter multiple detection addresses, separated by commas, such as `8.8.8.8,https://www.bing.com`\r\n- If it is an IP address, detection will be done via ping. If it is an HTTP(s) address, detection will be done via HTTP GET request.\r\n- **This configuration is global, and changes will affect other integration instances. Please modify with caution.**",
+                "description": "## Usage Introduction\r\n### Network Detection Address\r\nUsed to check if the network is functioning properly. If not set, the system default address will be used. If the default address check fails, you can try entering a custom address.\r\n- You can enter multiple detection addresses, separated by commas, such as `8.8.8.8,https://www.bing.com`\r\n- If it is an IP address, detection will be done via ping. If it is an HTTP(s) address, detection will be done via HTTP GET request.\r\n- If you want to restore the system default detection address, please enter a comma `,` and click 'Next'.\r\n- **This configuration is global, and changes will affect other integration instances. Please modify with caution.**",
                 "data": {
                     "network_detect_addr": "Network Detection Address"
                 }
