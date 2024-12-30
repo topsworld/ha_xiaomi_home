@@ -202,7 +202,8 @@
             "invalid_default_addr": "默認網絡檢測地址無法訪問，請檢查網絡配置或者使用自定義網絡檢測地址。",
             "unreachable_oauth2_host": "無法訪問 OAuth2 認證地址，請檢查網絡配置。",
             "unreachable_http_host": "無法訪問小米 HTTP API 地址，請檢查網絡配置。",
-            "unreachable_spec_host": "無法訪問小米 SPEC API 地址，請檢查網絡配置。"
+            "unreachable_spec_host": "無法訪問小米 SPEC API 地址，請檢查網絡配置。",
+            "unreachable_mqtt_broker": "無法訪問小米 MQTT Broker 地址，請檢查網絡配置。"
         },
         "abort": {
             "network_connect_error": "配置失敗。網絡連接異常，請檢查設備網絡配置。",

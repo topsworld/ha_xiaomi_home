@@ -202,7 +202,8 @@
             "invalid_default_addr": "Die Standard-Netzwerkerkennungsadresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration oder verwenden Sie eine benutzerdefinierte Netzwerkerkennungsadresse.",
             "unreachable_oauth2_host": "OAuth2-Authentifizierungsadresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration.",
             "unreachable_http_host": "Xiaomi HTTP API-Adresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration.",
-            "unreachable_spec_host": "Xiaomi SPEC API-Adresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration."
+            "unreachable_spec_host": "Xiaomi SPEC API-Adresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration.",
+            "unreachable_mqtt_broker": "Xiaomi MQTT Broker-Adresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration."
         },
         "abort": {
             "network_connect_error": "Konfiguration fehlgeschlagen. Netzwerkverbindungsfehler. Überprüfen Sie die Netzwerkkonfiguration des Geräts.",

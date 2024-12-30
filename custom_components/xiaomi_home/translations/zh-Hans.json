@@ -202,7 +202,8 @@
             "invalid_default_addr": "默认网络检测地址无法访问，请检查网络配置或者使用自定义网络检测地址。",
             "unreachable_oauth2_host": "无法访问 OAuth2 认证地址，请检查网络配置。",
             "unreachable_http_host": "无法访问小米 HTTP API 地址，请检查网络配置。",
-            "unreachable_spec_host": "无法访问小米 SPEC API 地址，请检查网络配置。"
+            "unreachable_spec_host": "无法访问小米 SPEC API 地址，请检查网络配置。",
+            "unreachable_mqtt_broker": "无法访问小米 MQTT Broker 地址，请检查网络配置。"
         },
         "abort": {
             "network_connect_error": "配置失败。网络连接异常，请检查设备网络配置。",

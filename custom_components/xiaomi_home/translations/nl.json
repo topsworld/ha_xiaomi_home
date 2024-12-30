@@ -202,7 +202,8 @@
             "invalid_default_addr": "Standaard netwerkdetectieadres is onbereikbaar, controleer de netwerkconfiguratie of gebruik een aangepast netwerkdetectieadres.",
             "unreachable_oauth2_host": "Kan OAuth2-authenticatieadres niet bereiken, controleer de netwerkconfiguratie.",
             "unreachable_http_host": "Kan Xiaomi HTTP API-adres niet bereiken, controleer de netwerkconfiguratie.",
-            "unreachable_spec_host": "Kan Xiaomi SPEC API-adres niet bereiken, controleer de netwerkconfiguratie."
+            "unreachable_spec_host": "Kan Xiaomi SPEC API-adres niet bereiken, controleer de netwerkconfiguratie.",
+            "unreachable_mqtt_broker": "Kan Xiaomi MQTT Broker-adres niet bereiken, controleer de netwerkconfiguratie."
         },
         "abort": {
             "network_connect_error": "Configuratie mislukt. De netwerkverbinding is abnormaal. Controleer de netwerkinstellingen van de apparatuur.",

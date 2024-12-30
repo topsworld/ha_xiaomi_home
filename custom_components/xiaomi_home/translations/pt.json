@@ -202,7 +202,8 @@
             "invalid_default_addr": "O endereço de detecção de rede padrão está inacessível, por favor verifique a configuração da rede ou use um endereço de detecção de rede personalizado.",
             "unreachable_oauth2_host": "Não é possível acessar o endereço de autenticação OAuth2, verifique a configuração da rede.",
             "unreachable_http_host": "Não é possível acessar o endereço da API HTTP da Xiaomi, verifique a configuração da rede.",
-            "unreachable_spec_host": "Não é possível acessar o endereço da API SPEC da Xiaomi, verifique a configuração da rede."
+            "unreachable_spec_host": "Não é possível acessar o endereço da API SPEC da Xiaomi, verifique a configuração da rede.",
+            "unreachable_mqtt_broker": "Não é possível acessar o endereço do Broker MQTT da Xiaomi, verifique a configuração da rede."
         },
         "abort": {
             "network_connect_error": "A configuração falhou. A ligação de rede é anormal. Verifique a configuração da rede do equipamento.",

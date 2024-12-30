@@ -202,7 +202,8 @@
             "invalid_default_addr": "デフォルトのネットワーク検出アドレスにアクセスできません。ネットワーク設定を確認するか、カスタムネットワーク検出アドレスを使用してください。",
             "unreachable_oauth2_host": "OAuth2 認証アドレスにアクセスできません。ネットワーク設定を確認してください。",
             "unreachable_http_host": "Xiaomi HTTP API アドレスにアクセスできません。ネットワーク設定を確認してください。",
-            "unreachable_spec_host": "Xiaomi SPEC API アドレスにアクセスできません。ネットワーク設定を確認してください。"
+            "unreachable_spec_host": "Xiaomi SPEC API アドレスにアクセスできません。ネットワーク設定を確認してください。",
+            "unreachable_mqtt_broker": "Xiaomi MQTT ブローカーアドレスにアクセスできません。ネットワーク設定を確認してください。"
         },
         "abort": {
             "network_connect_error": "構成に失敗しました。ネットワーク接続に異常があります。デバイスのネットワーク構成を確認してください。",

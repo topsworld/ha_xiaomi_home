@@ -202,7 +202,8 @@
             "invalid_default_addr": "Default network detection address is unreachable, please check network configuration or use a custom network detection address.",
             "unreachable_oauth2_host": "Unable to reach OAuth2 authentication address, please check network configuration.",
             "unreachable_http_host": "Unable to reach Xiaomi HTTP API address, please check network configuration.",
-            "unreachable_spec_host": "Unable to reach Xiaomi SPEC API address, please check network configuration."
+            "unreachable_spec_host": "Unable to reach Xiaomi SPEC API address, please check network configuration.",
+            "unreachable_mqtt_broker": "Unable to reach Xiaomi MQTT Broker address, please check network configuration."
         },
         "abort": {
             "network_connect_error": "Configuration failed. The network connection is abnormal. Please check the equipment network configuration.",

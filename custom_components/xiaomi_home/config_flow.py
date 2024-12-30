@@ -1756,6 +1756,22 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 return await self.__show_network_detect_config_form(
                     reason='unreachable_spec_host')
             # MQTT Broker
+            # pylint: disable=import-outside-toplevel
+            try:
+                from paho.mqtt import client as mqtt
+                mqtt_client = mqtt.Client(
+                    client_id=f'ha.{self._uid}',
+                    protocol=mqtt.MQTTv5)
+                if mqtt_client.connect(
+                        host=f'{self._cloud_server}-ha.mqtt.io.mi.com',
+                        port=8883) != 0:
+                    raise RuntimeError('mqtt connect error')
+                mqtt_client.disconnect()
+                del mqtt_client
+            except Exception as err:  # pylint: disable=broad-exception-caught
+                _LOGGER.error('try connect mqtt broker error, %s', err)
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_mqtt_broker')
 
         return await self.async_step_config_confirm()
 
