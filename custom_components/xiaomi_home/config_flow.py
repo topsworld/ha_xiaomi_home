@@ -358,13 +358,12 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # pylint: disable=import-outside-toplevel
             try:
                 from paho.mqtt import client
-                from paho.mqtt.enums import MQTTErrorCode
                 mqtt_client = client.Client(
                     client_id=f'ha.{self._uid}',
-                    protocol=client.MQTTv5)
+                    protocol=client.MQTTv5)  # type: ignore
                 if mqtt_client.connect(
                         host=f'{self._cloud_server}-ha.mqtt.io.mi.com',
-                        port=8883) != MQTTErrorCode.MQTT_ERR_SUCCESS:
+                        port=8883) != 0:
                     raise RuntimeError('mqtt connect error')
                 mqtt_client.disconnect()
             except Exception as err:  # pylint: disable=broad-exception-caught
@@ -1811,13 +1810,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # pylint: disable=import-outside-toplevel
             try:
                 from paho.mqtt import client
-                from paho.mqtt.enums import MQTTErrorCode
                 mqtt_client = client.Client(
                     client_id=f'ha.{self._uid}',
-                    protocol=client.MQTTv5)
+                    protocol=client.MQTTv5)  # type: ignore
                 if mqtt_client.connect(
                         host=f'{self._cloud_server}-ha.mqtt.io.mi.com',
-                        port=8883) != MQTTErrorCode.MQTT_ERR_SUCCESS:
+                        port=8883) != 0:
                     raise RuntimeError('mqtt connect error')
                 mqtt_client.disconnect()
             except Exception as err:  # pylint: disable=broad-exception-caught
