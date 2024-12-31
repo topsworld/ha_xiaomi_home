@@ -383,11 +383,11 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id='network_detect_config',
             data_schema=vol.Schema({
-                vol.Required(
+                vol.Optional(
                     'network_detect_addr',
                     default=self._cc_network_detect_addr  # type: ignore
                 ): str,
-                vol.Required(
+                vol.Optional(
                     'check_network_deps',
                     default=self._opt_check_network_deps  # type: ignore
                 ): bool,
@@ -1836,11 +1836,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id='network_detect_config',
             data_schema=vol.Schema({
-                vol.Required(
+                vol.Optional(
                     'network_detect_addr',
                     default=self._cc_network_detect_addr  # type: ignore
                 ): str,
-                vol.Required(
+                vol.Optional(
                     'check_network_deps',
                     default=self._opt_check_network_deps  # type: ignore
                 ): bool,
