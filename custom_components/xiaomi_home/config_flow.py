@@ -339,9 +339,10 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return await self.__show_network_detect_config_form(
                     reason='unreachable_oauth2_host')
             # HTTP API
-            http_host = DEFAULT_OAUTH2_API_HOST
-            if self._cloud_server != DEFAULT_CLOUD_SERVER:
-                http_host = f'{self._cloud_server}.{http_host}'
+            http_host = (
+                DEFAULT_OAUTH2_API_HOST
+                if self._cloud_server == DEFAULT_CLOUD_SERVER
+                else f'{self._cloud_server}.{DEFAULT_OAUTH2_API_HOST}')
             if not await self._miot_network.http_multi_async(
                     url_list=[
                         f'https://{http_host}/app/v2/ha/oauth/get_token']):
@@ -394,7 +395,11 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             }),
             errors={'base': reason},
             description_placeholders={
-                'cloud_server': self._cloud_server},
+                'cloud_server': self._cloud_server,
+                'http_host': (
+                    DEFAULT_OAUTH2_API_HOST
+                    if self._cloud_server == DEFAULT_CLOUD_SERVER
+                    else f'{self._cloud_server}.{DEFAULT_OAUTH2_API_HOST}')},
             last_step=False
         )
 
@@ -1792,9 +1797,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 return await self.__show_network_detect_config_form(
                     reason='unreachable_oauth2_host')
             # HTTP API
-            http_host = DEFAULT_OAUTH2_API_HOST
-            if self._cloud_server != DEFAULT_CLOUD_SERVER:
-                http_host = f'{self._cloud_server}.{http_host}'
+            http_host = (
+                DEFAULT_OAUTH2_API_HOST
+                if self._cloud_server == DEFAULT_CLOUD_SERVER
+                else f'{self._cloud_server}.{DEFAULT_OAUTH2_API_HOST}')
             if not await self._miot_network.http_multi_async(
                     url_list=[
                         f'https://{http_host}/app/v2/ha/oauth/get_token']):
@@ -1846,7 +1852,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 ): bool,
             }),
             errors={'base': reason},
-            description_placeholders={'cloud_server': self._cloud_server},
+            description_placeholders={
+                'cloud_server': self._cloud_server,
+                'http_host': (
+                    DEFAULT_OAUTH2_API_HOST
+                    if self._cloud_server == DEFAULT_CLOUD_SERVER
+                    else f'{self._cloud_server}.{DEFAULT_OAUTH2_API_HOST}')},
             last_step=False
         )
 
