@@ -59,10 +59,5 @@
             "1",
             "5"
         ]
-    },
-    "urn:miot-spec-v2:device:switch:0000A003:lemesh-sw3f13": {
-        "properties": [
-            "11.3"
-        ]
     }
 }
