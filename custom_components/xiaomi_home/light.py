@@ -188,7 +188,7 @@ class Light(MIoTServiceEntity, LightEntity):
                         > self._VALUE_RANGE_MODE_COUNT_MAX
                     ):
                         _LOGGER.error(
-                            'Too many mode values, %s, %s, %s',
+                            'too many mode values, %s, %s, %s',
                             self.entity_id, prop.name, prop.value_range)
                     else:
                         for value in range(
@@ -201,9 +201,6 @@ class Light(MIoTServiceEntity, LightEntity):
                     self._attr_effect_list = list(self._mode_list.values())
                     self._attr_supported_features |= LightEntityFeature.EFFECT
                     self._prop_mode = prop
-                else:
-                    _LOGGER.error('invalid mode format, %s', self.entity_id)
-                    continue
 
         if not self._attr_supported_color_modes:
             if self._prop_brightness:
