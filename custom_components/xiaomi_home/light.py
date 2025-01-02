@@ -95,6 +95,7 @@ async def async_setup_entry(
 class Light(MIoTServiceEntity, LightEntity):
     """Light entities for Xiaomi Home."""
     # pylint: disable=unused-argument
+    _VALUE_RANGE_MODE_COUNT_MAX = 30
     _prop_on: Optional[MIoTSpecProperty]
     _prop_brightness: Optional[MIoTSpecProperty]
     _prop_color_temp: Optional[MIoTSpecProperty]
@@ -179,9 +180,20 @@ class Light(MIoTServiceEntity, LightEntity):
                         for item in prop.value_list}
                 elif isinstance(prop.value_range, dict):
                     mode_list = {}
+                    if (int((
+                        prop.value_range['value-range'][1]
+                        - prop.value_range['value-range'][0]
+                    ) / prop.value_range['value-range'][2])
+                        > self._VALUE_RANGE_MODE_COUNT_MAX
+                    ):
+                        _LOGGER.error(
+                            'Too many mode values, %s, %s, %s',
+                            self.entity_id, prop.name, prop.value_range)
+                        continue
                     for value in range(
-                            prop.value_range['min'], prop.value_range['max']):
-                        mode_list[value] = f'{value}'
+                            prop.value_range['min'], prop.value_range['max'],
+                            prop.value_range['step']):
+                        mode_list[value] = f'mode {value}'
                 if mode_list:
                     self._mode_list = mode_list
                     self._attr_effect_list = list(self._mode_list.values())
