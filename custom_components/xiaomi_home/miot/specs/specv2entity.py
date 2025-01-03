@@ -407,38 +407,38 @@ SPEC_PROP_TRANS_MAP: dict[str, dict | str] = {
             'device_class': SensorDeviceClass.DURATION,
             'entity': 'sensor'
         },
-	    'electric-power': {
+        'electric-power': {
             'device_class': SensorDeviceClass.POWER,
             'entity': 'sensor',
             'optional': {
                 'state_class': SensorStateClass.MEASUREMENT,
                 'unit_of_measurement': UnitOfPower.WATT
             }
-	    },
-	    'electric-current': {
+        },
+        'electric-current': {
             'device_class': SensorDeviceClass.CURRENT,
             'entity': 'sensor',
             'optional': {
                 'state_class': SensorStateClass.MEASUREMENT,
                 'unit_of_measurement': UnitOfElectricCurrent.AMPERE
             }
-	    },
-	    'power-consumption': {
+        },
+        'power-consumption': {
             'device_class': SensorDeviceClass.ENERGY,
             'entity': 'sensor',
             'optional': {
                 'state_class': SensorStateClass.TOTAL_INCREASING,
                 'unit_of_measurement': UnitOfEnergy.KILO_WATT_HOUR
             }
-	    },
-	    'total-battery': {
+        },
+        'total-battery': {
             'device_class': SensorDeviceClass.ENERGY,
             'entity': 'sensor',
             'optional': {
                 'state_class': SensorStateClass.TOTAL_INCREASING,
                 'unit_of_measurement': UnitOfEnergy.KILO_WATT_HOUR
             }
-	    },
+        },
         'has-someone-duration': 'no-one-determine-time',
         'no-one-duration': 'no-one-determine-time'
     }
