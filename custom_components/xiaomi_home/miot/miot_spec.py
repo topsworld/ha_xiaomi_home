@@ -59,8 +59,7 @@ from .miot_error import MIoTSpecError
 from .miot_storage import (
     MIoTStorage,
     SpecBoolTranslation,
-    SpecFilter,
-    SpecMultiLang)
+    SpecFilter)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -693,21 +692,16 @@ class MIoTSpecInstance:
         }
 
 
-class MIoTSpecParser:
-    """MIoT SPEC parser."""
-    # pylint: disable=inconsistent-quotes
-    VERSION: int = 1
-    DOMAIN: str = 'miot_specs'
+class _MIoTSpecMultiLang:
+    """MIoT SPEC multi lang class."""
+    # pylint: disable=broad-exception-caught
+    _DOMAIN: str = 'miot_specs_multi_lang'
     _lang: str
     _storage: MIoTStorage
     _main_loop: asyncio.AbstractEventLoop
 
-    _init_done: bool
-
-    _std_lib: _SpecStdLib
-    _bool_trans: SpecBoolTranslation
-    _multi_lang: SpecMultiLang
-    _spec_filter: SpecFilter
+    _custom_cache: dict[str, dict]
+    _current_data: Optional[dict[str, str]]
 
     def __init__(
         self, lang: Optional[str],
@@ -718,22 +712,137 @@ class MIoTSpecParser:
         self._storage = storage
         self._main_loop = loop or asyncio.get_running_loop()
 
+        self._custom_cache = {}
+        self._current_data = None
+
+    async def set_spec_async(self, urn: str) -> None:
+        if urn in self._custom_cache:
+            self._current_data = self._custom_cache[urn]
+            return
+
+        trans_cache: dict[str, str] = {}
+        trans_cloud: dict = {}
+        trans_local: dict = {}
+        # Get multi lang from cloud
+        try:
+            trans_cloud = await self.__get_multi_lang_async(urn)
+            if self._lang == 'zh-Hans':
+                # Simplified Chinese
+                trans_cache = trans_cloud.get('zh_cn', {})
+            elif self._lang == 'zh-Hant':
+                # Traditional Chinese, zh_hk or zh_tw
+                trans_cache = trans_cloud.get('zh_hk', {})
+                if not trans_cache:
+                    trans_cache = trans_cloud.get('zh_tw', {})
+            else:
+                trans_cache = trans_cloud.get(self._lang, {})
+        except Exception as err:
+            trans_cloud = {}
+            _LOGGER.info('get multi lang from cloud failed, %s, %s', urn, err)
+        # Get multi lang from local
+        try:
+            trans_local = await self._storage.load_async(
+                domain=self._DOMAIN, name=urn, type_=dict)  # type: ignore
+            if (
+                isinstance(trans_local, dict)
+                and self._lang in trans_local
+            ):
+                trans_cache.update(trans_local[self._lang])
+        except Exception as err:
+            trans_local = {}
+            _LOGGER.info('get multi lang from local failed, %s, %s', urn, err)
+        # Default language
+        if not trans_cache:
+            if DEFAULT_INTEGRATION_LANGUAGE in trans_cloud:
+                trans_cache = trans_cloud[DEFAULT_INTEGRATION_LANGUAGE]
+            if DEFAULT_INTEGRATION_LANGUAGE in trans_local:
+                trans_cache.update(
+                    trans_local[DEFAULT_INTEGRATION_LANGUAGE])
+        trans_data: dict[str, str] = {}
+        for tag, value in trans_cache.items():
+            if value is None or value.strip() == '':
+                continue
+            # The dict key is like:
+            # 'service:002:property:001:valuelist:000' or
+            # 'service:002:property:001' or 'service:002'
+            strs: list = tag.split(':')
+            strs_len = len(strs)
+            if strs_len == 2:
+                trans_data[f's:{int(strs[1])}'] = value
+            elif strs_len == 4:
+                type_ = 'p' if strs[2] == 'property' else (
+                    'a' if strs[2] == 'action' else 'e')
+                trans_data[
+                    f'{type_}:{int(strs[1])}:{int(strs[3])}'
+                ] = value
+            elif strs_len == 6:
+                trans_data[
+                    f'v:{int(strs[1])}:{int(strs[3])}:{int(strs[5])}'
+                ] = value
+
+        self._custom_cache[urn] = trans_data
+        self._current_data = trans_data
+
+    def translate(self, key: str) -> Optional[str]:
+        if not self._current_data:
+            return None
+        return self._current_data.get(key, None)
+
+    async def __get_multi_lang_async(self, urn: str) -> dict:
+        res_trans = await MIoTHttp.get_json_async(
+            url='https://miot-spec.org/instance/v2/multiLanguage',
+            params={'urn': urn})
+        if (
+            not isinstance(res_trans, dict)
+            or 'data' not in res_trans
+            or not isinstance(res_trans['data'], dict)
+        ):
+            raise MIoTSpecError('invalid translation data')
+        return res_trans['data']
+
+
+class MIoTSpecParser:
+    """MIoT SPEC parser."""
+    # pylint: disable=inconsistent-quotes
+    VERSION: int = 1
+    _DOMAIN: str = 'miot_specs'
+    _lang: str
+    _storage: MIoTStorage
+    _main_loop: asyncio.AbstractEventLoop
+
+    _std_lib: _SpecStdLib
+    _multi_lang: _MIoTSpecMultiLang
+
+    _init_done: bool
+
+    _bool_trans: SpecBoolTranslation
+    _spec_filter: SpecFilter
+
+    def __init__(
+        self, lang: Optional[str],
+        storage: MIoTStorage,
+        loop: Optional[asyncio.AbstractEventLoop] = None
+    ) -> None:
+        self._lang = lang or DEFAULT_INTEGRATION_LANGUAGE
+        self._storage = storage
+        self._main_loop = loop or asyncio.get_running_loop()
+        self._std_lib = _SpecStdLib(lang=self._lang)
+        self._multi_lang = _MIoTSpecMultiLang(
+            lang=self._lang, storage=self._storage, loop=self._main_loop)
+
         self._init_done = False
 
-        self._std_lib = _SpecStdLib(lang=self._lang)
         self._bool_trans = SpecBoolTranslation(
             lang=self._lang, loop=self._main_loop)
-        self._multi_lang = SpecMultiLang(lang=self._lang, loop=self._main_loop)
         self._spec_filter = SpecFilter(loop=self._main_loop)
 
     async def init_async(self) -> None:
         if self._init_done is True:
             return
         await self._bool_trans.init_async()
-        await self._multi_lang.init_async()
         await self._spec_filter.init_async()
         std_lib_cache = await self._storage.load_async(
-            domain=self.DOMAIN, name='spec_std_lib', type_=dict)
+            domain=self._DOMAIN, name='spec_std_lib', type_=dict)
         if (
             isinstance(std_lib_cache, dict)
             and 'data' in std_lib_cache
@@ -751,7 +860,7 @@ class MIoTSpecParser:
         # Update spec std lib
         if await self._std_lib.refresh_async():
             if not await self._storage.save_async(
-                domain=self.DOMAIN, name='spec_std_lib',
+                domain=self._DOMAIN, name='spec_std_lib',
                 data={
                     'data': self._std_lib.dump(),
                     'ts': int(time.time())
@@ -770,7 +879,6 @@ class MIoTSpecParser:
         self._init_done = False
         # self._std_lib.deinit()
         await self._bool_trans.deinit_async()
-        await self._multi_lang.deinit_async()
         await self._spec_filter.deinit_async()
 
     async def parse(
@@ -797,7 +905,7 @@ class MIoTSpecParser:
             return False
         if await self._std_lib.refresh_async():
             if not await self._storage.save_async(
-                domain=self.DOMAIN, name='spec_std_lib',
+                domain=self._DOMAIN, name='spec_std_lib',
                 data={
                     'data': self._std_lib.dump(),
                     'ts': int(time.time())
@@ -819,7 +927,7 @@ class MIoTSpecParser:
         if platform.system() == 'Windows':
             urn = urn.replace(':', '_')
         return await self._storage.load_async(
-            domain=self.DOMAIN,
+            domain=self._DOMAIN,
             name=f'{urn}_{self._lang}',
             type_=dict)  # type: ignore
 
@@ -827,7 +935,7 @@ class MIoTSpecParser:
         if platform.system() == 'Windows':
             urn = urn.replace(':', '_')
         return await self._storage.save_async(
-            domain=self.DOMAIN, name=f'{urn}_{self._lang}', data=data)
+            domain=self._DOMAIN, name=f'{urn}_{self._lang}', data=data)
 
     def __spec_format2dtype(self, format_: str) -> str:
         # 'string'|'bool'|'uint8'|'uint16'|'uint32'|
@@ -840,11 +948,6 @@ class MIoTSpecParser:
             url='https://miot-spec.org/miot-spec-v2/instance',
             params={'type': urn})
 
-    async def __get_translation(self, urn: str) -> Optional[dict]:
-        return await MIoTHttp.get_json_async(
-            url='https://miot-spec.org/instance/v2/multiLanguage',
-            params={'urn': urn})
-
     async def __parse(self, urn: str) -> MIoTSpecInstance:
         _LOGGER.debug('parse urn, %s', urn)
         # Load spec instance
@@ -856,68 +959,11 @@ class MIoTSpecParser:
             or 'services' not in instance
         ):
             raise MIoTSpecError(f'invalid urn instance, {urn}')
-        translation: dict = {}
         urn_strs: list[str] = urn.split(':')
         urn_key: str = ':'.join(urn_strs[:6])
-        try:
-            # Load multiple language configuration.
-            res_trans = await self.__get_translation(urn=urn)
-            if (
-                not isinstance(res_trans, dict)
-                or 'data' not in res_trans
-                or not isinstance(res_trans['data'], dict)
-            ):
-                raise MIoTSpecError('invalid translation data')
-            trans_data: dict[str, str] = {}
-            if self._lang == 'zh-Hans':
-                # Simplified Chinese
-                trans_data = res_trans['data'].get('zh_cn', {})
-            elif self._lang == 'zh-Hant':
-                # Traditional Chinese, zh_hk or zh_tw
-                trans_data = res_trans['data'].get('zh_hk', {})
-                if not trans_data:
-                    trans_data = res_trans['data'].get('zh_tw', {})
-            else:
-                trans_data = res_trans['data'].get(self._lang, {})
-            # Load local multiple language configuration.
-            multi_lang: dict = await self._multi_lang.translate_async(
-                urn_key=urn_key)
-            if multi_lang:
-                trans_data.update(multi_lang)
-            if not trans_data:
-                trans_data = res_trans['data'].get(
-                    DEFAULT_INTEGRATION_LANGUAGE, {})
-                if not trans_data:
-                    raise MIoTSpecError(
-                        f'the language is not supported, {self._lang}')
-                else:
-                    _LOGGER.error(
-                        'the language is not supported, %s, try using the '
-                        'default language, %s, %s',
-                        self._lang, DEFAULT_INTEGRATION_LANGUAGE, urn)
-            for tag, value in trans_data.items():
-                if value is None or value.strip() == '':
-                    continue
-                # The dict key is like:
-                # 'service:002:property:001:valuelist:000' or
-                # 'service:002:property:001' or 'service:002'
-                strs: list = tag.split(':')
-                strs_len = len(strs)
-                if strs_len == 2:
-                    translation[f's:{int(strs[1])}'] = value
-                elif strs_len == 4:
-                    type_ = 'p' if strs[2] == 'property' else (
-                        'a' if strs[2] == 'action' else 'e')
-                    translation[
-                        f'{type_}:{int(strs[1])}:{int(strs[3])}'
-                    ] = value
-                elif strs_len == 6:
-                    translation[
-                        f'v:{int(strs[1])}:{int(strs[3])}:{int(strs[5])}'
-                    ] = value
-        except MIoTSpecError as e:
-            _LOGGER.error('get translation error, %s, %s', urn, e)
-        # Spec filter
+        # Set translation cache
+        await self._multi_lang.set_spec_async(urn=urn_key)
+        # Set spec filter
         self._spec_filter.filter_spec(urn_key=urn_key)
         # Parse device type
         spec_instance: MIoTSpecInstance = MIoTSpecInstance(
@@ -948,7 +994,7 @@ class MIoTSpecParser:
             if type_strs[1] != 'miot-spec-v2':
                 spec_service.proprietary = True
             spec_service.description_trans = (
-                translation.get(f's:{service["iid"]}', None)
+                self._multi_lang.translate(f's:{service["iid"]}')
                 or self._std_lib.service_translate(key=':'.join(type_strs[:5]))
                 or service['description']
                 or spec_service.name
@@ -979,8 +1025,8 @@ class MIoTSpecParser:
                 if p_type_strs[1] != 'miot-spec-v2':
                     spec_prop.proprietary = spec_service.proprietary or True
                 spec_prop.description_trans = (
-                    translation.get(
-                        f'p:{service["iid"]}:{property_["iid"]}', None)
+                    self._multi_lang.translate(
+                        f'p:{service["iid"]}:{property_["iid"]}')
                     or self._std_lib.property_translate(
                         key=':'.join(p_type_strs[:5]))
                     or property_['description']
@@ -1000,9 +1046,9 @@ class MIoTSpecParser:
                     for index, v in enumerate(v_list):
                         v['name'] = v['description']
                         v['description'] = (
-                            translation.get(
+                            self._multi_lang.translate(
                                 f'v:{service["iid"]}:{property_["iid"]}:'
-                                f'{index}', None)
+                                f'{index}')
                             or self._std_lib.value_translate(
                                 key=f'{type_strs[:5]}|{p_type_strs[3]}|'
                                 f'{v["description"]}')
@@ -1037,8 +1083,8 @@ class MIoTSpecParser:
                 if e_type_strs[1] != 'miot-spec-v2':
                     spec_event.proprietary = spec_service.proprietary or True
                 spec_event.description_trans = (
-                    translation.get(
-                        f'e:{service["iid"]}:{event["iid"]}', None)
+                    self._multi_lang.translate(
+                        f'e:{service["iid"]}:{event["iid"]}')
                     or self._std_lib.event_translate(
                         key=':'.join(e_type_strs[:5]))
                     or event['description']
@@ -1073,8 +1119,8 @@ class MIoTSpecParser:
                 if a_type_strs[1] != 'miot-spec-v2':
                     spec_action.proprietary = spec_service.proprietary or True
                 spec_action.description_trans = (
-                    translation.get(
-                        f'a:{service["iid"]}:{action["iid"]}', None)
+                    self._multi_lang.translate(
+                        f'a:{service["iid"]}:{action["iid"]}')
                     or self._std_lib.action_translate(
                         key=':'.join(a_type_strs[:5]))
                     or action['description']
