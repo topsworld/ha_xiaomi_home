@@ -131,9 +131,9 @@ class Light(MIoTServiceEntity, LightEntity):
                 self._prop_on = prop
             # brightness
             if prop.name == 'brightness':
-                if isinstance(prop.value_range, dict):
+                if prop.value_range:
                     self._brightness_scale = (
-                        prop.value_range['min'], prop.value_range['max'])
+                        prop.value_range.min_, prop.value_range.max_)
                     self._prop_brightness = prop
                 elif (
                     self._mode_list is None
@@ -153,13 +153,13 @@ class Light(MIoTServiceEntity, LightEntity):
                     continue
             # color-temperature
             if prop.name == 'color-temperature':
-                if not isinstance(prop.value_range, dict):
+                if not prop.value_range:
                     _LOGGER.info(
                         'invalid color-temperature value_range format, %s',
                         self.entity_id)
                     continue
-                self._attr_min_color_temp_kelvin = prop.value_range['min']
-                self._attr_max_color_temp_kelvin = prop.value_range['max']
+                self._attr_min_color_temp_kelvin = prop.value_range.min_
+                self._attr_max_color_temp_kelvin = prop.value_range.max_
                 self._attr_supported_color_modes.add(ColorMode.COLOR_TEMP)
                 self._attr_color_mode = ColorMode.COLOR_TEMP
                 self._prop_color_temp = prop
@@ -178,13 +178,13 @@ class Light(MIoTServiceEntity, LightEntity):
                     mode_list = {
                         item['value']: item['description']
                         for item in prop.value_list}
-                elif isinstance(prop.value_range, dict):
+                elif prop.value_range:
                     mode_list = {}
                     if (
                         int((
-                            prop.value_range['max']
-                            - prop.value_range['min']
-                        ) / prop.value_range['step'])
+                            prop.value_range.max_
+                            - prop.value_range.min_
+                        ) / prop.value_range.step)
                         > self._VALUE_RANGE_MODE_COUNT_MAX
                     ):
                         _LOGGER.info(
@@ -192,9 +192,9 @@ class Light(MIoTServiceEntity, LightEntity):
                             self.entity_id, prop.name, prop.value_range)
                     else:
                         for value in range(
-                                prop.value_range['min'],
-                                prop.value_range['max'],
-                                prop.value_range['step']):
+                                prop.value_range.min_,
+                                prop.value_range.max_,
+                                prop.value_range.step):
                             mode_list[value] = f'mode {value}'
                 if mode_list:
                     self._mode_list = mode_list

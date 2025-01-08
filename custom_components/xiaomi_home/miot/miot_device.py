@@ -94,7 +94,8 @@ from .miot_spec import (
     MIoTSpecEvent,
     MIoTSpecInstance,
     MIoTSpecProperty,
-    MIoTSpecService
+    MIoTSpecService,
+    MIoTSpecValueRange
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -1006,8 +1007,7 @@ class MIoTPropertyEntity(Entity):
     service: MIoTSpecService
 
     _main_loop: asyncio.AbstractEventLoop
-    # {'min':int, 'max':int, 'step': int}
-    _value_range: dict[str, int]
+    _value_range: Optional[MIoTSpecValueRange]
     # {Any: Any}
     _value_list: Optional[dict[Any, Any]]
     _value: Any

@@ -64,13 +64,13 @@ from .miot_storage import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class _MIoTSpecValueRange:
+class MIoTSpecValueRange:
     """MIoT SPEC value range class."""
     min_: int
     max_: int
     step: int
 
-    def __init__(self, value_range: Union[dict, list, None]) -> None:
+    def __init__(self, value_range: Union[dict, list]) -> None:
         if isinstance(value_range, dict):
             self.load(value_range)
         elif isinstance(value_range, list):
@@ -100,6 +100,9 @@ class _MIoTSpecValueRange:
             'max': self.max_,
             'step': self.step
         }
+
+    def __str__(self) -> str:
+        return f'[{self.min_}, {self.max_}, {self.step}'
 
 
 class _MIoTSpecValueListItem:
@@ -419,10 +422,11 @@ class _MIoTSpecBase:
 class MIoTSpecProperty(_MIoTSpecBase):
     """MIoT SPEC property class."""
     format_: str
-    precision: int
     unit: Optional[str]
+    precision: int
 
-    _value_range: Optional[_MIoTSpecValueRange]
+    _value_range: Optional[MIoTSpecValueRange]
+
     value_list: Optional[list[dict]]
 
     _access: list
@@ -441,7 +445,7 @@ class MIoTSpecProperty(_MIoTSpecBase):
             unit: Optional[str] = None,
             value_range: Optional[dict] = None,
             value_list: Optional[list[dict]] = None,
-            precision: int = 0
+            precision: Optional[int] = None
     ) -> None:
         super().__init__(spec=spec)
         self.service = service
@@ -450,7 +454,7 @@ class MIoTSpecProperty(_MIoTSpecBase):
         self.unit = unit
         self.value_range = value_range
         self.value_list = value_list
-        self.precision = precision
+        self.precision = precision or 1
 
         self.spec_id = hash(
             f'p.{self.name}.{self.service.iid}.{self.iid}')
@@ -480,12 +484,19 @@ class MIoTSpecProperty(_MIoTSpecBase):
         return self._notifiable
 
     @property
-    def value_range(self) -> Optional[_MIoTSpecValueRange]:
+    def value_range(self) -> Optional[MIoTSpecValueRange]:
         return self._value_range
 
     @value_range.setter
     def value_range(self, value: Union[dict, list, None]) -> None:
-        self._value_range = _MIoTSpecValueRange(value_range=value)
+        """Set value-range, precision."""
+        if not value:
+            self._value_range = None
+            return
+        self._value_range = MIoTSpecValueRange(value_range=value)
+        if isinstance(value, list):
+            self.precision = len(str(value[2]).split(
+                '.')[1].rstrip('0')) if '.' in str(value[2]) else 0
 
     def value_format(self, value: Any) -> Any:
         if value is None:
@@ -648,7 +659,7 @@ class MIoTSpecInstance:
                     unit=prop['unit'],
                     value_range=prop['value_range'],
                     value_list=prop['value_list'],
-                    precision=prop.get('precision', 0))
+                    precision=prop.get('precision', None))
                 spec_service.properties.append(spec_prop)
             for event in service['events']:
                 spec_event = MIoTSpecEvent(
@@ -753,9 +764,9 @@ class _MIoTSpecMultiLang:
             _LOGGER.info('get multi lang from local failed, %s, %s', urn, err)
         # Default language
         if not trans_cache:
-            if DEFAULT_INTEGRATION_LANGUAGE in trans_cloud:
+            if trans_cloud and DEFAULT_INTEGRATION_LANGUAGE in trans_cloud:
                 trans_cache = trans_cloud[DEFAULT_INTEGRATION_LANGUAGE]
-            if DEFAULT_INTEGRATION_LANGUAGE in trans_local:
+            if trans_local and DEFAULT_INTEGRATION_LANGUAGE in trans_local:
                 trans_cache.update(
                     trans_local[DEFAULT_INTEGRATION_LANGUAGE])
         trans_data: dict[str, str] = {}
@@ -892,11 +903,11 @@ class MIoTSpecParser:
                 return MIoTSpecInstance.load(specs=cache_result)
         # Retry three times
         for index in range(3):
-            try:
-                return await self.__parse(urn=urn)
-            except Exception as err:  # pylint: disable=broad-exception-caught
-                _LOGGER.error(
-                    'parse error, retry, %d, %s, %s', index, urn, err)
+            # try:
+            return await self.__parse(urn=urn)
+            # except Exception as err:  # pylint: disable=broad-exception-caught
+            #     _LOGGER.error(
+            #         'parse error, retry, %d, %s, %s', index, urn, err)
         return None
 
     async def refresh_async(self, urn_list: list[str]) -> int:
@@ -1032,15 +1043,7 @@ class MIoTSpecParser:
                     or property_['description']
                     or spec_prop.name)
                 if 'value-range' in property_:
-                    spec_prop.value_range = {
-                        'min': property_['value-range'][0],
-                        'max': property_['value-range'][1],
-                        'step': property_['value-range'][2]
-                    }
-                    spec_prop.precision = len(str(
-                        property_['value-range'][2]).split(
-                        '.')[1].rstrip('0')) if '.' in str(
-                            property_['value-range'][2]) else 0
+                    spec_prop.value_range = property_['value-range']
                 elif 'value-list' in property_:
                     v_list: list[dict] = property_['value-list']
                     for index, v in enumerate(v_list):

@@ -180,26 +180,26 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
                 self._attr_hvac_modes = list(self._hvac_mode_map.values())
                 self._prop_mode = prop
             elif prop.name == 'target-temperature':
-                if not isinstance(prop.value_range, dict):
+                if not prop.value_range:
                     _LOGGER.error(
                         'invalid target-temperature value_range format, %s',
                         self.entity_id)
                     continue
-                self._attr_min_temp = prop.value_range['min']
-                self._attr_max_temp = prop.value_range['max']
-                self._attr_target_temperature_step = prop.value_range['step']
+                self._attr_min_temp = prop.value_range.min_
+                self._attr_max_temp = prop.value_range.max_
+                self._attr_target_temperature_step = prop.value_range.step
                 self._attr_temperature_unit = prop.external_unit
                 self._attr_supported_features |= (
                     ClimateEntityFeature.TARGET_TEMPERATURE)
                 self._prop_target_temp = prop
             elif prop.name == 'target-humidity':
-                if not isinstance(prop.value_range, dict):
+                if not prop.value_range:
                     _LOGGER.error(
                         'invalid target-humidity value_range format, %s',
                         self.entity_id)
                     continue
-                self._attr_min_humidity = prop.value_range['min']
-                self._attr_max_humidity = prop.value_range['max']
+                self._attr_min_humidity = prop.value_range.min_
+                self._attr_max_humidity = prop.value_range.max_
                 self._attr_supported_features |= (
                     ClimateEntityFeature.TARGET_HUMIDITY)
                 self._prop_target_humi = prop
@@ -517,14 +517,14 @@ class Heater(MIoTServiceEntity, ClimateEntity):
                     ClimateEntityFeature.TURN_OFF)
                 self._prop_on = prop
             elif prop.name == 'target-temperature':
-                if not isinstance(prop.value_range, dict):
+                if not prop.value_range:
                     _LOGGER.error(
                         'invalid target-temperature value_range format, %s',
                         self.entity_id)
                     continue
-                self._attr_min_temp = prop.value_range['min']
-                self._attr_max_temp = prop.value_range['max']
-                self._attr_target_temperature_step = prop.value_range['step']
+                self._attr_min_temp = prop.value_range.min_
+                self._attr_max_temp = prop.value_range.max_
+                self._attr_target_temperature_step = prop.value_range.step
                 self._attr_temperature_unit = prop.external_unit
                 self._attr_supported_features |= (
                     ClimateEntityFeature.TARGET_TEMPERATURE)

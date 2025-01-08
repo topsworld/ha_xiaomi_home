@@ -119,13 +119,13 @@ class Humidifier(MIoTServiceEntity, HumidifierEntity):
                 self._prop_on = prop
             # target-humidity
             elif prop.name == 'target-humidity':
-                if not isinstance(prop.value_range, dict):
+                if not prop.value_range:
                     _LOGGER.error(
                         'invalid target-humidity value_range format, %s',
                         self.entity_id)
                     continue
-                self._attr_min_humidity = prop.value_range['min']
-                self._attr_max_humidity = prop.value_range['max']
+                self._attr_min_humidity = prop.value_range.min_
+                self._attr_max_humidity = prop.value_range.max_
                 self._prop_target_humidity = prop
             # mode
             elif prop.name == 'mode':

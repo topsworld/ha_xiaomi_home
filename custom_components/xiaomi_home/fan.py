@@ -119,11 +119,11 @@ class Fan(MIoTServiceEntity, FanEntity):
                 self._attr_supported_features |= FanEntityFeature.TURN_OFF
                 self._prop_on = prop
             elif prop.name == 'fan-level':
-                if isinstance(prop.value_range, dict):
+                if prop.value_range:
                     # Fan level with value-range
-                    self._speed_min = prop.value_range['min']
-                    self._speed_max = prop.value_range['max']
-                    self._speed_step = prop.value_range['step']
+                    self._speed_min = prop.value_range.min_
+                    self._speed_max = prop.value_range.max_
+                    self._speed_step = prop.value_range.step
                     self._attr_speed_count = self._speed_max - self._speed_min+1
                     self._attr_supported_features |= FanEntityFeature.SET_SPEED
                     self._prop_fan_level = prop

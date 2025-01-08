@@ -172,13 +172,13 @@ class Cover(MIoTServiceEntity, CoverEntity):
             elif prop.name == 'current-position':
                 self._prop_current_position = prop
             elif prop.name == 'target-position':
-                if not isinstance(prop.value_range, dict):
+                if not prop.value_range:
                     _LOGGER.error(
                         'invalid target-position value_range format, %s',
                         self.entity_id)
                     continue
-                self._prop_position_value_min = prop.value_range['min']
-                self._prop_position_value_max = prop.value_range['max']
+                self._prop_position_value_min = prop.value_range.min_
+                self._prop_position_value_max = prop.value_range.max_
                 self._prop_position_value_range = (
                     self._prop_position_value_max -
                     self._prop_position_value_min)

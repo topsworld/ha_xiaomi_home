@@ -115,8 +115,8 @@ class Sensor(MIoTPropertyEntity, SensorEntity):
         """Return the current value of the sensor."""
         if self._value_range and isinstance(self._value, (int, float)):
             if (
-                self._value < self._value_range['min']
-                or self._value > self._value_range['max']
+                self._value < self._value_range.min_
+                or self._value > self._value_range.max_
             ):
                 _LOGGER.info(
                     '%s, data exception, out of range, %s, %s',
