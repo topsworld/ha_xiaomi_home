@@ -513,7 +513,7 @@ class MIoTDevice:
         if prop_access != (SPEC_PROP_TRANS_MAP[
                 'entities'][platform]['access']):
             return None
-        if prop.format_ not in SPEC_PROP_TRANS_MAP[
+        if prop.format_.__name__ not in SPEC_PROP_TRANS_MAP[
                 'entities'][platform]['format']:
             return None
         if prop.unit:
@@ -566,9 +566,9 @@ class MIoTDevice:
                 # general conversion
                 if not prop.platform:
                     if prop.writable:
-                        if prop.format_ == 'str':
+                        if prop.format_ == str:
                             prop.platform = 'text'
-                        elif prop.format_ == 'bool':
+                        elif prop.format_ == bool:
                             prop.platform = 'switch'
                             prop.device_class = SwitchDeviceClass.SWITCH
                         elif prop.value_list:

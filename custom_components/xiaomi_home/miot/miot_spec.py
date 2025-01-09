@@ -48,7 +48,7 @@ MIoT-Spec-V2 parser.
 import asyncio
 import platform
 import time
-from typing import Any, Optional, Union
+from typing import Any, Optional, Type, Union
 import logging
 from slugify import slugify
 
@@ -506,10 +506,10 @@ class _MIoTSpecBase:
 
 class MIoTSpecProperty(_MIoTSpecBase):
     """MIoT SPEC property class."""
-    format_: str
     unit: Optional[str]
     precision: int
 
+    _format_: Type
     _value_range: Optional[MIoTSpecValueRange]
     _value_list: Optional[MIoTSpecValueList]
 
@@ -542,6 +542,19 @@ class MIoTSpecProperty(_MIoTSpecBase):
 
         self.spec_id = hash(
             f'p.{self.name}.{self.service.iid}.{self.iid}')
+
+    @property
+    def format_(self) -> Type:
+        return self._format_
+
+    @format_.setter
+    def format_(self, value: str) -> None:
+        self._format_ = {
+            'string': str,
+            'str': str,
+            'bool': bool,
+            'float': float}.get(
+            value, int)
 
     @property
     def access(self) -> list:
@@ -601,11 +614,11 @@ class MIoTSpecProperty(_MIoTSpecBase):
     def value_format(self, value: Any) -> Any:
         if value is None:
             return None
-        if self.format_ == 'int':
+        if self.format_ == int:
             return int(value)
-        if self.format_ == 'float':
+        if self.format_ == float:
             return round(value, self.precision)
-        if self.format_ == 'bool':
+        if self.format_ == bool:
             return bool(value in [True, 1, 'True', 'true', '1'])
         return value
 
@@ -618,7 +631,7 @@ class MIoTSpecProperty(_MIoTSpecBase):
             'description_trans': self.description_trans,
             'proprietary': self.proprietary,
             'need_filter': self.need_filter,
-            'format': self.format_,
+            'format': self.format_.__name__,
             'access': self._access,
             'unit': self.unit,
             'value_range': (
@@ -1048,12 +1061,6 @@ class MIoTSpecParser:
         return await self._storage.save_async(
             domain=self._DOMAIN, name=f'{urn}_{self._lang}', data=data)
 
-    def __spec_format2dtype(self, format_: str) -> str:
-        # 'string'|'bool'|'uint8'|'uint16'|'uint32'|
-        # 'int8'|'int16'|'int32'|'int64'|'float'
-        return {'string': 'str', 'bool': 'bool', 'float': 'float'}.get(
-            format_, 'int')
-
     async def __get_instance(self, urn: str) -> Optional[dict]:
         return await MIoTHttp.get_json_async(
             url='https://miot-spec.org/miot-spec-v2/instance',
@@ -1124,7 +1131,7 @@ class MIoTSpecParser:
                 spec_prop: MIoTSpecProperty = MIoTSpecProperty(
                     spec=property_,
                     service=spec_service,
-                    format_=self.__spec_format2dtype(property_['format']),
+                    format_=property_['format'],
                     access=property_['access'],
                     unit=property_.get('unit', None))
                 spec_prop.name = p_type_strs[3]

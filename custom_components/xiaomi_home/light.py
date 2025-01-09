@@ -96,7 +96,7 @@ class Light(MIoTServiceEntity, LightEntity):
     """Light entities for Xiaomi Home."""
     # pylint: disable=unused-argument
     _VALUE_RANGE_MODE_COUNT_MAX = 30
-    _prop_on: Optional[MIoTSpecProperty]
+    _prop_on: MIoTSpecProperty
     _prop_brightness: Optional[MIoTSpecProperty]
     _prop_color_temp: Optional[MIoTSpecProperty]
     _prop_color: Optional[MIoTSpecProperty]
@@ -253,7 +253,7 @@ class Light(MIoTServiceEntity, LightEntity):
         result: bool = False
         # on
         # Dirty logic for lumi.gateway.mgl03 indicator light
-        value_on = True if self._prop_on.format_ == 'bool' else 1
+        value_on = True if self._prop_on.format_ == bool else 1
         result = await self.set_property_async(
             prop=self._prop_on, value=value_on)
         # brightness
@@ -288,5 +288,5 @@ class Light(MIoTServiceEntity, LightEntity):
     async def async_turn_off(self, **kwargs) -> None:
         """Turn the light off."""
         # Dirty logic for lumi.gateway.mgl03 indicator light
-        value_on = False if self._prop_on.format_ == 'bool' else 0
+        value_on = False if self._prop_on.format_ == bool else 0
         return await self.set_property_async(prop=self._prop_on, value=value_on)
