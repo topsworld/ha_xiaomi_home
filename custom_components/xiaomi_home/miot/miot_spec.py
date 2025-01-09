@@ -50,6 +50,7 @@ import platform
 import time
 from typing import Any, Optional, Union
 import logging
+from slugify import slugify
 
 
 # pylint: disable=relative-beyond-top-level
@@ -75,6 +76,8 @@ class MIoTSpecValueRange:
             self.load(value_range)
         elif isinstance(value_range, list):
             self.from_spec(value_range)
+        else:
+            raise MIoTSpecError('invalid value range format')
 
     def load(self, value_range: dict) -> None:
         if (
@@ -105,14 +108,41 @@ class MIoTSpecValueRange:
         return f'[{self.min_}, {self.max_}, {self.step}'
 
 
-class _MIoTSpecValueListItem:
+class MIoTSpecValueListItem:
     """MIoT SPEC value list item class."""
-    # All lower-case SPEC description.
+    # NOTICE: bool type without name
     name: str
     # Value
     value: Any
     # Descriptions after multilingual conversion.
     description: str
+
+    def __init__(self, item: dict) -> None:
+        self.load(item)
+
+    def load(self, item: dict) -> None:
+        if 'value' not in item or 'description' not in item:
+            raise MIoTSpecError('invalid value list item, %s')
+
+        self.name = item.get('name', None)
+        self.value = item['value']
+        self.description = item['description']
+
+    @staticmethod
+    def from_spec(item: dict) -> 'MIoTSpecValueListItem':
+        if (
+            'name' not in item
+            or 'value' not in item
+            or 'description' not in item
+        ):
+            raise MIoTSpecError('invalid value list item, %s')
+        # Slugify name and convert to lower-case.
+        cache = {
+            'name': slugify(text=item['name'], separator='_').lower(),
+            'value': item['value'],
+            'description': item['description']
+        }
+        return MIoTSpecValueListItem(cache)
 
     def dump(self) -> dict:
         return {
@@ -121,13 +151,68 @@ class _MIoTSpecValueListItem:
             'description': self.description
         }
 
+    def __str__(self) -> str:
+        return f'{self.name}: {self.value} - {self.description}'
 
-class _MIoTSpecValueList:
+
+class MIoTSpecValueList:
     """MIoT SPEC value list class."""
-    items: list[_MIoTSpecValueListItem]
+    items: list[MIoTSpecValueListItem]
+
+    def __init__(self, value_list: list[dict]) -> None:
+        if not isinstance(value_list, list):
+            raise MIoTSpecError('invalid value list format')
+        self.items = []
+        self.load(value_list)
+
+    @property
+    def names(self) -> list[str]:
+        return [item.name for item in self.items]
+
+    @property
+    def values(self) -> list[Any]:
+        return [item.value for item in self.items]
+
+    @property
+    def descriptions(self) -> list[str]:
+        return [item.description for item in self.items]
+
+    @staticmethod
+    def from_spec(value_list: list[dict]) -> 'MIoTSpecValueList':
+        result = MIoTSpecValueList([])
+        dup_desc: dict[str, int] = {}
+        for item in value_list:
+            # Handle duplicate descriptions.
+            count = 0
+            if item['description'] in dup_desc:
+                count = dup_desc[item['description']]
+            count += 1
+            dup_desc[item['description']] = count
+            if count > 1:
+                item['name'] = f'{item["name"]}_{count}'
+                item['description'] = f'{item["description"]}_{count}'
+
+            result.items.append(MIoTSpecValueListItem.from_spec(item))
+        return result
+
+    def load(self, value_list: list[dict]) -> None:
+        for item in value_list:
+            self.items.append(MIoTSpecValueListItem(item))
 
     def to_map(self) -> dict:
         return {item.value: item.description for item in self.items}
+
+    def get_value_by_description(self, description: str) -> Any:
+        for item in self.items:
+            if item.description == description:
+                return item.value
+        return None
+
+    def get_description_by_value(self, value: Any) -> Optional[str]:
+        for item in self.items:
+            if item.value == value:
+                return item.description
+        return None
 
     def dump(self) -> list:
         return [item.dump() for item in self.items]
@@ -426,8 +511,7 @@ class MIoTSpecProperty(_MIoTSpecBase):
     precision: int
 
     _value_range: Optional[MIoTSpecValueRange]
-
-    value_list: Optional[list[dict]]
+    _value_list: Optional[MIoTSpecValueList]
 
     _access: list
     _writable: bool
@@ -498,6 +582,22 @@ class MIoTSpecProperty(_MIoTSpecBase):
             self.precision = len(str(value[2]).split(
                 '.')[1].rstrip('0')) if '.' in str(value[2]) else 0
 
+    @property
+    def value_list(self) -> Optional[MIoTSpecValueList]:
+        return self._value_list
+
+    @value_list.setter
+    def value_list(
+        self, value: Union[list[dict], MIoTSpecValueList, None]
+    ) -> None:
+        if not value:
+            self._value_list = None
+            return
+        if isinstance(value, list):
+            self._value_list = MIoTSpecValueList(value_list=value)
+        elif isinstance(value, MIoTSpecValueList):
+            self._value_list = value
+
     def value_format(self, value: Any) -> Any:
         if value is None:
             return None
@@ -506,7 +606,7 @@ class MIoTSpecProperty(_MIoTSpecBase):
         if self.format_ == 'float':
             return round(value, self.precision)
         if self.format_ == 'bool':
-            return bool(value in [True, 1, 'true', '1'])
+            return bool(value in [True, 1, 'True', 'true', '1'])
         return value
 
     def dump(self) -> dict:
@@ -522,8 +622,8 @@ class MIoTSpecProperty(_MIoTSpecBase):
             'access': self._access,
             'unit': self.unit,
             'value_range': (
-                self.value_range.dump() if self.value_range else None),
-            'value_list': self.value_list,
+                self._value_range.dump() if self._value_range else None),
+            'value_list': self._value_list.dump() if self._value_list else None,
             'precision': self.precision
         }
 
@@ -552,8 +652,8 @@ class MIoTSpecEvent(_MIoTSpecBase):
             'description': self.description,
             'description_trans': self.description_trans,
             'proprietary': self.proprietary,
-            'need_filter': self.need_filter,
             'argument': [prop.iid for prop in self.argument],
+            'need_filter': self.need_filter
         }
 
 
@@ -583,10 +683,10 @@ class MIoTSpecAction(_MIoTSpecBase):
             'iid': self.iid,
             'description': self.description,
             'description_trans': self.description_trans,
-            'proprietary': self.proprietary,
-            'need_filter': self.need_filter,
             'in': [prop.iid for prop in self.in_],
-            'out': [prop.iid for prop in self.out]
+            'out': [prop.iid for prop in self.out],
+            'proprietary': self.proprietary,
+            'need_filter': self.need_filter
         }
 
 
@@ -611,9 +711,9 @@ class MIoTSpecService(_MIoTSpecBase):
             'description_trans': self.description_trans,
             'proprietary': self.proprietary,
             'properties': [prop.dump() for prop in self.properties],
-            'need_filter': self.need_filter,
             'events': [event.dump() for event in self.events],
             'actions': [action.dump() for action in self.actions],
+            'need_filter': self.need_filter
         }
 
 
@@ -903,11 +1003,11 @@ class MIoTSpecParser:
                 return MIoTSpecInstance.load(specs=cache_result)
         # Retry three times
         for index in range(3):
-            # try:
-            return await self.__parse(urn=urn)
-            # except Exception as err:  # pylint: disable=broad-exception-caught
-            #     _LOGGER.error(
-            #         'parse error, retry, %d, %s, %s', index, urn, err)
+            try:
+                return await self.__parse(urn=urn)
+            except Exception as err:  # pylint: disable=broad-exception-caught
+                _LOGGER.error(
+                    'parse error, retry, %d, %s, %s', index, urn, err)
         return None
 
     async def refresh_async(self, urn_list: list[str]) -> int:
@@ -1055,14 +1155,14 @@ class MIoTSpecParser:
                             or self._std_lib.value_translate(
                                 key=f'{type_strs[:5]}|{p_type_strs[3]}|'
                                 f'{v["description"]}')
-                            or v['name']
-                        )
-                    spec_prop.value_list = v_list
+                            or v['name'])
+                    spec_prop.value_list = MIoTSpecValueList.from_spec(v_list)
                 elif property_['format'] == 'bool':
                     v_tag = ':'.join(p_type_strs[:5])
-                    v_descriptions: dict = (
+                    v_descriptions = (
                         await self._bool_trans.translate_async(urn=v_tag))
                     if v_descriptions:
+                        # bool without value-list.name
                         spec_prop.value_list = v_descriptions
                 spec_service.properties.append(spec_prop)
             # Parse service event

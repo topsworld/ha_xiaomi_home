@@ -95,6 +95,7 @@ from .miot_spec import (
     MIoTSpecInstance,
     MIoTSpecProperty,
     MIoTSpecService,
+    MIoTSpecValueList,
     MIoTSpecValueRange
 )
 
@@ -837,18 +838,20 @@ class MIoTServiceEntity(Entity):
             self.miot_device.unsub_event(
                 siid=event.service.iid, eiid=event.iid)
 
-    def get_map_description(self, map_: dict[int, Any], key: int) -> Any:
+    def get_map_value(
+        self, map_: dict[int, Any], key: int
+    ) -> Any:
         if map_ is None:
             return None
         return map_.get(key, None)
 
-    def get_map_value(
-        self, map_: dict[int, Any], description: Any
+    def get_map_key(
+        self, map_: dict[int, Any], value: Any
     ) -> Optional[int]:
         if map_ is None:
             return None
-        for key, value in map_.items():
-            if value == description:
+        for key, value_ in map_.items():
+            if value_ == value:
                 return key
         return None
 
@@ -1009,7 +1012,7 @@ class MIoTPropertyEntity(Entity):
     _main_loop: asyncio.AbstractEventLoop
     _value_range: Optional[MIoTSpecValueRange]
     # {Any: Any}
-    _value_list: Optional[dict[Any, Any]]
+    _value_list: Optional[MIoTSpecValueList]
     _value: Any
 
     _pending_write_ha_state_timer: Optional[asyncio.TimerHandle]
@@ -1022,11 +1025,7 @@ class MIoTPropertyEntity(Entity):
         self.service = spec.service
         self._main_loop = miot_device.miot_client.main_loop
         self._value_range = spec.value_range
-        if spec.value_list:
-            self._value_list = {
-                item['value']: item['description'] for item in spec.value_list}
-        else:
-            self._value_list = None
+        self._value_list = spec.value_list
         self._value = None
         self._pending_write_ha_state_timer = None
         # Gen entity_id
@@ -1077,15 +1076,12 @@ class MIoTPropertyEntity(Entity):
     def get_vlist_description(self, value: Any) -> Optional[str]:
         if not self._value_list:
             return None
-        return self._value_list.get(value, None)
+        return self._value_list.get_description_by_value(value)
 
     def get_vlist_value(self, description: str) -> Any:
         if not self._value_list:
             return None
-        for key, value in self._value_list.items():
-            if value == description:
-                return key
-        return None
+        return self._value_list.get_value_by_description(description)
 
     async def set_property_async(self, value: Any) -> bool:
         if not self.spec.writable:

@@ -103,7 +103,7 @@ class Light(MIoTServiceEntity, LightEntity):
     _prop_mode: Optional[MIoTSpecProperty]
 
     _brightness_scale: Optional[tuple[int, int]]
-    _mode_list: Optional[dict[Any, Any]]
+    _mode_map: Optional[dict[Any, Any]]
 
     def __init__(
         self, miot_device: MIoTDevice,  entity_data: MIoTEntityData
@@ -122,7 +122,7 @@ class Light(MIoTServiceEntity, LightEntity):
         self._prop_color = None
         self._prop_mode = None
         self._brightness_scale = None
-        self._mode_list = None
+        self._mode_map = None
 
         # properties
         for prop in entity_data.props:
@@ -136,15 +136,12 @@ class Light(MIoTServiceEntity, LightEntity):
                         prop.value_range.min_, prop.value_range.max_)
                     self._prop_brightness = prop
                 elif (
-                    self._mode_list is None
-                    and isinstance(prop.value_list, list)
+                    self._mode_map is None
                     and prop.value_list
                 ):
                     # For value-list brightness
-                    self._mode_list = {
-                        item['value']: item['description']
-                        for item in prop.value_list}
-                    self._attr_effect_list = list(self._mode_list.values())
+                    self._mode_map = prop.value_list.to_map()
+                    self._attr_effect_list = list(self._mode_map.values())
                     self._attr_supported_features |= LightEntityFeature.EFFECT
                     self._prop_mode = prop
                 else:
@@ -171,13 +168,8 @@ class Light(MIoTServiceEntity, LightEntity):
             # mode
             if prop.name == 'mode':
                 mode_list = None
-                if (
-                    isinstance(prop.value_list, list)
-                    and prop.value_list
-                ):
-                    mode_list = {
-                        item['value']: item['description']
-                        for item in prop.value_list}
+                if prop.value_list:
+                    mode_list = prop.value_list.to_map()
                 elif prop.value_range:
                     mode_list = {}
                     if (
@@ -197,8 +189,8 @@ class Light(MIoTServiceEntity, LightEntity):
                                 prop.value_range.step):
                             mode_list[value] = f'mode {value}'
                 if mode_list:
-                    self._mode_list = mode_list
-                    self._attr_effect_list = list(self._mode_list.values())
+                    self._mode_map = mode_list
+                    self._attr_effect_list = list(self._mode_map.values())
                     self._attr_supported_features |= LightEntityFeature.EFFECT
                     self._prop_mode = prop
                 else:
@@ -212,21 +204,6 @@ class Light(MIoTServiceEntity, LightEntity):
             elif self._prop_on:
                 self._attr_supported_color_modes.add(ColorMode.ONOFF)
                 self._attr_color_mode = ColorMode.ONOFF
-
-    def __get_mode_description(self, key: int) -> Optional[str]:
-        """Convert mode value to description."""
-        if self._mode_list is None:
-            return None
-        return self._mode_list.get(key, None)
-
-    def __get_mode_value(self, description: str) -> Optional[int]:
-        """Convert mode description to value."""
-        if self._mode_list is None:
-            return None
-        for key, value in self._mode_list.items():
-            if value == description:
-                return key
-        return None
 
     @property
     def is_on(self) -> Optional[bool]:
@@ -264,7 +241,8 @@ class Light(MIoTServiceEntity, LightEntity):
     @property
     def effect(self) -> Optional[str]:
         """Return the current mode."""
-        return self.__get_mode_description(
+        return self.get_map_value(
+            map_=self._mode_map,
             key=self.get_prop_value(prop=self._prop_mode))
 
     async def async_turn_on(self, **kwargs) -> None:
@@ -303,7 +281,8 @@ class Light(MIoTServiceEntity, LightEntity):
         if ATTR_EFFECT in kwargs:
             result = await self.set_property_async(
                 prop=self._prop_mode,
-                value=self.__get_mode_value(description=kwargs[ATTR_EFFECT]))
+                value=self.get_map_key(
+                    map_=self._mode_map, value=kwargs[ATTR_EFFECT]))
         return result
 
     async def async_turn_off(self, **kwargs) -> None:

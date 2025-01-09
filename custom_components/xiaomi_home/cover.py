@@ -132,42 +132,36 @@ class Cover(MIoTServiceEntity, CoverEntity):
         # properties
         for prop in entity_data.props:
             if prop.name == 'motor-control':
-                if (
-                    not isinstance(prop.value_list, list)
-                    or not prop.value_list
-                ):
+                if not prop.value_list:
                     _LOGGER.error(
                         'motor-control value_list is None, %s', self.entity_id)
                     continue
-                for item in prop.value_list:
-                    if item['name'].lower() in ['open']:
+                for item in prop.value_list.items:
+                    if item.name in {'open'}:
                         self._attr_supported_features |= (
                             CoverEntityFeature.OPEN)
-                        self._prop_motor_value_open = item['value']
-                    elif item['name'].lower() in ['close']:
+                        self._prop_motor_value_open = item.value
+                    elif item.name in {'close'}:
                         self._attr_supported_features |= (
                             CoverEntityFeature.CLOSE)
-                        self._prop_motor_value_close = item['value']
-                    elif item['name'].lower() in ['pause']:
+                        self._prop_motor_value_close = item.value
+                    elif item.name in {'pause'}:
                         self._attr_supported_features |= (
                             CoverEntityFeature.STOP)
-                        self._prop_motor_value_pause = item['value']
+                        self._prop_motor_value_pause = item.value
                 self._prop_motor_control = prop
             elif prop.name == 'status':
-                if (
-                    not isinstance(prop.value_list, list)
-                    or not prop.value_list
-                ):
+                if not prop.value_list:
                     _LOGGER.error(
                         'status value_list is None, %s', self.entity_id)
                     continue
-                for item in prop.value_list:
-                    if item['name'].lower() in ['opening', 'open']:
-                        self._prop_status_opening = item['value']
-                    elif item['name'].lower() in ['closing', 'close']:
-                        self._prop_status_closing = item['value']
-                    elif item['name'].lower() in ['stop', 'pause']:
-                        self._prop_status_stop = item['value']
+                for item in prop.value_list.items:
+                    if item.name in {'opening', 'open'}:
+                        self._prop_status_opening = item.value
+                    elif item.name in {'closing', 'close'}:
+                        self._prop_status_closing = item.value
+                    elif item.name in {'stop', 'pause'}:
+                        self._prop_status_stop = item.value
                 self._prop_status = prop
             elif prop.name == 'current-position':
                 self._prop_current_position = prop

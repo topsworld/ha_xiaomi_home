@@ -90,10 +90,10 @@ class Fan(MIoTServiceEntity, FanEntity):
     _prop_mode: Optional[MIoTSpecProperty]
     _prop_horizontal_swing: Optional[MIoTSpecProperty]
 
-    _speed_min: Optional[int]
-    _speed_max: Optional[int]
-    _speed_step: Optional[int]
-    _mode_list: Optional[dict[Any, Any]]
+    _speed_min: int
+    _speed_max: int
+    _speed_step: int
+    _mode_map: Optional[dict[Any, Any]]
 
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
@@ -110,7 +110,7 @@ class Fan(MIoTServiceEntity, FanEntity):
         self._speed_min = 65535
         self._speed_max = 0
         self._speed_step = 1
-        self._mode_list = None
+        self._mode_map = None
 
         # properties
         for prop in entity_data.props:
@@ -129,46 +129,27 @@ class Fan(MIoTServiceEntity, FanEntity):
                     self._prop_fan_level = prop
                 elif (
                     self._prop_fan_level is None
-                    and isinstance(prop.value_list, list)
                     and prop.value_list
                 ):
                     # Fan level with value-list
-                    for item in prop.value_list:
-                        self._speed_min = min(self._speed_min, item['value'])
-                        self._speed_max = max(self._speed_max, item['value'])
+                    for item in prop.value_list.items:
+                        self._speed_min = min(self._speed_min, item.value)
+                        self._speed_max = max(self._speed_max, item.value)
                     self._attr_speed_count = self._speed_max - self._speed_min+1
                     self._attr_supported_features |= FanEntityFeature.SET_SPEED
                     self._prop_fan_level = prop
             elif prop.name == 'mode':
-                if (
-                    not isinstance(prop.value_list, list)
-                    or not prop.value_list
-                ):
+                if not prop.value_list:
                     _LOGGER.error(
                         'mode value_list is None, %s', self.entity_id)
                     continue
-                self._mode_list = {
-                    item['value']: item['description']
-                    for item in prop.value_list}
-                self._attr_preset_modes = list(self._mode_list.values())
+                self._mode_map = prop.value_list.to_map()
+                self._attr_preset_modes = list(self._mode_map.values())
                 self._attr_supported_features |= FanEntityFeature.PRESET_MODE
                 self._prop_mode = prop
             elif prop.name == 'horizontal-swing':
                 self._attr_supported_features |= FanEntityFeature.OSCILLATE
                 self._prop_horizontal_swing = prop
-
-    def __get_mode_description(self, key: int) -> Optional[str]:
-        if self._mode_list is None:
-            return None
-        return self._mode_list.get(key, None)
-
-    def __get_mode_value(self, description: str) -> Optional[int]:
-        if self._mode_list is None:
-            return None
-        for key, value in self._mode_list.items():
-            if value == description:
-                return key
-        return None
 
     async def async_turn_on(
         self, percentage: int = None, preset_mode: str = None, **kwargs: Any
@@ -189,7 +170,8 @@ class Fan(MIoTServiceEntity, FanEntity):
         if preset_mode:
             await self.set_property_async(
                 self._prop_mode,
-                value=self.__get_mode_value(description=preset_mode))
+                value=self.get_map_key(
+                    map_=self._mode_map, value=preset_mode))
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the fan off."""
@@ -217,7 +199,8 @@ class Fan(MIoTServiceEntity, FanEntity):
         """Set the preset mode."""
         await self.set_property_async(
             self._prop_mode,
-            value=self.__get_mode_value(description=preset_mode))
+            value=self.get_map_key(
+                map_=self._mode_map, value=preset_mode))
 
     async def async_set_direction(self, direction: str) -> None:
         """Set the direction of the fan."""
@@ -238,7 +221,8 @@ class Fan(MIoTServiceEntity, FanEntity):
         """Return the current preset mode,
         e.g., auto, smart, eco, favorite."""
         return (
-            self.__get_mode_description(
+            self.get_map_value(
+                map_=self._mode_map,
                 key=self.get_prop_value(prop=self._prop_mode))
             if self._prop_mode else None)
 
