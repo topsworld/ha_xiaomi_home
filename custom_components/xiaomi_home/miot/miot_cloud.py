@@ -75,10 +75,11 @@ class MIoTOauthClient:
     _oauth_host: str
     _client_id: int
     _redirect_url: str
+    _device_id: str
 
     def __init__(
             self, client_id: str, redirect_url: str, cloud_server: str,
-            loop: Optional[asyncio.AbstractEventLoop] = None
+            uuid: str, loop: Optional[asyncio.AbstractEventLoop] = None
     ) -> None:
         self._main_loop = loop or asyncio.get_running_loop()
         if client_id is None or client_id.strip() == '':
@@ -87,6 +88,8 @@ class MIoTOauthClient:
             raise MIoTOauthError('invalid redirect_url')
         if not cloud_server:
             raise MIoTOauthError('invalid cloud_server')
+        if not uuid:
+            raise MIoTOauthError('invalid uuid')
 
         self._client_id = int(client_id)
         self._redirect_url = redirect_url
@@ -94,6 +97,7 @@ class MIoTOauthClient:
             self._oauth_host = DEFAULT_OAUTH2_API_HOST
         else:
             self._oauth_host = f'{cloud_server}.{DEFAULT_OAUTH2_API_HOST}'
+        self._device_id = f'ha.{uuid}'
         self._session = aiohttp.ClientSession(loop=self._main_loop)
 
     async def deinit_async(self) -> None:
@@ -132,6 +136,7 @@ class MIoTOauthClient:
             'redirect_uri': redirect_url or self._redirect_url,
             'client_id': self._client_id,
             'response_type': 'code',
+            'device_id': self._device_id
         }
         if state:
             params['state'] = state
@@ -191,6 +196,7 @@ class MIoTOauthClient:
             'client_id': self._client_id,
             'redirect_uri': self._redirect_url,
             'code': code,
+            'device_id': self._device_id
         })
 
     async def refresh_access_token_async(self, refresh_token: str) -> dict:
@@ -531,9 +537,18 @@ class MIoTHttpClient:
             name = device.get('name', None)
             urn = device.get('spec_type', None)
             model = device.get('model', None)
-            if did is None or name is None or urn is None or model is None:
-                _LOGGER.error(
-                    'get_device_list, cloud, invalid device, %s', device)
+            if did is None or name is None:
+                _LOGGER.info(
+                    'invalid device, cloud, %s', device)
+                continue
+            if urn is None or model is None:
+                _LOGGER.info(
+                    'missing the urn|model field, cloud, %s', device)
+                continue
+            if did.startswith('miwifi.'):
+                # The miwifi.* routers defined SPEC functions, but none of them
+                # were implemented.
+                _LOGGER.info('ignore miwifi.* device, cloud, %s', did)
                 continue
             device_infos[did] = {
                 'did': did,
@@ -634,7 +649,7 @@ class MIoTHttpClient:
         for did in dids:
             if did not in results:
                 devices.pop(did, None)
-                _LOGGER.error('get device info failed, %s', did)
+                _LOGGER.info('get device info failed, %s', did)
                 continue
             devices[did].update(results[did])
             # Whether sub devices
