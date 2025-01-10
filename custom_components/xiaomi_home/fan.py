@@ -87,7 +87,7 @@ async def async_setup_entry(
 class Fan(MIoTServiceEntity, FanEntity):
     """Fan entities for Xiaomi Home."""
     # pylint: disable=unused-argument
-    _prop_on: Optional[MIoTSpecProperty]
+    _prop_on: MIoTSpecProperty
     _prop_fan_level: Optional[MIoTSpecProperty]
     _prop_mode: Optional[MIoTSpecProperty]
     _prop_horizontal_swing: Optional[MIoTSpecProperty]
@@ -111,7 +111,7 @@ class Fan(MIoTServiceEntity, FanEntity):
         self._attr_current_direction = None
         self._attr_supported_features = FanEntityFeature(0)
 
-        self._prop_on = None
+        # _prop_on is required
         self._prop_fan_level = None
         self._prop_mode = None
         self._prop_horizontal_swing = None
@@ -170,16 +170,11 @@ class Fan(MIoTServiceEntity, FanEntity):
                 if prop.format_ == 'bool':
                     self._prop_wind_reverse_forward = False
                     self._prop_wind_reverse_reverse = True
-                elif (
-                    isinstance(prop.value_list, list)
-                    and prop.value_list
-                ):
-                    for item in prop.value_list:
-                        if item['name'].lower() in {'foreward'}:
-                            self._prop_wind_reverse_forward = item['value']
-                        elif item['name'].lower() in {
-                                'reversal', 'reverse'}:
-                            self._prop_wind_reverse_reverse = item['value']
+                elif prop.value_list:
+                    for item in prop.value_list.items:
+                        if item.name in {'foreward'}:
+                            self._prop_wind_reverse_forward = item.value
+                            self._prop_wind_reverse_reverse = item.value
                 if (
                     self._prop_wind_reverse_forward is None
                     or self._prop_wind_reverse_reverse is None
@@ -192,7 +187,8 @@ class Fan(MIoTServiceEntity, FanEntity):
                 self._prop_wind_reverse = prop
 
     async def async_turn_on(
-        self, percentage: int = None, preset_mode: str = None, **kwargs: Any
+        self, percentage: Optional[int] = None,
+        preset_mode: Optional[str] = None, **kwargs: Any
     ) -> None:
         """Turn the fan on.
 
@@ -204,12 +200,12 @@ class Fan(MIoTServiceEntity, FanEntity):
         # percentage
         if percentage:
             if self._speed_names:
-                speed = percentage_to_ordered_list_item(
-                    self._speed_names, percentage)
-                speed_value = self.get_map_value(
-                    map_=self._speed_name_map, description=speed)
                 await self.set_property_async(
-                    prop=self._prop_fan_level, value=speed_value)
+                    prop=self._prop_fan_level,
+                    value=self.get_map_value(
+                        map_=self._speed_name_map,
+                        key=percentage_to_ordered_list_item(
+                            self._speed_names, percentage)))
             else:
                 await self.set_property_async(
                     prop=self._prop_fan_level,
@@ -235,12 +231,12 @@ class Fan(MIoTServiceEntity, FanEntity):
         """Set the percentage of the fan speed."""
         if percentage > 0:
             if self._speed_names:
-                speed = percentage_to_ordered_list_item(
-                    self._speed_names, percentage)
-                speed_value = self.get_map_value(
-                    map_=self._speed_name_map, description=speed)
                 await self.set_property_async(
-                    prop=self._prop_fan_level, value=speed_value)
+                    prop=self._prop_fan_level,
+                    value=self.get_map_value(
+                        map_=self._speed_name_map,
+                        key=percentage_to_ordered_list_item(
+                            self._speed_names, percentage)))
             else:
                 await self.set_property_async(
                     prop=self._prop_fan_level,
