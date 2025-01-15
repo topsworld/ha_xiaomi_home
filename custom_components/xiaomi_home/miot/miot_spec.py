@@ -46,6 +46,7 @@ off Xiaomi or its affiliates' products.
 MIoT-Spec-V2 parser.
 """
 import asyncio
+import os
 import platform
 import time
 from typing import Any, Optional, Type, Union
@@ -55,11 +56,10 @@ from slugify import slugify
 
 # pylint: disable=relative-beyond-top-level
 from .const import DEFAULT_INTEGRATION_LANGUAGE, SPEC_STD_LIB_EFFECTIVE_TIME
-from .common import MIoTHttp
+from .common import MIoTHttp, load_yaml_file
 from .miot_error import MIoTSpecError
 from .miot_storage import (
     MIoTStorage,
-    SpecBoolTranslation,
     SpecFilter)
 
 _LOGGER = logging.getLogger(__name__)
@@ -476,6 +476,7 @@ class _MIoTSpecBase:
     state_class: Any
     icon: Optional[str]
     external_unit: Any
+    expression: Optional[str]
 
     spec_id: int
 
@@ -494,6 +495,7 @@ class _MIoTSpecBase:
         self.state_class = None
         self.icon = None
         self.external_unit = None
+        self.expression = None
 
         self.spec_id = hash(f'{self.type_}.{self.iid}')
 
@@ -925,6 +927,91 @@ class _MIoTSpecMultiLang:
         return res_trans['data']
 
 
+class _SpecBoolTranslation:
+    """
+    Boolean value translation.
+    """
+    _BOOL_TRANS_FILE = 'specs/bool_trans.yaml'
+    _main_loop: asyncio.AbstractEventLoop
+    _lang: str
+    _data: Optional[dict[str, list]]
+    _data_default: Optional[list[dict]]
+
+    def __init__(
+        self, lang: str, loop: Optional[asyncio.AbstractEventLoop] = None
+    ) -> None:
+        self._main_loop = loop or asyncio.get_event_loop()
+        self._lang = lang
+        self._data = None
+        self._data_default = None
+
+    async def init_async(self) -> None:
+        if isinstance(self._data, dict):
+            return
+        data = None
+        self._data = {}
+        try:
+            data = await self._main_loop.run_in_executor(
+                None, load_yaml_file,
+                os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    self._BOOL_TRANS_FILE))
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.error('bool trans, load file error, %s', err)
+            return
+        # Check if the file is a valid file
+        if (
+            not isinstance(data, dict)
+            or 'data' not in data
+            or not isinstance(data['data'], dict)
+            or 'translate' not in data
+            or not isinstance(data['translate'], dict)
+        ):
+            _LOGGER.error('bool trans, valid file')
+            return
+
+        if 'default' in data['translate']:
+            data_default = (
+                data['translate']['default'].get(self._lang, None)
+                or data['translate']['default'].get(
+                    DEFAULT_INTEGRATION_LANGUAGE, None))
+            if data_default:
+                self._data_default = [
+                    {'value': True, 'description': data_default[True]},
+                    {'value': False, 'description': data_default[False]}
+                ]
+
+        for urn, key in data['data'].items():
+            if key not in data['translate']:
+                _LOGGER.error('bool trans, unknown key, %s, %s', urn, key)
+                continue
+            trans_data = (
+                data['translate'][key].get(self._lang, None)
+                or data['translate'][key].get(
+                    DEFAULT_INTEGRATION_LANGUAGE, None))
+            if trans_data:
+                self._data[urn] = [
+                    {'value': True, 'description': trans_data[True]},
+                    {'value': False, 'description': trans_data[False]}
+                ]
+
+    async def deinit_async(self) -> None:
+        self._data = None
+        self._data_default = None
+
+    async def translate_async(self, urn: str) -> Optional[list[dict]]:
+        """
+        MUST call init_async() before calling this method.
+        [
+            {'value': True, 'description': 'True'},
+            {'value': False, 'description': 'False'}
+        ]
+        """
+        if not self._data or urn not in self._data:
+            return self._data_default
+        return self._data[urn]
+
+
 class MIoTSpecParser:
     """MIoT SPEC parser."""
     # pylint: disable=inconsistent-quotes
@@ -936,10 +1023,10 @@ class MIoTSpecParser:
 
     _std_lib: _SpecStdLib
     _multi_lang: _MIoTSpecMultiLang
+    _bool_trans: _SpecBoolTranslation
 
     _init_done: bool
 
-    _bool_trans: SpecBoolTranslation
     _spec_filter: SpecFilter
 
     def __init__(
@@ -956,7 +1043,7 @@ class MIoTSpecParser:
 
         self._init_done = False
 
-        self._bool_trans = SpecBoolTranslation(
+        self._bool_trans = _SpecBoolTranslation(
             lang=self._lang, loop=self._main_loop)
         self._spec_filter = SpecFilter(loop=self._main_loop)
 
