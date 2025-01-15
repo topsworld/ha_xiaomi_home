@@ -1082,7 +1082,7 @@ class MIoTSpecParser:
         # Set translation cache
         await self._multi_lang.set_spec_async(urn=urn_key)
         # Set spec filter
-        self._spec_filter.filter_spec(urn_key=urn_key)
+        await self._spec_filter.set_spec_spec(urn_key=urn_key)
         # Parse device type
         spec_instance: MIoTSpecInstance = MIoTSpecInstance(
             urn=urn, name=urn_strs[3],

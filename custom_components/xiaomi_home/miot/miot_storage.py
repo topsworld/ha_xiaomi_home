@@ -848,7 +848,7 @@ class SpecFilter:
         self._cache = None
         self._data = None
 
-    def filter_spec(self, urn_key: str) -> None:
+    async def set_spec_spec(self, urn_key: str) -> None:
         """MUST call init_async() first."""
         if not self._data:
             return
@@ -856,7 +856,7 @@ class SpecFilter:
 
     def filter_service(self, siid: int) -> bool:
         """Filter service by siid.
-        MUST call init_async() and filter_spec() first."""
+        MUST call init_async() and set_spec_spec() first."""
         if (
             self._cache
             and 'services' in self._cache
@@ -870,7 +870,7 @@ class SpecFilter:
 
     def filter_property(self, siid: int, piid: int) -> bool:
         """Filter property by piid.
-        MUST call init_async() and filter_spec() first."""
+        MUST call init_async() and set_spec_spec() first."""
         if (
             self._cache
             and 'properties' in self._cache
@@ -883,7 +883,7 @@ class SpecFilter:
 
     def filter_event(self, siid: int, eiid: int) -> bool:
         """Filter event by eiid.
-        MUST call init_async() and filter_spec() first."""
+        MUST call init_async() and set_spec_spec() first."""
         if (
             self._cache
             and 'events' in self._cache
@@ -897,7 +897,7 @@ class SpecFilter:
 
     def filter_action(self, siid: int, aiid: int) -> bool:
         """"Filter action by aiid.
-        MUST call init_async() and filter_spec() first."""
+        MUST call init_async() and set_spec_spec() first."""
         if (
             self._cache
             and 'actions' in self._cache
