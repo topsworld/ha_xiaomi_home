@@ -848,6 +848,30 @@ class MIoTClient:
         _LOGGER.debug('client unsub device state, %s', did)
         return True
 
+    async def remove_device_async(self, did: str) -> None:
+        if did not in self._device_list_cache:
+            return
+        sub_from = self._sub_source_list.pop(did, None)
+        # Unsub
+        if sub_from:
+            if sub_from == 'cloud':
+                self._mips_cloud.unsub_prop(did=did)
+                self._mips_cloud.unsub_event(did=did)
+            elif sub_from == 'lan':
+                self._miot_lan.unsub_prop(did=did)
+                self._miot_lan.unsub_event(did=did)
+            elif sub_from in self._mips_local:
+                mips = self._mips_local[sub_from]
+                mips.unsub_prop(did=did)
+                mips.unsub_event(did=did)
+        # Storage
+        await self._storage.save_async(
+            domain='miot_devices',
+            name=f'{self._uid}_{self._cloud_server}',
+            data=self._device_list_cache)
+        # Update notify
+        self.__request_show_devices_changed_notify()
+
     def __get_exec_error_with_rc(self, rc: int) -> str:
         err_msg: str = self._i18n.translate(key=f'error.common.{rc}')
         if not err_msg:
