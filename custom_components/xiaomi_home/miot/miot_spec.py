@@ -58,9 +58,7 @@ from slugify import slugify
 from .const import DEFAULT_INTEGRATION_LANGUAGE, SPEC_STD_LIB_EFFECTIVE_TIME
 from .common import MIoTHttp, load_yaml_file
 from .miot_error import MIoTSpecError
-from .miot_storage import (
-    MIoTStorage,
-    SpecFilter)
+from .miot_storage import MIoTStorage
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -1012,6 +1010,113 @@ class _SpecBoolTranslation:
         return self._data[urn]
 
 
+class _SpecFilter:
+    """
+    MIoT-Spec-V2 filter for entity conversion.
+    """
+    _SPEC_FILTER_FILE = 'specs/spec_filter.yaml'
+    _main_loop: asyncio.AbstractEventLoop
+    _data: Optional[dict[str, dict[str, set]]]
+    _cache: Optional[dict]
+
+    def __init__(self, loop: Optional[asyncio.AbstractEventLoop]) -> None:
+        self._main_loop = loop or asyncio.get_event_loop()
+        self._data = None
+        self._cache = None
+
+    async def init_async(self) -> None:
+        if isinstance(self._data, dict):
+            return
+        filter_data = None
+        self._data = {}
+        try:
+            filter_data = await self._main_loop.run_in_executor(
+                None, load_yaml_file,
+                os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    self._SPEC_FILTER_FILE))
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.error('spec filter, load file error, %s', err)
+            return
+        if not isinstance(filter_data, dict):
+            _LOGGER.error('spec filter, invalid spec filter content')
+            return
+        for values in list(filter_data.values()):
+            if not isinstance(values, dict):
+                _LOGGER.error('spec filter, invalid spec filter data')
+                return
+            for value in values.values():
+                if not isinstance(value, list):
+                    _LOGGER.error('spec filter, invalid spec filter rules')
+                    return
+
+        self._data = filter_data
+
+    async def deinit_async(self) -> None:
+        self._cache = None
+        self._data = None
+
+    async def set_spec_spec(self, urn_key: str) -> None:
+        """MUST call init_async() first."""
+        if not self._data:
+            return
+        self._cache = self._data.get(urn_key, None)
+
+    def filter_service(self, siid: int) -> bool:
+        """Filter service by siid.
+        MUST call init_async() and set_spec_spec() first."""
+        if (
+            self._cache
+            and 'services' in self._cache
+            and (
+                str(siid) in self._cache['services']
+                or '*' in self._cache['services'])
+        ):
+            return True
+
+        return False
+
+    def filter_property(self, siid: int, piid: int) -> bool:
+        """Filter property by piid.
+        MUST call init_async() and set_spec_spec() first."""
+        if (
+            self._cache
+            and 'properties' in self._cache
+            and (
+                f'{siid}.{piid}' in self._cache['properties']
+                or f'{siid}.*' in self._cache['properties'])
+        ):
+            return True
+        return False
+
+    def filter_event(self, siid: int, eiid: int) -> bool:
+        """Filter event by eiid.
+        MUST call init_async() and set_spec_spec() first."""
+        if (
+            self._cache
+            and 'events' in self._cache
+            and (
+                f'{siid}.{eiid}' in self._cache['events']
+                or f'{siid}.*' in self._cache['events']
+            )
+        ):
+            return True
+        return False
+
+    def filter_action(self, siid: int, aiid: int) -> bool:
+        """"Filter action by aiid.
+        MUST call init_async() and set_spec_spec() first."""
+        if (
+            self._cache
+            and 'actions' in self._cache
+            and (
+                f'{siid}.{aiid}' in self._cache['actions']
+                or f'{siid}.*' in self._cache['actions'])
+        ):
+            return True
+        return False
+
+
 class MIoTSpecParser:
     """MIoT SPEC parser."""
     # pylint: disable=inconsistent-quotes
@@ -1024,10 +1129,9 @@ class MIoTSpecParser:
     _std_lib: _SpecStdLib
     _multi_lang: _MIoTSpecMultiLang
     _bool_trans: _SpecBoolTranslation
+    _spec_filter: _SpecFilter
 
     _init_done: bool
-
-    _spec_filter: SpecFilter
 
     def __init__(
         self, lang: Optional[str],
@@ -1040,12 +1144,11 @@ class MIoTSpecParser:
         self._std_lib = _SpecStdLib(lang=self._lang)
         self._multi_lang = _MIoTSpecMultiLang(
             lang=self._lang, storage=self._storage, loop=self._main_loop)
-
-        self._init_done = False
-
         self._bool_trans = _SpecBoolTranslation(
             lang=self._lang, loop=self._main_loop)
-        self._spec_filter = SpecFilter(loop=self._main_loop)
+        self._spec_filter = _SpecFilter(loop=self._main_loop)
+
+        self._init_done = False
 
     async def init_async(self) -> None:
         if self._init_done is True:
