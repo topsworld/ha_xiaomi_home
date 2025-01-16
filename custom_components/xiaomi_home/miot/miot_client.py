@@ -59,7 +59,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.components import zeroconf
 
 # pylint: disable=relative-beyond-top-level
-from .common import MIoTMatcher
+from .common import MIoTMatcher, slugify_name
 from .const import (
     DEFAULT_CTRL_MODE, DEFAULT_INTEGRATION_LANGUAGE, DEFAULT_NICK_NAME, DOMAIN,
     MIHOME_CERT_EXPIRE_MARGIN, NETWORK_REFRESH_INTERVAL,
@@ -871,6 +871,13 @@ class MIoTClient:
             data=self._device_list_cache)
         # Update notify
         self.__request_show_devices_changed_notify()
+
+    async def remove_device2_async(self, did_tag: str) -> None:
+        for did in self._device_list_cache:
+            d_tag = slugify_name(name=f'{self.cloud_server}_{did}')
+            if did_tag == d_tag:
+                await self.remove_device_async(did)
+                break
 
     def __get_exec_error_with_rc(self, rc: int) -> str:
         err_msg: str = self._i18n.translate(key=f'error.common.{rc}')

@@ -55,6 +55,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from paho.mqtt.matcher import MQTTMatcher
 import yaml
+from slugify import slugify
 
 MIOT_ROOT_PATH: str = path.dirname(path.abspath(__file__))
 
@@ -90,6 +91,11 @@ def randomize_int(value: int, ratio: float) -> int:
 def randomize_float(value: float, ratio: float) -> float:
     """Randomize a float value."""
     return value * (1 - ratio + random.random()*2*ratio)
+
+
+def slugify_name(name: str, separator: str = '_') -> str:
+    """Slugify a name."""
+    return slugify(name, separator=separator)
 
 
 class MIoTMatcher(MQTTMatcher):

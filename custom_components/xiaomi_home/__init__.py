@@ -330,21 +330,10 @@ async def async_remove_config_entry_device(
             'remove device failed, invalid domain, %s, %s',
             device_entry.id, device_entry.identifiers)
         return False
-    device_info = identifiers[1].split('_')
-    if len(device_info) != 2:
-        _LOGGER.error(
-            'remove device failed, invalid device info, %s, %s',
-            device_entry.id, device_entry.identifiers)
-        return False
-    did = device_info[1]
-    if did not in miot_client.device_list:
-        _LOGGER.error(
-            'remove device failed, device not found, %s, %s',
-            device_entry.id, device_entry.identifiers)
-        return False
+
     # Remove device
-    await miot_client.remove_device_async(did)
+    await miot_client.remove_device2_async(did_tag=identifiers[1])
     device_registry.async_get(hass).async_remove_device(device_entry.id)
     _LOGGER.info(
-        'remove device, %s, %s, %s', device_info[0], did, device_entry.id)
+        'remove device, %s, %s', identifiers[1], device_entry.id)
     return True

@@ -75,7 +75,7 @@ from homeassistant.const import (
 )
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.components.switch import SwitchDeviceClass
-from homeassistant.util import slugify
+
 
 # pylint: disable=relative-beyond-top-level
 from .specs.specv2entity import (
@@ -85,6 +85,7 @@ from .specs.specv2entity import (
     SPEC_PROP_TRANS_MAP,
     SPEC_SERVICE_TRANS_MAP
 )
+from .common import slugify_name
 from .const import DOMAIN
 from .miot_client import MIoTClient
 from .miot_error import MIoTClientError, MIoTDeviceError
@@ -334,11 +335,11 @@ class MIoTDevice:
 
     @property
     def did_tag(self) -> str:
-        return slugify(f'{self.miot_client.cloud_server}_{self._did}')
+        return slugify_name(f'{self.miot_client.cloud_server}_{self._did}')
 
     @staticmethod
     def gen_did_tag(cloud_server: str, did: str) -> str:
-        return slugify(f'{cloud_server}_{did}')
+        return slugify_name(f'{cloud_server}_{did}')
 
     def gen_device_entity_id(self, ha_domain: str) -> str:
         return (
@@ -355,21 +356,24 @@ class MIoTDevice:
     ) -> str:
         return (
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
-            f'{self._model_strs[-1][:20]}_{slugify(spec_name)}_p_{siid}_{piid}')
+            f'{self._model_strs[-1][:20]}_{slugify_name(spec_name)}'
+            f'_p_{siid}_{piid}')
 
     def gen_event_entity_id(
         self, ha_domain: str, spec_name: str, siid: int, eiid: int
     ) -> str:
         return (
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
-            f'{self._model_strs[-1][:20]}_{slugify(spec_name)}_e_{siid}_{eiid}')
+            f'{self._model_strs[-1][:20]}_{slugify_name(spec_name)}'
+            f'_e_{siid}_{eiid}')
 
     def gen_action_entity_id(
         self, ha_domain: str, spec_name: str, siid: int, aiid: int
     ) -> str:
         return (
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
-            f'{self._model_strs[-1][:20]}_{slugify(spec_name)}_a_{siid}_{aiid}')
+            f'{self._model_strs[-1][:20]}_{slugify_name(spec_name)}'
+            f'_a_{siid}_{aiid}')
 
     @property
     def name(self) -> str:
