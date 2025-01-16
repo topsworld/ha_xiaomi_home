@@ -466,7 +466,7 @@ class _MIoTSpecBase:
     description_trans: Optional[str]
     proprietary: bool
     need_filter: bool
-    name: Optional[str]
+    name: str
 
     # External params
     platform: Optional[str]
@@ -486,7 +486,7 @@ class _MIoTSpecBase:
         self.description_trans = spec.get('description_trans', None)
         self.proprietary = spec.get('proprietary', False)
         self.need_filter = spec.get('need_filter', False)
-        self.name = spec.get('name', None)
+        self.name = spec.get('name', 'xiaomi')
 
         self.platform = None
         self.device_class = None
