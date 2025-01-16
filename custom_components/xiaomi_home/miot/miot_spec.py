@@ -1270,7 +1270,7 @@ class MIoTSpecParser:
         urn_strs: list[str] = urn.split(':')
         urn_key: str = ':'.join(urn_strs[:6])
         # Set translation cache
-        await self._multi_lang.set_spec_async(urn=urn_key)
+        await self._multi_lang.set_spec_async(urn=urn)
         # Set spec filter
         await self._spec_filter.set_spec_spec(urn_key=urn_key)
         # Parse device type
@@ -1344,6 +1344,8 @@ class MIoTSpecParser:
                 elif 'value-list' in property_:
                     v_list: list[dict] = property_['value-list']
                     for index, v in enumerate(v_list):
+                        if v['description'].strip() == '':
+                            v['description'] = f'v_{v["value"]}'
                         v['name'] = v['description']
                         v['description'] = (
                             self._multi_lang.translate(
