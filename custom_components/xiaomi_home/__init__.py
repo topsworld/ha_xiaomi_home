@@ -209,12 +209,7 @@ async def async_setup_entry(
                             if er.async_get(entity_id_or_uuid=entity_id):
                                 er.async_remove(entity_id=entity_id)
             # Action debug
-            if miot_client.action_debug:
-                if 'notify' in device.action_list:
-                    # Add text entity for debug action
-                    device.action_list['action_text'] = (
-                        device.action_list['notify'])
-            else:
+            if not miot_client.action_debug:
                 # Remove text entity for debug action
                 for action in device.action_list.get('notify', []):
                     entity_id = device.gen_action_entity_id(
@@ -222,6 +217,8 @@ async def async_setup_entry(
                         siid=action.service.iid, aiid=action.iid)
                     if er.async_get(entity_id_or_uuid=entity_id):
                         er.async_remove(entity_id=entity_id)
+
+            # Binary sensor display
 
         hass.data[DOMAIN]['devices'][config_entry.entry_id] = miot_devices
         await hass.config_entries.async_forward_entry_setups(

@@ -76,9 +76,10 @@ async def async_setup_entry(
         for prop in miot_device.prop_list.get('text', []):
             new_entities.append(Text(miot_device=miot_device, spec=prop))
 
-        for action in miot_device.action_list.get('action_text', []):
-            new_entities.append(ActionText(
-                miot_device=miot_device, spec=action))
+        if miot_device.miot_client.action_debug:
+            for action in miot_device.action_list.get('notify', []):
+                new_entities.append(ActionText(
+                    miot_device=miot_device, spec=action))
 
     if new_entities:
         async_add_entities(new_entities)
@@ -114,8 +115,6 @@ class ActionText(MIoTActionEntity, TextEntity):
             f'{prop.description_trans}({prop.format_.__name__})'
             for prop in self.spec.in_])
         self._attr_extra_state_attributes['action params'] = f'[{action_in}]'
-        # For action debug
-        self.action_platform = 'action_text'
 
     async def async_set_value(self, value: str) -> None:
         if not value:

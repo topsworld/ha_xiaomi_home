@@ -1325,7 +1325,6 @@ class MIoTActionEntity(Entity):
     miot_device: MIoTDevice
     spec: MIoTSpecAction
     service: MIoTSpecService
-    action_platform: str
 
     _main_loop: asyncio.AbstractEventLoop
     _in_map: dict[int, MIoTSpecProperty]
@@ -1338,7 +1337,6 @@ class MIoTActionEntity(Entity):
         self.miot_device = miot_device
         self.spec = spec
         self.service = spec.service
-        self.action_platform = 'action'
         self._main_loop = miot_device.miot_client.main_loop
         self._state_sub_id = 0
         # Gen entity_id
@@ -1365,12 +1363,12 @@ class MIoTActionEntity(Entity):
 
     async def async_added_to_hass(self) -> None:
         self._state_sub_id = self.miot_device.sub_device_state(
-            key=f'{self.action_platform}.{ self.service.iid}.{self.spec.iid}',
+            key=f'a.{ self.service.iid}.{self.spec.iid}',
             handler=self.__on_device_state_changed)
 
     async def async_will_remove_from_hass(self) -> None:
         self.miot_device.unsub_device_state(
-            key=f'{self.action_platform}.{ self.service.iid}.{self.spec.iid}',
+            key=f'a.{ self.service.iid}.{self.spec.iid}',
             sub_id=self._state_sub_id)
 
     async def action_async(
