@@ -663,7 +663,8 @@ class _MipsClient(ABC):
 
     def __on_disconnect(self,  client, user_data, rc, props) -> None:
         if self._mqtt_state:
-            self.log_error(f'mips disconnect, {rc}, {props}')
+            (self.log_info if rc == 0 else self.log_error)(
+                f'mips disconnect, {rc}, {props}')
             self._mqtt_state = False
             if self._mqtt_timer:
                 self._mqtt_timer.cancel()
