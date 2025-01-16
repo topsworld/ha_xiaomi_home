@@ -85,7 +85,7 @@ from .specs.specv2entity import (
     SPEC_PROP_TRANS_MAP,
     SPEC_SERVICE_TRANS_MAP
 )
-from .common import slugify_name
+from .common import slugify_name, slugify_did
 from .const import DOMAIN
 from .miot_client import MIoTClient
 from .miot_error import MIoTClientError, MIoTDeviceError
@@ -335,11 +335,8 @@ class MIoTDevice:
 
     @property
     def did_tag(self) -> str:
-        return slugify_name(f'{self.miot_client.cloud_server}_{self._did}')
-
-    @staticmethod
-    def gen_did_tag(cloud_server: str, did: str) -> str:
-        return slugify_name(f'{cloud_server}_{did}')
+        return slugify_did(
+            cloud_server=self.miot_client.cloud_server, did=self._did)
 
     def gen_device_entity_id(self, ha_domain: str) -> str:
         return (

@@ -54,6 +54,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.components import persistent_notification
 from homeassistant.helpers import device_registry, entity_registry
 
+from .miot.common import slugify_did
 from .miot.miot_storage import (
     DeviceManufacturer, MIoTStorage, MIoTCert)
 from .miot.miot_spec import (
@@ -237,7 +238,7 @@ async def async_setup_entry(
                 device_entry = dr.async_get_device(
                     identifiers={(
                         DOMAIN,
-                        MIoTDevice.gen_did_tag(
+                        slugify_did(
                             cloud_server=config_entry.data['cloud_server'],
                             did=did))},
                     connections=None)

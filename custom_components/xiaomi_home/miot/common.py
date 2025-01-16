@@ -98,6 +98,11 @@ def slugify_name(name: str, separator: str = '_') -> str:
     return slugify(name, separator=separator)
 
 
+def slugify_did(cloud_server: str, did: str) -> str:
+    """Slugify a device id."""
+    return slugify(f'{cloud_server}_{did}', separator='_')
+
+
 class MIoTMatcher(MQTTMatcher):
     """MIoT Pub/Sub topic matcher."""
 
