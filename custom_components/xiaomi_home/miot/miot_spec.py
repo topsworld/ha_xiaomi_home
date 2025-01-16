@@ -155,6 +155,7 @@ class MIoTSpecValueListItem:
 
 class MIoTSpecValueList:
     """MIoT SPEC value list class."""
+    # pylint: disable=inconsistent-quotes
     items: list[MIoTSpecValueListItem]
 
     def __init__(self, value_list: list[dict]) -> None:
@@ -218,6 +219,7 @@ class MIoTSpecValueList:
 
 class _SpecStdLib:
     """MIoT-Spec-V2 standard library."""
+    # pylint: disable=inconsistent-quotes
     _lang: str
     _devices: dict[str, dict[str, str]]
     _services: dict[str, dict[str, str]]
