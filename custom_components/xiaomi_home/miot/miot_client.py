@@ -150,7 +150,7 @@ class MIoTClient:
     # Device list update timestamp
     _device_list_update_ts: int
 
-    _sub_source_list: dict[str]
+    _sub_source_list: dict[str, str]
     _sub_tree: MIoTMatcher
     _sub_device_state: dict[str, MipsDeviceState]
 
@@ -557,7 +557,8 @@ class MIoTClient:
             return True
         except Exception as err:
             self.__show_client_error_notify(
-                message=self._i18n.translate('miot.client.invalid_oauth_info'),
+                message=self._i18n.translate(
+                    'miot.client.invalid_oauth_info'),  # type: ignore
                 notify_key='oauth_info')
             _LOGGER.error(
                 'refresh oauth info error (%s, %s), %s, %s',
@@ -600,7 +601,8 @@ class MIoTClient:
             return True
         except MIoTClientError as error:
             self.__show_client_error_notify(
-                message=self._i18n.translate('miot.client.invalid_cert_info'),
+                message=self._i18n.translate(
+                    'miot.client.invalid_cert_info'),  # type: ignore
                 notify_key='user_cert')
             _LOGGER.error(
                 'refresh user cert error, %s, %s',
@@ -894,7 +896,8 @@ class MIoTClient:
                 break
 
     def __get_exec_error_with_rc(self, rc: int) -> str:
-        err_msg: str = self._i18n.translate(key=f'error.common.{rc}')
+        err_msg: str = self._i18n.translate(
+            key=f'error.common.{rc}')  # type: ignore
         if not err_msg:
             err_msg = f'{self._i18n.translate(key="error.common.-10000")}, '
             err_msg += f'code={rc}'
@@ -1301,7 +1304,7 @@ class MIoTClient:
         if not cache_list:
             self.__show_client_error_notify(
                 message=self._i18n.translate(
-                    'miot.client.invalid_device_cache'),
+                    'miot.client.invalid_device_cache'),  # type: ignore
                 notify_key='device_cache')
             raise MIoTClientError('load device list from cache error')
         else:
@@ -1389,7 +1392,8 @@ class MIoTClient:
             home_ids=list(self._entry_data.get('home_selected', {}).keys()))
         if not result and 'devices' not in result:
             self.__show_client_error_notify(
-                message=self._i18n.translate('miot.client.device_cloud_error'),
+                message=self._i18n.translate(
+                    'miot.client.device_cloud_error'),  # type: ignore
                 notify_key='device_cloud')
             return
         else:
@@ -1746,13 +1750,14 @@ class MIoTClient:
 
     @final
     def __show_client_error_notify(
-        self, message: str, notify_key: str = ''
+        self, message: Optional[str], notify_key: str = ''
     ) -> None:
         if message:
+
             self._persistence_notify(
                 f'{DOMAIN}{self._uid}{self._cloud_server}{notify_key}error',
                 self._i18n.translate(
-                    key='miot.client.xiaomi_home_error_title'),
+                    key='miot.client.xiaomi_home_error_title'),  # type: ignore
                 self._i18n.translate(
                     key='miot.client.xiaomi_home_error',
                     replace={
@@ -1760,8 +1765,7 @@ class MIoTClient:
                             'nick_name', DEFAULT_NICK_NAME),
                         'uid': self._uid,
                         'cloud_server': self._cloud_server,
-                        'message': message
-                    }))
+                        'message': message}))  # type: ignore
         else:
             self._persistence_notify(
                 f'{DOMAIN}{self._uid}{self._cloud_server}{notify_key}error',
@@ -1827,19 +1831,19 @@ class MIoTClient:
                 key='miot.client.device_list_add',
                 replace={
                     'count': count_add,
-                    'message': message_add})
+                    'message': message_add})  # type: ignore
         if 'del' in self._display_devs_notify and count_del:
             message += self._i18n.translate(
                 key='miot.client.device_list_del',
                 replace={
                     'count': count_del,
-                    'message': message_del})
+                    'message': message_del})  # type: ignore
         if 'offline' in self._display_devs_notify and count_offline:
             message += self._i18n.translate(
                 key='miot.client.device_list_offline',
                 replace={
                     'count': count_offline,
-                    'message': message_offline})
+                    'message': message_offline})  # type: ignore
         if message != '':
             network_status = self._i18n.translate(
                 key='miot.client.network_status_online'
@@ -1847,7 +1851,8 @@ class MIoTClient:
                 else 'miot.client.network_status_offline')
             self._persistence_notify(
                 self.__gen_notify_key('dev_list_changed'),
-                self._i18n.translate('miot.client.device_list_changed_title'),
+                self._i18n.translate(
+                    'miot.client.device_list_changed_title'),  # type: ignore
                 self._i18n.translate(
                     key='miot.client.device_list_changed',
                     replace={
@@ -1856,8 +1861,7 @@ class MIoTClient:
                         'uid': self._uid,
                         'cloud_server': self._cloud_server,
                         'network_status': network_status,
-                        'message': message
-                    }))
+                        'message': message}))  # type: ignore
             _LOGGER.debug(
                 'show device list changed notify, add %s, del %s, offline %s',
                 count_add, count_del, count_offline)
