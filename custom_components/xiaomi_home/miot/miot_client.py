@@ -169,6 +169,8 @@ class MIoTClient:
     _show_devices_changed_notify_timer: Optional[asyncio.TimerHandle]
     # Display devices changed notify
     _display_devs_notify: list[str]
+    _display_binary_text: bool
+    _display_binary_bool: bool
 
     def __init__(
             self,
@@ -235,6 +237,10 @@ class MIoTClient:
 
         self._display_devs_notify = entry_data.get(
             'display_devices_changed_notify', ['add', 'del', 'offline'])
+        self._display_binary_text = 'text' in entry_data.get(
+            'display_binary_mode', ['text'])
+        self._display_binary_bool = 'bool' in entry_data.get(
+            'display_binary_mode', ['text'])
 
     async def init_async(self) -> None:
         # Load user config and check
@@ -468,6 +474,14 @@ class MIoTClient:
     @property
     def display_devices_changed_notify(self) -> list[str]:
         return self._display_devs_notify
+
+    @property
+    def display_binary_text(self) -> bool:
+        return self._display_binary_text
+
+    @property
+    def display_binary_bool(self) -> bool:
+        return self._display_binary_bool
 
     @display_devices_changed_notify.setter
     def display_devices_changed_notify(self, value: list[str]) -> None:

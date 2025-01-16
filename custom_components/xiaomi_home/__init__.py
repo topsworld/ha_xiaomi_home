@@ -217,8 +217,21 @@ async def async_setup_entry(
                         siid=action.service.iid, aiid=action.iid)
                     if er.async_get(entity_id_or_uuid=entity_id):
                         er.async_remove(entity_id=entity_id)
-
             # Binary sensor display
+            if not miot_client.display_binary_bool:
+                for prop in device.prop_list.get('binary_sensor', []):
+                    entity_id = device.gen_prop_entity_id(
+                        ha_domain='binary_sensor', spec_name=prop.name,
+                        siid=prop.service.iid, piid=prop.iid)
+                    if er.async_get(entity_id_or_uuid=entity_id):
+                        er.async_remove(entity_id=entity_id)
+            if not miot_client.display_binary_text:
+                for prop in device.prop_list.get('binary_sensor', []):
+                    entity_id = device.gen_prop_entity_id(
+                        ha_domain='sensor', spec_name=prop.name,
+                        siid=prop.service.iid, piid=prop.iid)
+                    if er.async_get(entity_id_or_uuid=entity_id):
+                        er.async_remove(entity_id=entity_id)
 
         hass.data[DOMAIN]['devices'][config_entry.entry_id] = miot_devices
         await hass.config_entries.async_forward_entry_setups(
