@@ -72,6 +72,9 @@ translate:
     fr:
       true: Vrai
       false: Faux
+    it:
+      true: Vero
+      false: Falso
     ja:
       true: 真
       false: 偽
@@ -106,6 +109,9 @@ translate:
     fr:
       true: Ouvert
       false: Fermer
+    it:
+      true: Aperto
+      false: Chiuso
     ja:
       true: 開く
       false: 閉じる
@@ -140,6 +146,9 @@ translate:
     fr:
       true: Oui
       false: Non
+    it:
+      true: Si
+      false: No
     ja:
       true: はい
       false: いいえ
@@ -174,6 +183,9 @@ translate:
     fr:
       true: Mouvement détecté
       false: Aucun mouvement détecté
+    it:
+      true: Movimento Rilevato,
+      false: Nessun Movimento Rilevato
     ja:
       true: 動きを検知
       false: 動きが検出されません
@@ -208,6 +220,9 @@ translate:
     fr:
       true: Contact
       false: Pas de contact
+    it:
+      true: Contatto
+      false: Nessun contatto
     ja:
       true: 接触
       false: 非接触
