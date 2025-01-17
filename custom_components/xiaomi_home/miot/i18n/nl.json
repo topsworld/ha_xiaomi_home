@@ -54,6 +54,10 @@
             "enable": "Inschakelen",
             "disable": "Uitschakelen"
         },
+        "binary_mode": {
+            "text": "Tekstsensor-entiteit",
+            "bool": "Binairesensor-entiteit"
+        },
         "device_state": {
             "add": "Toevoegen",
             "del": "Niet beschikbaar",

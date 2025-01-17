@@ -48,6 +48,7 @@
                     "ctrl_mode": "控制模式",
                     "action_debug": "Action 调试模式",
                     "hide_non_standard_entities": "隐藏非标准生成实体",
+                    "display_binary_mode": "二进制传感器显示模式",
                     "display_devices_changed_notify": "显示设备状态变化通知"
                 }
             },
@@ -119,6 +120,7 @@
                     "update_devices": "更新设备列表",
                     "action_debug": "Action 调试模式",
                     "hide_non_standard_entities": "隐藏非标准生成实体",
+                    "display_binary_mode": "二进制传感器显示模式",
                     "display_devices_changed_notify": "显示设备状态变化通知",
                     "update_trans_rules": "更新实体转换规则",
                     "update_lan_ctrl_config": "更新局域网控制配置",

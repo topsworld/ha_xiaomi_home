@@ -124,6 +124,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     _area_name_rule: str
     _action_debug: bool
     _hide_non_standard_entities: bool
+    _display_binary_mode: list[str]
     _display_devices_changed_notify: list[str]
 
     _cloud_server: str
@@ -158,6 +159,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._area_name_rule = self.DEFAULT_AREA_NAME_RULE
         self._action_debug = False
         self._hide_non_standard_entities = False
+        self._display_binary_mode = ['text']
         self._display_devices_changed_notify = ['add', 'del', 'offline']
         self._auth_info = {}
         self._nick_name = DEFAULT_NICK_NAME
@@ -728,6 +730,8 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 'action_debug', self._action_debug)
             self._hide_non_standard_entities = user_input.get(
                 'hide_non_standard_entities', self._hide_non_standard_entities)
+            self._display_binary_mode = user_input.get(
+                'display_binary_mode', self._display_binary_mode)
             self._display_devices_changed_notify = user_input.get(
                 'display_devices_changed_notify',
                 self._display_devices_changed_notify)
@@ -750,6 +754,12 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     'hide_non_standard_entities',
                     default=self._hide_non_standard_entities  # type: ignore
                 ): bool,
+                vol.Required(
+                    'display_binary_mode',
+                    default=self._display_binary_mode  # type: ignore
+                ): cv.multi_select(
+                    self._miot_i18n.translate(
+                        key='config.binary_mode')),  # type: ignore
                 vol.Required(
                     'display_devices_changed_notify',
                     default=self._display_devices_changed_notify  # type: ignore
@@ -932,6 +942,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 'action_debug': self._action_debug,
                 'hide_non_standard_entities':
                     self._hide_non_standard_entities,
+                'display_binary_mode': self._display_binary_mode,
                 'display_devices_changed_notify':
                     self._display_devices_changed_notify
             })
@@ -973,6 +984,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     _devices_filter: dict
     _action_debug: bool
     _hide_non_standard_entities: bool
+    _display_binary_mode: list[str]
     _display_devs_notify: list[str]
 
     _oauth_redirect_url_full: str
@@ -987,6 +999,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     _nick_name_new: Optional[str]
     _action_debug_new: bool
     _hide_non_standard_entities_new: bool
+    _display_binary_mode_new: list[str]
     _update_user_info: bool
     _update_devices: bool
     _update_trans_rules: bool
@@ -1025,6 +1038,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._action_debug = self._entry_data.get('action_debug', False)
         self._hide_non_standard_entities = self._entry_data.get(
             'hide_non_standard_entities', False)
+        self._display_binary_mode = self._entry_data.get(
+            'display_binary_mode', ['text'])
         self._display_devs_notify = self._entry_data.get(
             'display_devices_changed_notify', ['add', 'del', 'offline'])
         self._home_selected_list = list(
@@ -1043,6 +1058,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._nick_name_new = None
         self._action_debug_new = False
         self._hide_non_standard_entities_new = False
+        self._display_binary_mode_new = []
         self._update_user_info = False
         self._update_devices = False
         self._update_trans_rules = False
@@ -1310,6 +1326,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         default=self._hide_non_standard_entities  # type: ignore
                     ): bool,
                     vol.Required(
+                        'display_binary_mode',
+                        default=self._display_binary_mode  # type: ignore
+                    ): cv.multi_select(
+                        self._miot_i18n.translate(
+                            'config.binary_mode')),  # type: ignore
+                    vol.Required(
                         'update_trans_rules',
                         default=self._update_trans_rules  # type: ignore
                     ): bool,
@@ -1337,6 +1359,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             'action_debug', self._action_debug)
         self._hide_non_standard_entities_new = user_input.get(
             'hide_non_standard_entities', self._hide_non_standard_entities)
+        self._display_binary_mode_new = user_input.get(
+            'display_binary_mode', self._display_binary_mode)
         self._display_devs_notify = user_input.get(
             'display_devices_changed_notify', self._display_devs_notify)
         self._update_trans_rules = user_input.get(
@@ -1939,6 +1963,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         ):
             self._entry_data['hide_non_standard_entities'] = (
                 self._hide_non_standard_entities_new)
+            self._need_reload = True
+        if set(self._display_binary_mode) != set(self._display_binary_mode_new):
+            self._entry_data['display_binary_mode'] = (
+                self._display_binary_mode_new)
             self._need_reload = True
         # Update display_devices_changed_notify
         self._entry_data['display_devices_changed_notify'] = (

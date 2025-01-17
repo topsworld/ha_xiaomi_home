@@ -54,6 +54,10 @@
             "enable": "啟用",
             "disable": "禁用"
         },
+        "binary_mode": {
+            "text": "文本傳感器實體",
+            "bool": "二進制傳感器實體"
+        },
         "device_state": {
             "add": "新增",
             "del": "不可用",

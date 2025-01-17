@@ -54,6 +54,10 @@
             "enable": "activer",
             "disable": "désactiver"
         },
+        "binary_mode": {
+            "text": "Entité du capteur de texte",
+            "bool": "Entité du capteur binaire"
+        },
         "device_state": {
             "add": "Ajouter",
             "del": "Supprimer",

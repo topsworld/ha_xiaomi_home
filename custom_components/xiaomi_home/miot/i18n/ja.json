@@ -54,6 +54,10 @@
             "enable": "有効",
             "disable": "無効"
         },
+        "binary_mode": {
+            "text": "テキストセンサーエンティティ",
+            "bool": "バイナリセンサーエンティティ"
+        },
         "device_state": {
             "add": "追加",
             "del": "利用不可",

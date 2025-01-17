@@ -54,6 +54,10 @@
             "enable": "启用",
             "disable": "禁用"
         },
+        "binary_mode": {
+            "text": "文本传感器实体",
+            "bool": "二进制传感器实体"
+        },
         "device_state": {
             "add": "新增",
             "del": "不可用",
