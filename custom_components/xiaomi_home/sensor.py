@@ -106,18 +106,15 @@ class Sensor(MIoTPropertyEntity, SensorEntity):
                 # device_class is not empty but unit is empty.
                 # Set the default unit according to device_class.
                 unit_sets = DEVICE_CLASS_UNITS.get(
-                    self._attr_device_class, None)
+                    self._attr_device_class, None)  # type: ignore
                 self._attr_native_unit_of_measurement = list(
                     unit_sets)[0] if unit_sets else None
+            # Set state_class
+            if spec.state_class:
+                self._attr_state_class = spec.state_class
         # Set icon
         if spec.icon:
             self._attr_icon = spec.icon
-        # Set state_class
-        if spec.state_class:
-            self._attr_state_class = spec.state_class
-        else:
-            # Set default state_class
-            self._attr_state_class = SensorStateClass.MEASUREMENT
 
     @property
     def native_value(self) -> Any:
