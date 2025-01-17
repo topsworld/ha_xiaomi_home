@@ -476,7 +476,6 @@ class _MIoTSpecBase:
     state_class: Any
     icon: Optional[str]
     external_unit: Any
-    expression: Optional[str]
 
     spec_id: int
 
@@ -495,7 +494,6 @@ class _MIoTSpecBase:
         self.state_class = None
         self.icon = None
         self.external_unit = None
-        self.expression = None
 
         self.spec_id = hash(f'{self.type_}.{self.iid}')
 
@@ -519,6 +517,7 @@ class MIoTSpecProperty(_MIoTSpecBase):
     _writable: bool
     _readable: bool
     _notifiable: bool
+    _expr: Optional[str]
 
     service: 'MIoTSpecService'
 
@@ -531,7 +530,8 @@ class MIoTSpecProperty(_MIoTSpecBase):
             unit: Optional[str] = None,
             value_range: Optional[dict] = None,
             value_list: Optional[list[dict]] = None,
-            precision: Optional[int] = None
+            precision: Optional[int] = None,
+            expr: Optional[str] = None
     ) -> None:
         super().__init__(spec=spec)
         self.service = service
@@ -541,6 +541,7 @@ class MIoTSpecProperty(_MIoTSpecBase):
         self.value_range = value_range
         self.value_list = value_list
         self.precision = precision or 1
+        self._expr = expr
 
         self.spec_id = hash(
             f'p.{self.name}.{self.service.iid}.{self.iid}')
@@ -613,6 +614,18 @@ class MIoTSpecProperty(_MIoTSpecBase):
         elif isinstance(value, MIoTSpecValueList):
             self._value_list = value
 
+    def eval_expr(self, src_value: Any) -> Any:
+        if not self._expr:
+            return src_value
+        try:
+            # pylint: disable=eval-used
+            return eval(self._expr, {'src_value': src_value})
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.error(
+                'eval expression error, %s, %s, %s, %s',
+                self.iid, src_value, self._expr, err)
+            return src_value
+
     def value_format(self, value: Any) -> Any:
         if value is None:
             return None
@@ -639,7 +652,8 @@ class MIoTSpecProperty(_MIoTSpecBase):
             'value_range': (
                 self._value_range.dump() if self._value_range else None),
             'value_list': self._value_list.dump() if self._value_list else None,
-            'precision': self.precision
+            'precision': self.precision,
+            'expr': self._expr
         }
 
 
@@ -732,7 +746,6 @@ class MIoTSpecService(_MIoTSpecBase):
         }
 
 
-# @dataclass
 class MIoTSpecInstance:
     """MIoT SPEC instance class."""
     urn: str
@@ -774,7 +787,8 @@ class MIoTSpecInstance:
                     unit=prop['unit'],
                     value_range=prop['value_range'],
                     value_list=prop['value_list'],
-                    precision=prop.get('precision', None))
+                    precision=prop.get('precision', None),
+                    expr=prop.get('expr', None))
                 spec_service.properties.append(spec_prop)
             for event in service['events']:
                 spec_event = MIoTSpecEvent(
@@ -1117,6 +1131,11 @@ class _SpecFilter:
         ):
             return True
         return False
+
+
+class _SpecModify:
+    def __init__(self) -> None:
+        pass
 
 
 class MIoTSpecParser:

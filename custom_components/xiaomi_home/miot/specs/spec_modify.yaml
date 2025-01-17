@@ -1,0 +1,3 @@
+urn:miot-spec-v2:device:magnet-sensor:0000A016:isa-dw2hl:1:
+  prop.2.2:
+    expr: "not src_value"
