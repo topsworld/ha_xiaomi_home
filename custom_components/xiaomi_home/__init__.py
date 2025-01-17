@@ -93,7 +93,7 @@ async def async_setup_entry(
         """Send messages in Notifications dialog box."""
         if title:
             persistent_notification.async_create(
-                hass=hass,  message=message,
+                hass=hass,  message=message or '',
                 title=title, notification_id=notify_id)
         else:
             persistent_notification.async_dismiss(
@@ -126,9 +126,8 @@ async def async_setup_entry(
         miot_devices: list[MIoTDevice] = []
         er = entity_registry.async_get(hass=hass)
         for did, info in miot_client.device_list.items():
-            spec_instance: MIoTSpecInstance = await spec_parser.parse(
-                urn=info['urn'])
-            if spec_instance is None:
+            spec_instance = await spec_parser.parse(urn=info['urn'])
+            if not isinstance(spec_instance, MIoTSpecInstance):
                 _LOGGER.error('spec content is None, %s, %s', did, info)
                 continue
             device: MIoTDevice = MIoTDevice(
@@ -156,7 +155,8 @@ async def async_setup_entry(
                     for entity in filter_entities:
                         device.entity_list[platform].remove(entity)
                         entity_id = device.gen_service_entity_id(
-                            ha_domain=platform, siid=entity.spec.iid)
+                            ha_domain=platform,
+                            siid=entity.spec.iid)  # type: ignore
                         if er.async_get(entity_id_or_uuid=entity_id):
                             er.async_remove(entity_id=entity_id)
                 if platform in device.prop_list:
