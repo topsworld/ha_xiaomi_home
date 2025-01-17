@@ -169,6 +169,8 @@ class MIoTClient:
     _show_devices_changed_notify_timer: Optional[asyncio.TimerHandle]
     # Display devices changed notify
     _display_devs_notify: list[str]
+    _display_notify_content_hash: Optional[int]
+    # Display binary mode
     _display_binary_text: bool
     _display_binary_bool: bool
 
@@ -237,6 +239,7 @@ class MIoTClient:
 
         self._display_devs_notify = entry_data.get(
             'display_devices_changed_notify', ['add', 'del', 'offline'])
+        self._display_notify_content_hash = None
         self._display_binary_text = 'text' in entry_data.get(
             'display_binary_mode', ['text'])
         self._display_binary_bool = 'bool' in entry_data.get(
@@ -1845,6 +1848,12 @@ class MIoTClient:
                     'count': count_offline,
                     'message': message_offline})  # type: ignore
         if message != '':
+            msg_hash = hash(message)
+            if msg_hash == self._display_notify_content_hash:
+                # Notify content no change, return
+                _LOGGER.debug(
+                    'device list changed notify content no change, return')
+                return
             network_status = self._i18n.translate(
                 key='miot.client.network_status_online'
                 if self._network.network_status
@@ -1862,6 +1871,7 @@ class MIoTClient:
                         'cloud_server': self._cloud_server,
                         'network_status': network_status,
                         'message': message}))  # type: ignore
+            self._display_notify_content_hash = msg_hash
             _LOGGER.debug(
                 'show device list changed notify, add %s, del %s, offline %s',
                 count_add, count_del, count_offline)
