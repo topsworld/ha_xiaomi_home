@@ -389,14 +389,20 @@ class MIoTDevice:
         self._entity_list[entity_data.platform].append(entity_data)
 
     def append_prop(self, prop: MIoTSpecProperty) -> None:
+        if not prop.platform:
+            return
         self._prop_list.setdefault(prop.platform, [])
         self._prop_list[prop.platform].append(prop)
 
     def append_event(self, event: MIoTSpecEvent) -> None:
+        if not event.platform:
+            return
         self._event_list.setdefault(event.platform, [])
         self._event_list[event.platform].append(event)
 
     def append_action(self, action: MIoTSpecAction) -> None:
+        if not action.platform:
+            return
         self._action_list.setdefault(action.platform, [])
         self._action_list[action.platform].append(action)
 
@@ -625,8 +631,7 @@ class MIoTDevice:
                             prop.platform = 'binary_sensor'
                         else:
                             prop.platform = 'sensor'
-                if prop.platform:
-                    self.append_prop(prop=prop)
+                self.append_prop(prop=prop)
             # STEP 3.2: event conversion
             for event in service.events:
                 if event.platform:
@@ -796,12 +801,12 @@ class MIoTServiceEntity(Entity):
         self._state_sub_id = 0
         self._value_sub_ids = {}
         # Gen entity id
-        if isinstance(entity_data.spec, MIoTSpecInstance):
+        if isinstance(self.entity_data.spec, MIoTSpecInstance):
             self.entity_id = miot_device.gen_device_entity_id(DOMAIN)
             self._attr_name = f' {self.entity_data.spec.description_trans}'
-        elif isinstance(entity_data.spec, MIoTSpecService):
+        elif isinstance(self.entity_data.spec, MIoTSpecService):
             self.entity_id = miot_device.gen_service_entity_id(
-                DOMAIN, siid=entity_data.spec.iid)
+                DOMAIN, siid=self.entity_data.spec.iid)
             self._attr_name = (
                 f'{"* "if self.entity_data.spec.proprietary else " "}'
                 f'{self.entity_data.spec.description_trans}')
@@ -1277,8 +1282,8 @@ class MIoTEventEntity(Entity):
 
     @abstractmethod
     def on_event_occurred(
-        self, name: str, arguments: list[dict[int, Any]]
-    ): ...
+        self, name: str, arguments: dict[str, Any] | None = None
+    ) -> None: ...
 
     def __on_event_occurred(self, params: dict, ctx: Any) -> None:
         _LOGGER.debug('event occurred, %s',  params)

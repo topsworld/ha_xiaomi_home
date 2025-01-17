@@ -465,7 +465,7 @@ class _MIoTSpecBase:
     iid: int
     type_: str
     description: str
-    description_trans: Optional[str]
+    description_trans: str
     proprietary: bool
     need_filter: bool
     name: str
