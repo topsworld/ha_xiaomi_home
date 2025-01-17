@@ -59,188 +59,188 @@ data:
   urn:miot-spec-v2:property:wifi-ssid-hidden:000000E3: yes_no
   urn:miot-spec-v2:property:wind-reverse:00000117: yes_no
 translate:
-  default:
-    de:
-      true: Wahr
-      false: Falsch
-    en:
-      true: True
-      false: False
-    es:
-      true: Verdadero
-      false: Falso
-    fr:
-      true: Vrai
-      false: Faux
-    it:
-      true: Vero
-      false: Falso
-    ja:
-      true: 真
-      false: 偽
-    nl:
-      true: True
-      false: False
-    pt:
-      true: True
-      false: False
-    pt-BR:
-      true: True
-      false: False
-    ru:
-      true: Истина
-      false: Ложь
-    zh-Hans:
-      true: 真
-      false: 假
-    zh-Hant:
-      true: 真
-      false: 假
-  open_close:
-    de:
-      true: Öffnen
-      false: Schließen
-    en:
-      true: Open
-      false: Close
-    es:
-      true: Abierto
-      false: Cerrado
-    fr:
-      true: Ouvert
-      false: Fermer
-    it:
-      true: Aperto
-      false: Chiuso
-    ja:
-      true: 開く
-      false: 閉じる
-    nl:
-      true: Open
-      false: Dicht
-    pt:
-      true: Aberto
-      false: Fechado
-    pt-BR:
-      true: Aberto
-      false: Fechado
-    ru:
-      true: Открыть
-      false: Закрыть
-    zh-Hans:
-      true: 开启
-      false: 关闭
-    zh-Hant:
-      true: 開啟
-      false: 關閉
-  yes_no:
-    de:
-      true: Ja
-      false: Nein
-    en:
-      true: Yes
-      false: No
-    es:
-      true: Sí
-      false: No
-    fr:
-      true: Oui
-      false: Non
-    it:
-      true: Si
-      false: No
-    ja:
-      true: はい
-      false: いいえ
-    nl:
-      true: Ja
-      false: Nee
-    pt:
-      true: Sim
-      false: Não
-    pt-BR:
-      true: Sim
-      false: Não
-    ru:
-      true: Да
-      false: Нет
-    zh-Hans:
-      true: 是
-      false: 否
-    zh-Hant:
-      true: 是
-      false: 否
-  motion_state:
-    de:
-      true: Bewegung erkannt
-      false: Keine Bewegung erkannt
-    en:
-      true: Motion Detected
-      false: No Motion Detected
-    es:
-      true: Movimiento detectado
-      false: No se detecta movimiento
-    fr:
-      true: Mouvement détecté
-      false: Aucun mouvement détecté
-    it:
-      true: Movimento Rilevato,
-      false: Nessun Movimento Rilevato
-    ja:
-      true: 動きを検知
-      false: 動きが検出されません
-    nl:
-      true: Contact
-      false: Geen contact
-    pt:
-      true: Contato
-      false: Sem contato
-    pt-BR:
-      true: Contato
-      false: Sem contato
-    ru:
-      true: Обнаружено движение
-      false: Движение не обнаружено
-    zh-Hans:
-      true: 有人
-      false: 无人
-    zh-Hant:
-      true: 有人
-      false: 無人
   contact_state:
     de:
-      true: Kontakt
-      false: Kein Kontakt
+      'false': Kein Kontakt
+      'true': Kontakt
     en:
-      true: Contact
-      false: No Contact
+      'false': No Contact
+      'true': Contact
     es:
-      true: Contacto
-      false: Sin contacto
+      'false': Sin contacto
+      'true': Contacto
     fr:
-      true: Contact
-      false: Pas de contact
+      'false': Pas de contact
+      'true': Contact
     it:
-      true: Contatto
-      false: Nessun contatto
+      'false': Nessun contatto
+      'true': Contatto
     ja:
-      true: 接触
-      false: 非接触
+      'false': 非接触
+      'true': 接触
     nl:
-      true: Contact
-      false: Geen contact
+      'false': Geen contact
+      'true': Contact
     pt:
-      true: Contato
-      false: Sem contato
+      'false': Sem contato
+      'true': Contato
     pt-BR:
-      true: Contato
-      false: Sem contato
+      'false': Sem contato
+      'true': Contato
     ru:
-      true: Контакт
-      false: Нет контакта
+      'false': Нет контакта
+      'true': Контакт
     zh-Hans:
-      true: 接触
-      false: 分离
+      'false': 分离
+      'true': 接触
     zh-Hant:
-      true: 接觸
-      false: 分離
+      'false': 分離
+      'true': 接觸
+  default:
+    de:
+      'false': Falsch
+      'true': Wahr
+    en:
+      'false': 'False'
+      'true': 'True'
+    es:
+      'false': Falso
+      'true': Verdadero
+    fr:
+      'false': Faux
+      'true': Vrai
+    it:
+      'false': Falso
+      'true': Vero
+    ja:
+      'false': 偽
+      'true': 真
+    nl:
+      'false': 'False'
+      'true': 'True'
+    pt:
+      'false': 'False'
+      'true': 'True'
+    pt-BR:
+      'false': 'False'
+      'true': 'True'
+    ru:
+      'false': Ложь
+      'true': Истина
+    zh-Hans:
+      'false': 假
+      'true': 真
+    zh-Hant:
+      'false': 假
+      'true': 真
+  motion_state:
+    de:
+      'false': Keine Bewegung erkannt
+      'true': Bewegung erkannt
+    en:
+      'false': No Motion Detected
+      'true': Motion Detected
+    es:
+      'false': No se detecta movimiento
+      'true': Movimiento detectado
+    fr:
+      'false': Aucun mouvement détecté
+      'true': Mouvement détecté
+    it:
+      'false': Nessun Movimento Rilevato
+      'true': Movimento Rilevato
+    ja:
+      'false': 動きが検出されません
+      'true': 動きを検知
+    nl:
+      'false': Geen contact
+      'true': Contact
+    pt:
+      'false': Sem contato
+      'true': Contato
+    pt-BR:
+      'false': Sem contato
+      'true': Contato
+    ru:
+      'false': Движение не обнаружено
+      'true': Обнаружено движение
+    zh-Hans:
+      'false': 无人
+      'true': 有人
+    zh-Hant:
+      'false': 無人
+      'true': 有人
+  open_close:
+    de:
+      'false': Schließen
+      'true': Öffnen
+    en:
+      'false': Close
+      'true': Open
+    es:
+      'false': Cerrado
+      'true': Abierto
+    fr:
+      'false': Fermer
+      'true': Ouvert
+    it:
+      'false': Chiuso
+      'true': Aperto
+    ja:
+      'false': 閉じる
+      'true': 開く
+    nl:
+      'false': Dicht
+      'true': Open
+    pt:
+      'false': Fechado
+      'true': Aberto
+    pt-BR:
+      'false': Fechado
+      'true': Aberto
+    ru:
+      'false': Закрыть
+      'true': Открыть
+    zh-Hans:
+      'false': 关闭
+      'true': 开启
+    zh-Hant:
+      'false': 關閉
+      'true': 開啟
+  yes_no:
+    de:
+      'false': Nein
+      'true': Ja
+    en:
+      'false': 'No'
+      'true': 'Yes'
+    es:
+      'false': 'No'
+      'true': Sí
+    fr:
+      'false': Non
+      'true': Oui
+    it:
+      'false': 'No'
+      'true': Si
+    ja:
+      'false': いいえ
+      'true': はい
+    nl:
+      'false': Nee
+      'true': Ja
+    pt:
+      'false': Não
+      'true': Sim
+    pt-BR:
+      'false': Não
+      'true': Sim
+    ru:
+      'false': Нет
+      'true': Да
+    zh-Hans:
+      'false': 否
+      'true': 是
+    zh-Hant:
+      'false': 否
+      'true': 是

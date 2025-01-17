@@ -977,8 +977,8 @@ class _SpecBoolTranslation:
                     DEFAULT_INTEGRATION_LANGUAGE, None))
             if data_default:
                 self._data_default = [
-                    {'value': True, 'description': data_default[True]},
-                    {'value': False, 'description': data_default[False]}
+                    {'value': True, 'description': data_default['true']},
+                    {'value': False, 'description': data_default['false']}
                 ]
 
         for urn, key in data['data'].items():
@@ -991,8 +991,8 @@ class _SpecBoolTranslation:
                     DEFAULT_INTEGRATION_LANGUAGE, None))
             if trans_data:
                 self._data[urn] = [
-                    {'value': True, 'description': trans_data[True]},
-                    {'value': False, 'description': trans_data[False]}
+                    {'value': True, 'description': trans_data['true']},
+                    {'value': False, 'description': trans_data['false']}
                 ]
 
     async def deinit_async(self) -> None:

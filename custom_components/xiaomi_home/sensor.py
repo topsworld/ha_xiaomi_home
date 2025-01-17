@@ -53,7 +53,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
-from homeassistant.components.sensor import DEVICE_CLASS_UNITS, SensorStateClass
+from homeassistant.components.sensor import DEVICE_CLASS_UNITS
 
 from .miot.miot_device import MIoTDevice, MIoTPropertyEntity
 from .miot.miot_spec import MIoTSpecProperty

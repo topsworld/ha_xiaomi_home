@@ -16,13 +16,10 @@ MIOT_I18N_RELATIVE_PATH: str = path.join(
     ROOT_PATH, '../custom_components/xiaomi_home/miot/i18n')
 SPEC_BOOL_TRANS_FILE = path.join(
     ROOT_PATH,
-    '../custom_components/xiaomi_home/miot/specs/bool_trans.json')
-SPEC_MULTI_LANG_FILE = path.join(
-    ROOT_PATH,
-    '../custom_components/xiaomi_home/miot/specs/multi_lang.json')
+    '../custom_components/xiaomi_home/miot/specs/bool_trans.yaml')
 SPEC_FILTER_FILE = path.join(
     ROOT_PATH,
-    '../custom_components/xiaomi_home/miot/specs/spec_filter.json')
+    '../custom_components/xiaomi_home/miot/specs/spec_filter.yaml')
 
 
 def load_json_file(file_path: str) -> Optional[dict]:
@@ -52,6 +49,12 @@ def load_yaml_file(file_path: str) -> Optional[dict]:
     except yaml.YAMLError:
         _LOGGER.info('%s, is not a valid YAML file.', file_path)
         return None
+
+
+def save_yaml_file(file_path: str, data: dict) -> None:
+    with open(file_path, 'w', encoding='utf-8') as file:
+        yaml.safe_dump(
+            data, file, default_flow_style=False, allow_unicode=True, indent=2)
 
 
 def dict_str_str(d: dict) -> bool:
@@ -161,25 +164,17 @@ def compare_dict_structure(dict1: dict, dict2: dict) -> bool:
 
 
 def sort_bool_trans(file_path: str):
-    trans_data: dict = load_json_file(file_path=file_path)
+    trans_data = load_yaml_file(file_path=file_path)
+    assert isinstance(trans_data, dict), f'{file_path} format error'
     trans_data['data'] = dict(sorted(trans_data['data'].items()))
     for key, trans in trans_data['translate'].items():
         trans_data['translate'][key] = dict(sorted(trans.items()))
     return trans_data
 
 
-def sort_multi_lang(file_path: str):
-    multi_lang: dict = load_json_file(file_path=file_path)
-    multi_lang = dict(sorted(multi_lang.items()))
-    for urn, trans in multi_lang.items():
-        multi_lang[urn] = dict(sorted(trans.items()))
-        for lang, spec in multi_lang[urn].items():
-            multi_lang[urn][lang] = dict(sorted(spec.items()))
-    return multi_lang
-
-
 def sort_spec_filter(file_path: str):
-    filter_data: dict = load_json_file(file_path=file_path)
+    filter_data = load_yaml_file(file_path=file_path)
+    assert isinstance(filter_data, dict), f'{file_path} format error'
     filter_data = dict(sorted(filter_data.items()))
     for urn, spec in filter_data.items():
         filter_data[urn] = dict(sorted(spec.items()))
@@ -188,30 +183,26 @@ def sort_spec_filter(file_path: str):
 
 @pytest.mark.github
 def test_bool_trans():
-    data: dict = load_json_file(SPEC_BOOL_TRANS_FILE)
+    data = load_yaml_file(SPEC_BOOL_TRANS_FILE)
+    assert isinstance(data, dict)
     assert data, f'load {SPEC_BOOL_TRANS_FILE} failed'
     assert bool_trans(data), f'{SPEC_BOOL_TRANS_FILE} format error'
 
 
 @pytest.mark.github
 def test_spec_filter():
-    data: dict = load_json_file(SPEC_FILTER_FILE)
+    data = load_yaml_file(SPEC_FILTER_FILE)
+    assert isinstance(data, dict)
     assert data, f'load {SPEC_FILTER_FILE} failed'
     assert spec_filter(data), f'{SPEC_FILTER_FILE} format error'
-
-
-@pytest.mark.github
-def test_multi_lang():
-    data: dict = load_json_file(SPEC_MULTI_LANG_FILE)
-    assert data, f'load {SPEC_MULTI_LANG_FILE} failed'
-    assert nested_3_dict_str_str(data), f'{SPEC_MULTI_LANG_FILE} format error'
 
 
 @pytest.mark.github
 def test_miot_i18n():
     for file_name in listdir(MIOT_I18N_RELATIVE_PATH):
         file_path: str = path.join(MIOT_I18N_RELATIVE_PATH, file_name)
-        data: dict = load_json_file(file_path)
+        data = load_json_file(file_path)
+        assert isinstance(data, dict)
         assert data, f'load {file_path} failed'
         assert nested_3_dict_str_str(data), f'{file_path} format error'
 
@@ -220,7 +211,8 @@ def test_miot_i18n():
 def test_translations():
     for file_name in listdir(TRANS_RELATIVE_PATH):
         file_path: str = path.join(TRANS_RELATIVE_PATH, file_name)
-        data: dict = load_json_file(file_path)
+        data = load_json_file(file_path)
+        assert isinstance(data, dict)
         assert data, f'load {file_path} failed'
         assert dict_str_dict(data), f'{file_path} format error'
 
@@ -237,15 +229,16 @@ def test_miot_lang_integrity():
     i18n_names: set[str] = set(listdir(MIOT_I18N_RELATIVE_PATH))
     assert len(i18n_names) == len(translations_names)
     assert i18n_names == translations_names
-    bool_trans_data: set[str] = load_json_file(SPEC_BOOL_TRANS_FILE)
+    bool_trans_data = load_yaml_file(SPEC_BOOL_TRANS_FILE)
+    assert isinstance(bool_trans_data, dict)
     bool_trans_names: set[str] = set(
         bool_trans_data['translate']['default'].keys())
     assert len(bool_trans_names) == len(translations_names)
     # Check translation files structure
-    default_dict: dict = load_json_file(
+    default_dict = load_json_file(
         path.join(TRANS_RELATIVE_PATH, integration_lang_list[0]))
     for name in list(integration_lang_list)[1:]:
-        compare_dict: dict = load_json_file(
+        compare_dict = load_json_file(
             path.join(TRANS_RELATIVE_PATH, name))
         if not compare_dict_structure(default_dict, compare_dict):
             _LOGGER.info(
@@ -255,7 +248,7 @@ def test_miot_lang_integrity():
     default_dict = load_json_file(
         path.join(MIOT_I18N_RELATIVE_PATH, integration_lang_list[0]))
     for name in list(integration_lang_list)[1:]:
-        compare_dict: dict = load_json_file(
+        compare_dict = load_json_file(
             path.join(MIOT_I18N_RELATIVE_PATH, name))
         if not compare_dict_structure(default_dict, compare_dict):
             _LOGGER.info(
@@ -272,19 +265,13 @@ def test_miot_data_sort():
         'INTEGRATION_LANGUAGES not sorted, correct order\r\n'
         f'{list(sort_langs.keys())}')
     assert json.dumps(
-        load_json_file(file_path=SPEC_BOOL_TRANS_FILE)) == json.dumps(
+        load_yaml_file(file_path=SPEC_BOOL_TRANS_FILE)) == json.dumps(
             sort_bool_trans(file_path=SPEC_BOOL_TRANS_FILE)), (
                 f'{SPEC_BOOL_TRANS_FILE} not sorted, goto project root path'
                 ' and run the following command sorting, ',
                 'pytest -s -v -m update ./test/check_rule_format.py')
     assert json.dumps(
-        load_json_file(file_path=SPEC_MULTI_LANG_FILE)) == json.dumps(
-            sort_multi_lang(file_path=SPEC_MULTI_LANG_FILE)), (
-                f'{SPEC_MULTI_LANG_FILE} not sorted, goto project root path'
-                ' and run the following command sorting, ',
-                'pytest -s -v -m update ./test/check_rule_format.py')
-    assert json.dumps(
-        load_json_file(file_path=SPEC_FILTER_FILE)) == json.dumps(
+        load_yaml_file(file_path=SPEC_FILTER_FILE)) == json.dumps(
             sort_spec_filter(file_path=SPEC_FILTER_FILE)), (
                 f'{SPEC_FILTER_FILE} not sorted, goto project root path'
                 ' and run the following command sorting, ',
@@ -294,11 +281,8 @@ def test_miot_data_sort():
 @pytest.mark.update
 def test_sort_spec_data():
     sort_data: dict = sort_bool_trans(file_path=SPEC_BOOL_TRANS_FILE)
-    save_json_file(file_path=SPEC_BOOL_TRANS_FILE, data=sort_data)
+    save_yaml_file(file_path=SPEC_BOOL_TRANS_FILE, data=sort_data)
     _LOGGER.info('%s formatted.', SPEC_BOOL_TRANS_FILE)
-    sort_data = sort_multi_lang(file_path=SPEC_MULTI_LANG_FILE)
-    save_json_file(file_path=SPEC_MULTI_LANG_FILE, data=sort_data)
-    _LOGGER.info('%s formatted.', SPEC_MULTI_LANG_FILE)
     sort_data = sort_spec_filter(file_path=SPEC_FILTER_FILE)
-    save_json_file(file_path=SPEC_FILTER_FILE, data=sort_data)
+    save_yaml_file(file_path=SPEC_FILTER_FILE, data=sort_data)
     _LOGGER.info('%s formatted.', SPEC_FILTER_FILE)

@@ -65,13 +65,13 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from custom_components.xiaomi_home.miot.common import MIoTHttp
 
 # pylint: disable=relative-beyond-top-level
 from .const import (
     MANUFACTURER_EFFECTIVE_TIME,
     MIHOME_CA_CERT_STR,
     MIHOME_CA_CERT_SHA256)
+from .common import MIoTHttp
 from .miot_error import MIoTCertError, MIoTError, MIoTStorageError
 
 _LOGGER = logging.getLogger(__name__)
@@ -217,7 +217,8 @@ class MIoTStorage:
                 w_bytes = json.dumps(data).encode('utf-8')
             else:
                 _LOGGER.error(
-                    'save error, unsupported data type, %s', type(data).__name__)
+                    'save error, unsupported data type, %s',
+                    type(data).__name__)
                 return False
             with open(full_path, 'wb') as w_file:
                 w_file.write(w_bytes)
