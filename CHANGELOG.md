@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## v0.2.0b0
+This version has modified some default units of sensors. After the update, it will cause Home Assistant to pop up some compatibility prompts. You can choose to re-add the integration to resolve it.
+
+这个版本修改了一些传感器默认单位，更新后会导致 Home Assistant 弹出一些兼容提示，您可以选择重新添加集成解决。
+### Added
+- Add prop trans rule for surge-power. [#595](https://github.com/XiaoMi/ha_xiaomi_home/pull/595)
+- Support modify spec and value conversion. [#663](https://github.com/XiaoMi/ha_xiaomi_home/pull/663)
+### Changed
+- Update readme. [#681](https://github.com/XiaoMi/ha_xiaomi_home/pull/681)
+- Update pylint code max line length to 120. 
+### Fixed
+- Fix variable name or comment errors & fix test_lan error. [#678](https://github.com/XiaoMi/ha_xiaomi_home/pull/678) [#690](https://github.com/XiaoMi/ha_xiaomi_home/pull/690)
+- Fix water heater error & some type error. [#684](https://github.com/XiaoMi/ha_xiaomi_home/pull/684)
+- Fix fan level with value-list & fan reverse [#689](https://github.com/XiaoMi/ha_xiaomi_home/pull/689)
+
 ## v0.1.5b2
 ### Added
 - Support binary sensors to be displayed as text sensor entities and binary sensor entities. [#592](https://github.com/XiaoMi/ha_xiaomi_home/pull/592)
