@@ -326,8 +326,8 @@ class MIoTHttpClient:
         res_obj: dict = json.loads(res_str)
         if res_obj.get('code', None) != 0:
             raise MIoTHttpError(
-                f'invalid response code, {res_obj.get("code",None)}, '
-                f'{res_obj.get("message","")}')
+                f'invalid response code, {res_obj.get("code", None)}, '
+                f'{res_obj.get("message", "")}')
         _LOGGER.debug(
             'mihome api get, %s%s, %s -> %s',
             self._base_url, url_path, params, res_obj)
@@ -354,8 +354,8 @@ class MIoTHttpClient:
         res_obj: dict = json.loads(res_str)
         if res_obj.get('code', None) != 0:
             raise MIoTHttpError(
-                f'invalid response code, {res_obj.get("code",None)}, '
-                f'{res_obj.get("message","")}')
+                f'invalid response code, {res_obj.get("code", None)}, '
+                f'{res_obj.get("message", "")}')
         _LOGGER.debug(
             'mihome api post, %s%s, %s -> %s',
             self._base_url, url_path, data, res_obj)
@@ -777,7 +777,25 @@ class MIoTHttpClient:
 
         return await fut
 
-    async def set_prop_async(self, params: list) -> list:
+    async def set_prop_async(
+        self, did: str, siid: int, piid: int, value: Any
+    ) -> dict:
+        res_obj = await self.__mihome_api_post_async(
+            url_path='/app/v2/miotspec/prop/set',
+            data={
+                'params': [
+                    {'did': did, 'siid': siid, 'piid': piid, 'value': value}]
+            },
+            timeout=15
+        )
+        if 'result' not in res_obj and len(res_obj['result']) != 1:
+            raise MIoTHttpError(
+                f'invalid response result, {res_obj}',
+                MIoTErrorCode.CODE_MIPS_INVALID_RESULT)
+
+        return res_obj['result'][0]
+
+    async def set_props_async(self, params: list) -> list:
         """
         params = [{"did": "xxxx", "siid": 2, "piid": 1, "value": False}]
         """

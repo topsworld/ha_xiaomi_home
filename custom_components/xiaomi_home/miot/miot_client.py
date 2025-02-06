@@ -634,6 +634,9 @@ class MIoTClient:
                 else:
                     result = await mips.set_prop_async(
                         did=did, siid=siid, piid=piid, value=value)
+                    _LOGGER.info(
+                        'gw set prop, %s.%s.%s=%s -> %s',
+                        did, siid, piid, value, result)
                     rc = (result or {}).get(
                         'code', MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
                     if rc in [0, 1]:
@@ -645,8 +648,9 @@ class MIoTClient:
             if device_lan and device_lan.get('online', False):
                 result = await self._miot_lan.set_prop_async(
                     did=did, siid=siid, piid=piid, value=value)
-                _LOGGER.debug(
-                    'lan set prop, %s, %s, %s -> %s', did, siid, piid, result)
+                _LOGGER.info(
+                    'lan set prop, %s.%s.%s=%s -> %s',
+                    did, siid, piid, value, result)
                 rc = (result or {}).get(
                     'code', MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
                 if rc in [0, 1]:
@@ -658,14 +662,12 @@ class MIoTClient:
         device_cloud = self._device_list_cloud.get(did, None)
         if device_cloud and device_cloud.get('online', False):
             result = await self._http.set_prop_async(
-                params=[
-                    {'did': did, 'siid': siid, 'piid': piid, 'value': value}
-                ])
-            _LOGGER.debug(
-                'set prop response, %s.%d.%d, %s, result, %s',
+                did=did, siid=siid, piid=piid, value=value)
+            _LOGGER.info(
+                'cloud set prop, %s.%d.%d=%s -> result, %s',
                 did, siid, piid, value, result)
-            if result and len(result) == 1:
-                rc = result[0].get(
+            if result:
+                rc = result.get(
                     'code', MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
                 if rc in [0, 1]:
                     return True
@@ -675,8 +677,7 @@ class MIoTClient:
                     self._main_loop.create_task(
                         await self.__refresh_cloud_device_with_dids_async(
                             dids=[did]))
-                raise MIoTClientError(
-                    self.__get_exec_error_with_rc(rc=rc))
+            raise MIoTClientError(self.__get_exec_error_with_rc(rc=rc))
 
         # Show error message
         raise MIoTClientError(
