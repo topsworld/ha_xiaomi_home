@@ -991,6 +991,15 @@ class MIoTServiceEntity(Entity):
                 self.miot_device.unsub_event(
                     siid=event.service.iid, eiid=event.iid, sub_id=sub_id)
 
+    async def async_update(self) -> None:
+        for prop in self.entity_data.props:
+            if not prop.readable:
+                continue
+            self._prop_value_map[prop] = await self.get_property_async(prop)
+            _LOGGER.info(
+                'async_update, %s, %s, %s', self.entity_id, prop.name,
+                self._prop_value_map[prop])
+
     def get_map_value(
         self, map_: Optional[dict[int, Any]], key: int
     ) -> Any:
@@ -1235,6 +1244,13 @@ class MIoTPropertyEntity(Entity):
         self.miot_device.unsub_property(
             siid=self.service.iid, piid=self.spec.iid,
             sub_id=self._value_sub_id)
+
+    async def async_update(self) -> None:
+        if not self.spec.readable:
+            return
+        self._value = await self.get_property_async()
+        _LOGGER.info(
+            'async_update, %s, %s, %s', self.entity_id, self.name, self._value)
 
     def get_vlist_description(self, value: Any) -> Optional[str]:
         if not self._value_list:
