@@ -1158,7 +1158,7 @@ class MIoTServiceEntity(Entity):
         if self._pending_write_ha_state_timer:
             self._pending_write_ha_state_timer.cancel()
         self._pending_write_ha_state_timer = self._main_loop.call_later(
-            1, self.__write_ha_state_handler)
+            30, self.__write_ha_state_handler)
 
     def __write_ha_state_handler(self) -> None:
         self._pending_write_ha_state_timer = None
@@ -1321,7 +1321,7 @@ class MIoTPropertyEntity(Entity):
         if self._pending_write_ha_state_timer:
             self._pending_write_ha_state_timer.cancel()
         self._pending_write_ha_state_timer = self._main_loop.call_later(
-            1, self.__write_ha_state_handler)
+            30, self.__write_ha_state_handler)
 
     def __write_ha_state_handler(self) -> None:
         self._pending_write_ha_state_timer = None
