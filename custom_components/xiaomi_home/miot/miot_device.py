@@ -1398,7 +1398,7 @@ class MIoTEventEntity(Entity):
 
     @abstractmethod
     def on_event_occurred(
-        self, name: str, arguments: dict[str, Any] | None = None
+        self, name: str, arguments: Optional[dict[str, Any]] = None
     ) -> None: ...
 
     def __on_event_occurred(self, params: dict, ctx: Any) -> None:
