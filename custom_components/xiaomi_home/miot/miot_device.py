@@ -1339,7 +1339,7 @@ class MIoTEventEntity(Entity):
     _main_loop: asyncio.AbstractEventLoop
     _attr_event_types: list[str]
     _arguments_map: dict[int, str]
-    _state_sub_id: int
+    # _state_sub_id: int
     _value_sub_id: int
 
     def __init__(self, miot_device: MIoTDevice, spec: MIoTSpecEvent) -> None:
@@ -1360,13 +1360,13 @@ class MIoTEventEntity(Entity):
         self._attr_name = (
             f'{"* "if self.spec.proprietary else " "}'
             f'{self.service.description_trans} {spec.description_trans}')
-        self._attr_available = miot_device.online
+        self._attr_available = True  # miot_device.online
         self._attr_event_types = [spec.description_trans]
 
         self._arguments_map = {}
         for prop in spec.argument:
             self._arguments_map[prop.iid] = prop.description_trans
-        self._state_sub_id = 0
+        # self._state_sub_id = 0
         self._value_sub_id = 0
 
         _LOGGER.info(
@@ -1380,18 +1380,18 @@ class MIoTEventEntity(Entity):
 
     async def async_added_to_hass(self) -> None:
         # Sub device state changed
-        self._state_sub_id = self.miot_device.sub_device_state(
-            key=f'event.{ self.service.iid}.{self.spec.iid}',
-            handler=self.__on_device_state_changed)
+        # self._state_sub_id = self.miot_device.sub_device_state(
+        #     key=f'event.{ self.service.iid}.{self.spec.iid}',
+        #     handler=self.__on_device_state_changed)
         # Sub value changed
         self._value_sub_id = self.miot_device.sub_event(
             handler=self.__on_event_occurred,
             siid=self.service.iid, eiid=self.spec.iid)
 
     async def async_will_remove_from_hass(self) -> None:
-        self.miot_device.unsub_device_state(
-            key=f'event.{ self.service.iid}.{self.spec.iid}',
-            sub_id=self._state_sub_id)
+        # self.miot_device.unsub_device_state(
+        #     key=f'event.{ self.service.iid}.{self.spec.iid}',
+        #     sub_id=self._state_sub_id)
         self.miot_device.unsub_event(
             siid=self.service.iid, eiid=self.spec.iid,
             sub_id=self._value_sub_id)
@@ -1429,14 +1429,14 @@ class MIoTEventEntity(Entity):
             name=self.spec.description_trans, arguments=trans_arg)
         self.async_write_ha_state()
 
-    def __on_device_state_changed(
-        self, key: str, state: MIoTDeviceState
-    ) -> None:
-        state_new = state == MIoTDeviceState.ONLINE
-        if state_new == self._attr_available:
-            return
-        self._attr_available = state_new
-        self.async_write_ha_state()
+    # def __on_device_state_changed(
+    #     self, key: str, state: MIoTDeviceState
+    # ) -> None:
+    #     state_new = state == MIoTDeviceState.ONLINE
+    #     if state_new == self._attr_available:
+    #         return
+    #     self._attr_available = state_new
+    #     self.async_write_ha_state()
 
 
 class MIoTActionEntity(Entity):
