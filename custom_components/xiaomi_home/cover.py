@@ -44,6 +44,10 @@ or other intellectual property rights of Xiaomi or its affiliates; or,
 off Xiaomi or its affiliates' products.
 
 Cover entities for Xiaomi Home.
+- airer
+- curtain
+- window-opener
+- motor-controller
 """
 from __future__ import annotations
 import logging

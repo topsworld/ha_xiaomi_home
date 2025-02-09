@@ -44,6 +44,12 @@ or other intellectual property rights of Xiaomi or its affiliates; or,
 off Xiaomi or its affiliates' products.
 
 Climate entities for Xiaomi Home.
+- air-conditioner
+- air-condition-outlet
+- bath-heater
+- electric-blanket
+- heater
+- thermostat
 """
 from __future__ import annotations
 import logging
