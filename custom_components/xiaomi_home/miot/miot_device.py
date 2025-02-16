@@ -1295,9 +1295,10 @@ class MIoTPropertyEntity(Entity):
             self._pending_write_ha_state_timer.cancel()
             self._pending_write_ha_state_timer = None
         value = self.spec.value_format(params['value'])
+        value = self.spec.eval_expr(src_value=value)
         if self._value == value:
             return
-        self._value = self.spec.eval_expr(value)
+        self._value = value
         self.async_write_ha_state()
 
     def __on_device_state_changed(
