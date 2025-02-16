@@ -47,6 +47,7 @@ MIoT device instance.
 """
 import asyncio
 from abc import abstractmethod
+import time
 from typing import Any, Callable, Optional
 import logging
 
@@ -873,6 +874,7 @@ class MIoTServiceEntity(Entity):
         MIoTSpecProperty, Callable[[MIoTSpecProperty, Any], None]]
 
     _pending_write_ha_state_timer: Optional[asyncio.TimerHandle]
+    _update_list: dict[MIoTSpecProperty, int]
 
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
@@ -908,6 +910,7 @@ class MIoTServiceEntity(Entity):
         self._event_occurred_handler = None
         self._prop_changed_subs = {}
         self._pending_write_ha_state_timer = None
+        self._update_list = {}
         _LOGGER.info(
             'new miot service entity, %s, %s, %s, %s',
             self.miot_device.name, self._attr_name, self.entity_data.spec.name,
@@ -1103,19 +1106,33 @@ class MIoTServiceEntity(Entity):
 
     def __on_properties_changed(self, params: dict, ctx: Any) -> None:
         _LOGGER.debug('properties changed, %s', params)
+        value_changed: bool = False
         for prop in self.entity_data.props:
             if (
                 prop.iid != params['piid']
                 or prop.service.iid != params['siid']
             ):
                 continue
+            self._update_list[prop] = int(time.time())
             value = prop.value_format(params['value'])
             value = prop.eval_expr(value)
+            if (
+                prop in self._prop_value_map
+                and self._prop_value_map[prop] == value
+            ):
+                # Value not changed
+                break
             self._prop_value_map[prop] = value
+            value_changed = True
             if prop in self._prop_changed_subs:
                 self._prop_changed_subs[prop](prop, value)
             break
-        if not self._pending_write_ha_state_timer:
+        if self._pending_write_ha_state_timer:
+            if len(self._update_list) == len(self.entity_data.props):
+                self._pending_write_ha_state_timer.cancel()
+                self._pending_write_ha_state_timer = None
+                self.async_write_ha_state()
+        elif value_changed:
             self.async_write_ha_state()
 
     def __on_event_occurred(self, params: dict, ctx: Any) -> None:
@@ -1150,6 +1167,7 @@ class MIoTServiceEntity(Entity):
         self.__refresh_props_value()
 
     def __refresh_props_value(self) -> None:
+        self._update_list = {}
         for prop in self.entity_data.props:
             if not prop.readable:
                 continue
