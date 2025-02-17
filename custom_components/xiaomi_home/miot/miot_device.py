@@ -47,6 +47,7 @@ MIoT device instance.
 """
 import asyncio
 from abc import abstractmethod
+import time
 from typing import Any, Callable, Optional
 import logging
 
@@ -873,6 +874,7 @@ class MIoTServiceEntity(Entity):
         MIoTSpecProperty, Callable[[MIoTSpecProperty, Any], None]]
 
     _pending_write_ha_state_timer: Optional[asyncio.TimerHandle]
+    _update_list: dict[MIoTSpecProperty, int]
 
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
@@ -908,6 +910,7 @@ class MIoTServiceEntity(Entity):
         self._event_occurred_handler = None
         self._prop_changed_subs = {}
         self._pending_write_ha_state_timer = None
+        self._update_list = {}
         _LOGGER.info(
             'new miot service entity, %s, %s, %s, %s',
             self.miot_device.name, self._attr_name, self.entity_data.spec.name,
@@ -966,9 +969,7 @@ class MIoTServiceEntity(Entity):
             self.__refresh_props_value()
 
     async def async_will_remove_from_hass(self) -> None:
-        if self._pending_write_ha_state_timer:
-            self._pending_write_ha_state_timer.cancel()
-            self._pending_write_ha_state_timer = None
+        self.__cancel_write_ha_state_timer()
         state_id = 's.0'
         if isinstance(self.entity_data.spec, MIoTSpecService):
             state_id = f's.{self.entity_data.spec.iid}'
@@ -990,6 +991,15 @@ class MIoTServiceEntity(Entity):
             if sub_id:
                 self.miot_device.unsub_event(
                     siid=event.service.iid, eiid=event.iid, sub_id=sub_id)
+
+    async def async_update(self) -> None:
+        for prop in self.entity_data.props:
+            if not prop.readable:
+                continue
+            self._prop_value_map[prop] = await self.get_property_async(prop)
+            _LOGGER.info(
+                'async_update, %s, %s, %s', self.entity_id, prop.name,
+                self._prop_value_map[prop])
 
     def get_map_value(
         self, map_: Optional[dict[int, Any]], key: int
@@ -1034,7 +1044,6 @@ class MIoTServiceEntity(Entity):
             raise RuntimeError(
                 f'set property failed, property is None, '
                 f'{self.entity_id}, {self.name}')
-        value = prop.value_format(value)
         if prop not in self.entity_data.props:
             raise RuntimeError(
                 f'set property failed, unknown property, '
@@ -1043,6 +1052,7 @@ class MIoTServiceEntity(Entity):
             raise RuntimeError(
                 f'set property failed, not writable, '
                 f'{self.entity_id}, {self.name}, {prop.name}')
+        value = prop.value_format(value)
         try:
             await self.miot_device.miot_client.set_prop_async(
                 did=self.miot_device.did, siid=prop.service.iid,
@@ -1072,13 +1082,10 @@ class MIoTServiceEntity(Entity):
                 'get property failed, not readable, %s, %s, %s',
                 self.entity_id, self.name, prop.name)
             return None
-        result = prop.value_format(
+        value = prop.value_format(
             await self.miot_device.miot_client.get_prop_async(
                 did=self.miot_device.did, siid=prop.service.iid, piid=prop.iid))
-        if result != self._prop_value_map[prop]:
-            self._prop_value_map[prop] = result
-            self.async_write_ha_state()
-        return result
+        return prop.eval_expr(value)
 
     async def action_async(
         self, action: MIoTSpecAction, in_list: Optional[list] = None
@@ -1103,12 +1110,24 @@ class MIoTServiceEntity(Entity):
                 or prop.service.iid != params['siid']
             ):
                 continue
-            value: Any = prop.value_format(params['value'])
+            self._update_list[prop] = int(time.time())
+            value = prop.value_format(params['value'])
+            value = prop.eval_expr(value)
+            if (
+                prop in self._prop_value_map
+                and self._prop_value_map[prop] == value
+            ):
+                # Value not changed
+                break
             self._prop_value_map[prop] = value
             if prop in self._prop_changed_subs:
                 self._prop_changed_subs[prop](prop, value)
             break
-        if not self._pending_write_ha_state_timer:
+        if self._pending_write_ha_state_timer:
+            if len(self._update_list) == len(self.entity_data.props):
+                self.__cancel_write_ha_state_timer()
+                self.async_write_ha_state()
+        else:
             self.async_write_ha_state()
 
     def __on_event_occurred(self, params: dict, ctx: Any) -> None:
@@ -1138,20 +1157,26 @@ class MIoTServiceEntity(Entity):
             return
         self._attr_available = state_new
         if not self._attr_available:
+            self.__cancel_write_ha_state_timer()
             self.async_write_ha_state()
             return
         self.__refresh_props_value()
 
     def __refresh_props_value(self) -> None:
+        self._update_list = {}
         for prop in self.entity_data.props:
             if not prop.readable:
                 continue
             self.miot_device.miot_client.request_refresh_prop(
                 did=self.miot_device.did, siid=prop.service.iid, piid=prop.iid)
+        self.__cancel_write_ha_state_timer()
+        self._pending_write_ha_state_timer = self._main_loop.call_later(
+            30, self.__write_ha_state_handler)
+
+    def __cancel_write_ha_state_timer(self) -> None:
         if self._pending_write_ha_state_timer:
             self._pending_write_ha_state_timer.cancel()
-        self._pending_write_ha_state_timer = self._main_loop.call_later(
-            1, self.__write_ha_state_handler)
+            self._pending_write_ha_state_timer = None
 
     def __write_ha_state_handler(self) -> None:
         self._pending_write_ha_state_timer = None
@@ -1226,15 +1251,20 @@ class MIoTPropertyEntity(Entity):
             self.__request_refresh_prop()
 
     async def async_will_remove_from_hass(self) -> None:
-        if self._pending_write_ha_state_timer:
-            self._pending_write_ha_state_timer.cancel()
-            self._pending_write_ha_state_timer = None
+        self.__cancel_write_ha_state_timer()
         self.miot_device.unsub_device_state(
             key=f'{ self.service.iid}.{self.spec.iid}',
             sub_id=self._state_sub_id)
         self.miot_device.unsub_property(
             siid=self.service.iid, piid=self.spec.iid,
             sub_id=self._value_sub_id)
+
+    async def async_update(self) -> None:
+        if not self.spec.readable:
+            return
+        self._value = await self.get_property_async()
+        _LOGGER.info(
+            'async_update, %s, %s, %s', self.entity_id, self.name, self._value)
 
     def get_vlist_description(self, value: Any) -> Optional[str]:
         if not self._value_list:
@@ -1269,23 +1299,28 @@ class MIoTPropertyEntity(Entity):
                 'get property failed, not readable, %s, %s',
                 self.entity_id, self.name)
             return None
-        return self.spec.value_format(
-            await self.miot_device.miot_client.get_prop_async(
-                did=self.miot_device.did, siid=self.spec.service.iid,
-                piid=self.spec.iid))
+        value = await self.miot_device.miot_client.get_prop_async(
+            did=self.miot_device.did, siid=self.spec.service.iid,
+            piid=self.spec.iid)
+        value = self.spec.value_format(value=value)
+        return self.spec.eval_expr(src_value=value)
 
     def __on_value_changed(self, params: dict, ctx: Any) -> None:
         _LOGGER.debug('property changed, %s', params)
-        self._value = self.spec.value_format(params['value'])
-        self._value = self.spec.eval_expr(self._value)
-        if not self._pending_write_ha_state_timer:
-            self.async_write_ha_state()
+        self.__cancel_write_ha_state_timer()
+        value = self.spec.value_format(params['value'])
+        self._value = self.spec.eval_expr(src_value=value)
+        self.async_write_ha_state()
 
     def __on_device_state_changed(
         self, key: str, state: MIoTDeviceState
     ) -> None:
-        self._attr_available = state == MIoTDeviceState.ONLINE
+        state_new = state == MIoTDeviceState.ONLINE
+        if state_new == self._attr_available:
+            return
+        self._attr_available = state_new
         if not self._attr_available:
+            self.__cancel_write_ha_state_timer()
             self.async_write_ha_state()
             return
         # Refresh value
@@ -1299,7 +1334,12 @@ class MIoTPropertyEntity(Entity):
         if self._pending_write_ha_state_timer:
             self._pending_write_ha_state_timer.cancel()
         self._pending_write_ha_state_timer = self._main_loop.call_later(
-            1, self.__write_ha_state_handler)
+            30, self.__write_ha_state_handler)
+
+    def __cancel_write_ha_state_timer(self) -> None:
+        if self._pending_write_ha_state_timer:
+            self._pending_write_ha_state_timer.cancel()
+            self._pending_write_ha_state_timer = None
 
     def __write_ha_state_handler(self) -> None:
         self._pending_write_ha_state_timer = None
@@ -1317,7 +1357,7 @@ class MIoTEventEntity(Entity):
     _main_loop: asyncio.AbstractEventLoop
     _attr_event_types: list[str]
     _arguments_map: dict[int, str]
-    _state_sub_id: int
+    # _state_sub_id: int
     _value_sub_id: int
 
     def __init__(self, miot_device: MIoTDevice, spec: MIoTSpecEvent) -> None:
@@ -1338,13 +1378,13 @@ class MIoTEventEntity(Entity):
         self._attr_name = (
             f'{"* "if self.spec.proprietary else " "}'
             f'{self.service.description_trans} {spec.description_trans}')
-        self._attr_available = miot_device.online
+        self._attr_available = True  # miot_device.online
         self._attr_event_types = [spec.description_trans]
 
         self._arguments_map = {}
         for prop in spec.argument:
             self._arguments_map[prop.iid] = prop.description_trans
-        self._state_sub_id = 0
+        # self._state_sub_id = 0
         self._value_sub_id = 0
 
         _LOGGER.info(
@@ -1358,25 +1398,25 @@ class MIoTEventEntity(Entity):
 
     async def async_added_to_hass(self) -> None:
         # Sub device state changed
-        self._state_sub_id = self.miot_device.sub_device_state(
-            key=f'event.{ self.service.iid}.{self.spec.iid}',
-            handler=self.__on_device_state_changed)
+        # self._state_sub_id = self.miot_device.sub_device_state(
+        #     key=f'event.{ self.service.iid}.{self.spec.iid}',
+        #     handler=self.__on_device_state_changed)
         # Sub value changed
         self._value_sub_id = self.miot_device.sub_event(
             handler=self.__on_event_occurred,
             siid=self.service.iid, eiid=self.spec.iid)
 
     async def async_will_remove_from_hass(self) -> None:
-        self.miot_device.unsub_device_state(
-            key=f'event.{ self.service.iid}.{self.spec.iid}',
-            sub_id=self._state_sub_id)
+        # self.miot_device.unsub_device_state(
+        #     key=f'event.{ self.service.iid}.{self.spec.iid}',
+        #     sub_id=self._state_sub_id)
         self.miot_device.unsub_event(
             siid=self.service.iid, eiid=self.spec.iid,
             sub_id=self._value_sub_id)
 
     @abstractmethod
     def on_event_occurred(
-        self, name: str, arguments: dict[str, Any] | None = None
+        self, name: str, arguments: Optional[dict[str, Any]] = None
     ) -> None: ...
 
     def __on_event_occurred(self, params: dict, ctx: Any) -> None:
@@ -1407,14 +1447,14 @@ class MIoTEventEntity(Entity):
             name=self.spec.description_trans, arguments=trans_arg)
         self.async_write_ha_state()
 
-    def __on_device_state_changed(
-        self, key: str, state: MIoTDeviceState
-    ) -> None:
-        state_new = state == MIoTDeviceState.ONLINE
-        if state_new == self._attr_available:
-            return
-        self._attr_available = state_new
-        self.async_write_ha_state()
+    # def __on_device_state_changed(
+    #     self, key: str, state: MIoTDeviceState
+    # ) -> None:
+    #     state_new = state == MIoTDeviceState.ONLINE
+    #     if state_new == self._attr_available:
+    #         return
+    #     self._attr_available = state_new
+    #     self.async_write_ha_state()
 
 
 class MIoTActionEntity(Entity):
