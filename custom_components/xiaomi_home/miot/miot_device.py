@@ -1251,9 +1251,7 @@ class MIoTPropertyEntity(Entity):
             self.__request_refresh_prop()
 
     async def async_will_remove_from_hass(self) -> None:
-        if self._pending_write_ha_state_timer:
-            self._pending_write_ha_state_timer.cancel()
-            self._pending_write_ha_state_timer = None
+        self.__cancel_write_ha_state_timer()
         self.miot_device.unsub_device_state(
             key=f'{ self.service.iid}.{self.spec.iid}',
             sub_id=self._state_sub_id)
