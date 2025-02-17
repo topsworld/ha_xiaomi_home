@@ -1106,7 +1106,6 @@ class MIoTServiceEntity(Entity):
 
     def __on_properties_changed(self, params: dict, ctx: Any) -> None:
         _LOGGER.debug('properties changed, %s', params)
-        value_changed: bool = False
         for prop in self.entity_data.props:
             if (
                 prop.iid != params['piid']
@@ -1123,7 +1122,6 @@ class MIoTServiceEntity(Entity):
                 # Value not changed
                 break
             self._prop_value_map[prop] = value
-            value_changed = True
             if prop in self._prop_changed_subs:
                 self._prop_changed_subs[prop](prop, value)
             break
@@ -1132,7 +1130,7 @@ class MIoTServiceEntity(Entity):
                 self._pending_write_ha_state_timer.cancel()
                 self._pending_write_ha_state_timer = None
                 self.async_write_ha_state()
-        elif value_changed:
+        else:
             self.async_write_ha_state()
 
     def __on_event_occurred(self, params: dict, ctx: Any) -> None:
@@ -1313,10 +1311,7 @@ class MIoTPropertyEntity(Entity):
             self._pending_write_ha_state_timer.cancel()
             self._pending_write_ha_state_timer = None
         value = self.spec.value_format(params['value'])
-        value = self.spec.eval_expr(src_value=value)
-        if self._value == value:
-            return
-        self._value = value
+        self._value = self.spec.eval_expr(src_value=value)
         self.async_write_ha_state()
 
     def __on_device_state_changed(
