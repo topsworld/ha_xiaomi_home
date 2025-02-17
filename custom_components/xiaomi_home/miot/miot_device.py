@@ -969,9 +969,7 @@ class MIoTServiceEntity(Entity):
             self.__refresh_props_value()
 
     async def async_will_remove_from_hass(self) -> None:
-        if self._pending_write_ha_state_timer:
-            self._pending_write_ha_state_timer.cancel()
-            self._pending_write_ha_state_timer = None
+        self.__cancel_write_ha_state_timer()
         state_id = 's.0'
         if isinstance(self.entity_data.spec, MIoTSpecService):
             state_id = f's.{self.entity_data.spec.iid}'
@@ -1127,8 +1125,7 @@ class MIoTServiceEntity(Entity):
             break
         if self._pending_write_ha_state_timer:
             if len(self._update_list) == len(self.entity_data.props):
-                self._pending_write_ha_state_timer.cancel()
-                self._pending_write_ha_state_timer = None
+                self.__cancel_write_ha_state_timer()
                 self.async_write_ha_state()
         else:
             self.async_write_ha_state()
@@ -1160,6 +1157,7 @@ class MIoTServiceEntity(Entity):
             return
         self._attr_available = state_new
         if not self._attr_available:
+            self.__cancel_write_ha_state_timer()
             self.async_write_ha_state()
             return
         self.__refresh_props_value()
@@ -1171,10 +1169,14 @@ class MIoTServiceEntity(Entity):
                 continue
             self.miot_device.miot_client.request_refresh_prop(
                 did=self.miot_device.did, siid=prop.service.iid, piid=prop.iid)
-        if self._pending_write_ha_state_timer:
-            self._pending_write_ha_state_timer.cancel()
+        self.__cancel_write_ha_state_timer()
         self._pending_write_ha_state_timer = self._main_loop.call_later(
             30, self.__write_ha_state_handler)
+
+    def __cancel_write_ha_state_timer(self) -> None:
+        if self._pending_write_ha_state_timer:
+            self._pending_write_ha_state_timer.cancel()
+            self._pending_write_ha_state_timer = None
 
     def __write_ha_state_handler(self) -> None:
         self._pending_write_ha_state_timer = None
@@ -1307,9 +1309,7 @@ class MIoTPropertyEntity(Entity):
 
     def __on_value_changed(self, params: dict, ctx: Any) -> None:
         _LOGGER.debug('property changed, %s', params)
-        if self._pending_write_ha_state_timer:
-            self._pending_write_ha_state_timer.cancel()
-            self._pending_write_ha_state_timer = None
+        self.__cancel_write_ha_state_timer()
         value = self.spec.value_format(params['value'])
         self._value = self.spec.eval_expr(src_value=value)
         self.async_write_ha_state()
@@ -1322,6 +1322,7 @@ class MIoTPropertyEntity(Entity):
             return
         self._attr_available = state_new
         if not self._attr_available:
+            self.__cancel_write_ha_state_timer()
             self.async_write_ha_state()
             return
         # Refresh value
@@ -1336,6 +1337,11 @@ class MIoTPropertyEntity(Entity):
             self._pending_write_ha_state_timer.cancel()
         self._pending_write_ha_state_timer = self._main_loop.call_later(
             30, self.__write_ha_state_handler)
+
+    def __cancel_write_ha_state_timer(self) -> None:
+        if self._pending_write_ha_state_timer:
+            self._pending_write_ha_state_timer.cancel()
+            self._pending_write_ha_state_timer = None
 
     def __write_ha_state_handler(self) -> None:
         self._pending_write_ha_state_timer = None
