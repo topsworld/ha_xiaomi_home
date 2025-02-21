@@ -63,7 +63,8 @@ from paho.mqtt.client import (
     MQTT_ERR_UNKNOWN,
     Client,
     MQTTv5,
-    MQTTMessage)
+    MQTTMessage,
+    CallbackAPIVersion)
 
 # pylint: disable=relative-beyond-top-level
 from .common import MIoTMatcher
@@ -602,9 +603,9 @@ class _MipsClient(ABC):
 
     def __mips_loop_thread(self) -> None:
         self.log_info('mips_loop_thread start')
-        # mqtt init for API_VERSION2,
-        # callback_api_version=CallbackAPIVersion.VERSION2,
-        self._mqtt = Client(client_id=self._client_id, protocol=MQTTv5)
+        self._mqtt = Client(
+            callback_api_version=CallbackAPIVersion.VERSION2,
+            client_id=self._client_id, protocol=MQTTv5)
         self._mqtt.enable_logger(logger=self._mqtt_logger)
         # Set mqtt config
         if self._username:
@@ -661,7 +662,7 @@ class _MipsClient(ABC):
         # Try to reconnect
         self.__mips_try_reconnect()
 
-    def __on_disconnect(self,  client, user_data, rc, props) -> None:
+    def __on_disconnect(self, client, user_data, flags, rc, props) -> None:
         if self._mqtt_state:
             (self.log_info if rc == 0 else self.log_error)(
                 f'mips disconnect, {rc}, {props}')
