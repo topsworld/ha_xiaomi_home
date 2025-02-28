@@ -19,6 +19,7 @@ _LOGGER = logging.getLogger(__name__)
     ('<Group id>', 'Gateway did', 'Gateway ip', 8883),
 ])
 @pytest.mark.asyncio
+@pytest.mark.mips_local
 async def test_mips_local_async(
     test_cache_path: str,
     test_domain_cloud_cache: str,
@@ -149,6 +150,7 @@ async def test_mips_local_async(
 
 
 @pytest.mark.asyncio
+@pytest.mark.mips_cloud
 async def test_mips_cloud_async(
     test_cache_path: str,
     test_name_uuid: str,
@@ -235,13 +237,12 @@ async def test_mips_cloud_async(
             did=central_did, siid=test_siid, piid=test_piid)
         assert isinstance(result1, bool)
         _LOGGER.info('get prop.%s.%s, value=%s', test_siid, test_piid, result1)
-        result2 = await miot_http.set_prop_async(params=[{
-            'did': central_did, 'siid': test_siid, 'piid': test_piid,
-            'value': not result1}])
+        result2 = await miot_http.set_prop_async(
+            did=central_did, siid=test_siid, piid=test_piid, value=not result1)
         _LOGGER.info(
             'set prop.%s.%s=%s, result=%s',
             test_siid, test_piid, not result1, result2)
-        assert isinstance(result2, list)
+        assert isinstance(result2, dict)
         result3 = await miot_http.get_prop_async(
             did=central_did, siid=test_siid, piid=test_piid)
         assert isinstance(result3, bool)

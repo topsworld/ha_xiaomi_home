@@ -57,6 +57,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Any, Callable, Optional, final, Coroutine
+from packaging.version import parse as parse_version
 
 from paho.mqtt.client import (
     MQTT_ERR_SUCCESS,
@@ -66,7 +67,7 @@ from paho.mqtt.client import (
     MQTTMessage)
 
 # pylint: disable=relative-beyond-top-level
-from .common import MIoTMatcher
+from .common import get_pkg_version, MIoTMatcher
 from .const import MIHOME_MQTT_KEEPALIVE
 from .miot_error import MIoTErrorCode, MIoTMipsError
 
@@ -230,6 +231,7 @@ class _MipsClient(ABC):
     _cert_file: Optional[str]
     _key_file: Optional[str]
 
+    _paho_api_version: int
     _mqtt_logger: Optional[logging.Logger]
     _mqtt: Optional[Client]
     _mqtt_fd: int
@@ -272,6 +274,13 @@ class _MipsClient(ABC):
         self._cert_file = cert_file
         self._key_file = key_file
 
+        self._paho_api_version = 1
+        paho_version = get_pkg_version('paho.mqtt')
+        if (
+            paho_version and
+            parse_version(paho_version) >= parse_version('2.0.0')
+        ):
+            self._paho_api_version = 2
         self._mqtt_logger = None
         self._mqtt_fd = -1
         self._mqtt_timer = None
@@ -602,9 +611,14 @@ class _MipsClient(ABC):
 
     def __mips_loop_thread(self) -> None:
         self.log_info('mips_loop_thread start')
-        # mqtt init for API_VERSION2,
-        # callback_api_version=CallbackAPIVersion.VERSION2,
-        self._mqtt = Client(client_id=self._client_id, protocol=MQTTv5)
+        # pylint: disable=import-outside-toplevel
+        if self._paho_api_version == 2:
+            from paho.mqtt.client import CallbackAPIVersion
+            self._mqtt = Client(
+                callback_api_version=CallbackAPIVersion.VERSION2,
+                client_id=self._client_id, protocol=MQTTv5)
+        else:
+            self._mqtt = Client(client_id=self._client_id, protocol=MQTTv5)
         self._mqtt.enable_logger(logger=self._mqtt_logger)
         # Set mqtt config
         if self._username:
@@ -623,15 +637,23 @@ class _MipsClient(ABC):
         else:
             self._mqtt.tls_set(tls_version=ssl.PROTOCOL_TLS_CLIENT)
         self._mqtt.tls_insecure_set(True)
-        self._mqtt.on_connect = self.__on_connect
-        self._mqtt.on_connect_fail = self.__on_connect_failed
-        self._mqtt.on_disconnect = self.__on_disconnect
+        if self._paho_api_version == 2:
+            self._mqtt.on_connect = self.__on_connect
+            self._mqtt.on_connect_fail = self.__on_connect_failed
+            self._mqtt.on_disconnect = self.__on_disconnect
+        else:
+            self._mqtt.on_connect = self.__on_connect_v1
+            self._mqtt.on_connect_fail = self.__on_connect_failed_v1
+            self._mqtt.on_disconnect = self.__on_disconnect_v1
         self._mqtt.on_message = self.__on_message
         # Connect to mips
         self.__mips_start_connect_tries()
         # Run event loop
         self._internal_loop.run_forever()
         self.log_info('mips_loop_thread exit!')
+
+    def __on_connect_v1(self, client, user_data, flags, rc, props) -> None:
+        self.__on_connect(client, user_data, flags, rc, props)
 
     def __on_connect(self, client, user_data, flags, rc, props) -> None:
         if not self._mqtt:
@@ -656,12 +678,18 @@ class _MipsClient(ABC):
         self.main_loop.call_soon_threadsafe(
             self._event_disconnect.clear)
 
+    def __on_connect_failed_v1(self, client: Client, user_data: Any) -> None:
+        self.__on_connect_failed(client, user_data)
+
     def __on_connect_failed(self, client: Client, user_data: Any) -> None:
         self.log_error('mips connect failed')
         # Try to reconnect
         self.__mips_try_reconnect()
 
-    def __on_disconnect(self,  client, user_data, rc, props) -> None:
+    def __on_disconnect_v1(self, client, user_data, rc, props) -> None:
+        self.__on_disconnect(client, user_data, None, rc, props)
+
+    def __on_disconnect(self, client, user_data, flags, rc, props) -> None:
         if self._mqtt_state:
             (self.log_info if rc == 0 else self.log_error)(
                 f'mips disconnect, {rc}, {props}')
