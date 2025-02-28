@@ -45,6 +45,7 @@ off Xiaomi or its affiliates' products.
 
 Common utilities.
 """
+import importlib.metadata
 import asyncio
 import json
 from os import path
@@ -101,6 +102,14 @@ def slugify_name(name: str, separator: str = '_') -> str:
 def slugify_did(cloud_server: str, did: str) -> str:
     """Slugify a device id."""
     return slugify(f'{cloud_server}_{did}', separator='_')
+
+
+def get_pkg_version(package_name) -> Optional[str]:
+    """Get the version of a package."""
+    try:
+        return importlib.metadata.version(package_name)
+    except Exception:  # pylint: disable=broad-exception-caught
+        return None
 
 
 class MIoTMatcher(MQTTMatcher):
@@ -178,7 +187,7 @@ class MIoTHttp:
         return await ev_loop.run_in_executor(
             None, MIoTHttp.get_json, url, params, headers)
 
-    @ staticmethod
+    @staticmethod
     async def post_async(
         url: str, data: Optional[dict] = None, headers: Optional[dict] = None,
         loop: Optional[asyncio.AbstractEventLoop] = None
