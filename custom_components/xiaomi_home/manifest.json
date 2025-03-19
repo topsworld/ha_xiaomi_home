@@ -2,7 +2,8 @@
     "domain": "xiaomi_home",
     "name": "Xiaomi Home",
     "codeowners": [
-        "@XiaoMi"
+        "@XiaoMi",
+        "@topsworld"
     ],
     "config_flow": true,
     "dependencies": [
@@ -11,10 +12,10 @@
         "ffmpeg",
         "zeroconf"
     ],
-    "documentation": "https://github.com/XiaoMi/ha_xiaomi_home/blob/main/README.md",
+    "documentation": "https://github.com/topsworld/ha_xiaomi_home/blob/main/README.md",
     "integration_type": "hub",
     "iot_class": "cloud_polling",
-    "issue_tracker": "https://github.com/XiaoMi/ha_xiaomi_home/issues",
+    "issue_tracker": "https://github.com/topsworld/ha_xiaomi_home/issues",
     "loggers": [
         "Xiaomi Home"
     ],

@@ -2,6 +2,8 @@
 
 [English](../README.md) | [简体中文](./README_zh.md)
 
+本仓库米家集成`非小米官方维护版本`，是基于 `v0.1.5` Fork 出来的版本，该版本将会实现更多及更高阶的极客功能。
+
 米家集成是一个由小米官方提供支持的 Home Assistant 的集成组件，它可以让您在 Home Assistant 中使用小米 IoT 智能设备。
 
 ## 安装
@@ -15,7 +17,7 @@
 
 ```bash
 cd config
-git clone https://github.com/XiaoMi/ha_xiaomi_home.git
+git clone https://github.com/topsworld/ha_xiaomi_home.git
 cd ha_xiaomi_home
 ./install.sh /config
 ```
@@ -33,7 +35,7 @@ git checkout v1.0.0
 
 ### 方法 2: [HACS](https://hacs.xyz/)
 
-HACS > 右上角三个点 > Custom repositories > Repository: https://github.com/XiaoMi/ha_xiaomi_home.git & Category or Type: Integration > ADD > 点击 HACS 的 New 或 Available for download 分类下的 Xiaomi Home ，进入集成详情页  > DOWNLOAD
+HACS > 右上角三个点 > Custom repositories > Repository: https://github.com/topsworld/ha_xiaomi_home.git & Category or Type: Integration > ADD > 点击 HACS 的 New 或 Available for download 分类下的 Xiaomi Home ，进入集成详情页  > DOWNLOAD
 
 > 米家集成暂未添加到 HACS 商店，敬请期待。
 
@@ -376,7 +378,7 @@ siid、piid、eiid、aiid、value 均为十进制三位整数。
 }
 ```
 
-> 在 Home Assistant 中修改了 `custom_components/xiaomi_home/translations/` 路径下的 `specv2entity.py`、`spec_filter.json`、`multi_lang.json` 文件的内容，需要在集成配置中更新实体转换规则才能生效。方法：[设置 > 设备与服务 > 已配置 > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > 配置 > 更新实体转换规则
+> 在 Home Assistant 中修改了 `custom_components/xiaomi_home/miot/specs/` 路径下的 `specv2entity.py`、`spec_filter.json`、`multi_lang.json` 文件的内容，需要在集成配置中更新实体转换规则才能生效。方法：[设置 > 设备与服务 > 已配置 > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > 配置 > 更新实体转换规则
 
 ## 文档
 

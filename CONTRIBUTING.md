@@ -10,7 +10,7 @@ Before you start contributing, please take a moment to review the following guid
 
 ### Reporting Bugs
 
-If you encounter a bug in the project, please [open an issue](https://github.com/XiaoMi/ha_xiaomi_home/issues/new/) on GitHub and provide the detailed information about the bug, including the steps to reproduce the bug, the logs of debug level and the time when it occurs.
+If you encounter a bug in the project, please [open an issue](https://github.com/topsworld/ha_xiaomi_home/issues/new/) on GitHub and provide the detailed information about the bug, including the steps to reproduce the bug, the logs of debug level and the time when it occurs.
 
 The [method](https://www.home-assistant.io/integrations/logger/#log-filters) to set the integration's log level:
 
@@ -25,7 +25,7 @@ logger:
 
 ### Suggesting Enhancements
 
-If you have ideas for enhancements or new features, you are welcomed to [start a discussion on ideas](https://github.com/XiaoMi/ha_xiaomi_home/discussions/new?category=ideas) on GitHub to discuss your ideas.
+If you have ideas for enhancements or new features, you are welcomed to [start a discussion on ideas](https://github.com/topsworld/ha_xiaomi_home/discussions/new?category=ideas) on GitHub to discuss your ideas.
 
 ### Contributing Code
 
@@ -98,11 +98,8 @@ footer: Optional. The footer is the place to reference GitHub issues and PRs tha
 
 When contributing to this project, you agree that your contributions will be licensed under the project's [LICENSE](../LICENSE.md).
 
-
-When you submit your first pull request, GitHub Action will prompt you to sign the Contributor License Agreement (CLA). Only after you sign the CLA, your pull request will be merged.
-
 ## How to Get Help
 
-If you need help or have questions, feel free to ask in [discussions](https://github.com/XiaoMi/ha_xiaomi_home/discussions/) on GitHub.
+If you need help or have questions, feel free to ask in [discussions](https://github.com/topsworld/ha_xiaomi_home/discussions/) on GitHub.
 
 You can also contact ha_xiaomi_home@xiaomi.com

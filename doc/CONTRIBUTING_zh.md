@@ -10,7 +10,7 @@
 
 ### 报告问题
 
-如果您在项目中遇到错误，请在 GitHub 上[报告问题](https://github.com/XiaoMi/ha_xiaomi_home/issues/new/)，并提供关于错误的详细信息，包括复现步骤、 debug 级日志以及错误出现的时间。
+如果您在项目中遇到错误，请在 GitHub 上[报告问题](https://github.com/topsworld/ha_xiaomi_home/issues/new/)，并提供关于错误的详细信息，包括复现步骤、 debug 级日志以及错误出现的时间。
 
 集成开启 debug 级日志的[方法](https://www.home-assistant.io/integrations/logger/#log-filters)：
 
@@ -25,7 +25,7 @@ logger:
 
 ### 建议增强功能
 
-如果您有增强或新功能的想法，欢迎您在 GitHub 讨论区[创建想法](https://github.com/XiaoMi/ha_xiaomi_home/discussions/new?category=ideas) 。我们期待您的建议！
+如果您有增强或新功能的想法，欢迎您在 GitHub 讨论区[创建想法](https://github.com/topsworld/ha_xiaomi_home/discussions/new?category=ideas) 。我们期待您的建议！
 
 ### 贡献代码
 
@@ -98,10 +98,8 @@ footer ：（可选）关联的 issue 或 pull request 编号。
 
 在为本项目做出贡献时，您同意您的贡献遵循本项目的[许可证](../LICENSE.md) 。
 
-当您第一次提交拉取请求时，GitHub Action 会提示您签署贡献者许可协议（Contributor License Agreement，CLA）。只有签署了 CLA ，本项目才会合入您的拉取请求。
-
 ## 获取帮助
 
-如果您需要帮助或有疑问，可在 GitHub 的[讨论区](https://github.com/XiaoMi/ha_xiaomi_home/discussions/)询问。
+如果您需要帮助或有疑问，可在 GitHub 的[讨论区](https://github.com/topsworld/ha_xiaomi_home/discussions/)询问。
 
 您还可以联系 ha_xiaomi_home@xiaomi.com

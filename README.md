@@ -2,6 +2,8 @@
 
 [English](./README.md) | [简体中文](./doc/README_zh.md)
 
+Please note that the Xiaomi Home integration in this repository is `a non-officially maintained version by Xiaomi`. It is a version forked from `v0.1.5`, and this version will implement more and more advanced geek features.
+
 Xiaomi Home Integration is an integrated component of Home Assistant supported by Xiaomi official. It allows you to use Xiaomi IoT smart devices in Home Assistant.
 
 ## Installation
@@ -15,7 +17,7 @@ Xiaomi Home Integration is an integrated component of Home Assistant supported b
 
 ```bash
 cd config
-git clone https://github.com/XiaoMi/ha_xiaomi_home.git
+git clone https://github.com/topsworld/ha_xiaomi_home.git
 cd ha_xiaomi_home
 ./install.sh /config
 ```
@@ -33,7 +35,7 @@ git checkout v1.0.0
 
 ### Method 2: [HACS](https://hacs.xyz/)
 
-HACS > Overflow Menu > Custom repositories > Repository: https://github.com/XiaoMi/ha_xiaomi_home.git & Category or Type: Integration > ADD > Xiaomi Home in New or Available for download section of HACS > DOWNLOAD
+HACS > Overflow Menu > Custom repositories > Repository: https://github.com/topsworld/ha_xiaomi_home.git & Category or Type: Integration > ADD > Xiaomi Home in New or Available for download section of HACS > DOWNLOAD
 
 > Xiaomi Home has not been added to the HACS store as a default yet. It's coming soon.
 
