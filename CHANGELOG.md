@@ -3,15 +3,15 @@
 ## v0.2.0b1
 ### Added
 ### Changed
-- feat: update cloud set prop logic. (#3)
-- perf: perf miot entity init logic. (#4)
+- feat: update cloud set prop logic. [#3](https://github.com/topsworld/ha_xiaomi_home/pull/3)
+- perf: perf miot entity init logic. [#4](https://github.com/topsworld/ha_xiaomi_home/pull/4)
 - feat: update miot entity write ha state timer logic.
-- feat: update paho to 2.1.0 & fix mips test case error. (#7)
-- doc: update document. (#8)
+- feat: update paho to 2.1.0 & fix mips test case error. [#7](https://github.com/topsworld/ha_xiaomi_home/pull/7)
+- doc: update document. [#8](https://github.com/topsworld/ha_xiaomi_home/pull/8)
 ### Fixed
-- fix: dirty fix event arg, support event messages without arguments. (#5)
+- fix: dirty fix event arg, support event messages without arguments. [#5](https://github.com/topsworld/ha_xiaomi_home/pull/5)
 - fix: remove miot entity value changed logic.
-- fix: fix fan wind-reverse trans. (#9)
+- fix: fix fan wind-reverse trans. [#9](https://github.com/topsworld/ha_xiaomi_home/pull/9)
 
 ## v0.2.0b0
 This version has modified some default units of sensors. After the update, it will cause Home Assistant to pop up some compatibility prompts. You can choose to re-add the integration to resolve it.
