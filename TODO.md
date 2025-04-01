@@ -17,6 +17,7 @@ If you encounter problems during the integration process, you can create an issu
 - [ ] Optimize the logic of the equipment control link, such as information like exception capture and error prompts.
 - [ ] Optimize the device event logic.
 - [ ] Optimize the device online and offline logic, such as creating a timer to refresh the device status regularly.
+- [ ] Home Assistant will synchronize the device status information again one minute after it is restored online to avoid the device online status not being synchronized.
 - [ ] The human presence sensor can be attempted to be converted into a binary_sensor entity.
 - [ ] The status of the department's doors and windows needs to be reversed, and it should be modified according to the actual online devices.
 - [ ] The integration can try to block the subscription messages of props and events, and only process spec messages to avoid printing error logs.
