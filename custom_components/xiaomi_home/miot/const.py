@@ -55,7 +55,7 @@ MIHOME_MQTT_KEEPALIVE: int = 60
 # seconds, 3 days
 MIHOME_CERT_EXPIRE_MARGIN: int = 3600*24*3
 
-NETWORK_REFRESH_INTERVAL: int = 60
+NETWORK_REFRESH_INTERVAL: int = 30
 
 OAUTH2_CLIENT_ID: str = '2882303761520251711'
 OAUTH2_AUTH_URL: str = 'https://account.xiaomi.com/oauth2/authorize'
