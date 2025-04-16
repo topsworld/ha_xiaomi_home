@@ -2,7 +2,7 @@
 
 [English](./README.md) | [简体中文](./doc/README_zh.md)
 
-Please note that the Xiaomi Home integration in this repository is `a non-officially maintained version by Xiaomi`. It is a version forked from `v0.1.5`, and this version will implement more and more advanced geek features.
+> **NOTE: Please note that the Xiaomi Home integration in this repository is `a non-officially maintained version`, which is a fork based on `v0.1.5`. This version will implement more and more advanced geek features.**
 
 Xiaomi Home Integration is an integrated component of Home Assistant supported by Xiaomi official. It allows you to use Xiaomi IoT smart devices in Home Assistant.
 

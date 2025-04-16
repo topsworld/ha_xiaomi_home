@@ -77,7 +77,13 @@ class NetworkInfo:
 
 
 class MIoTNetwork:
-    """MIoT network utilities."""
+    """MIoT network utilities.
+    - Periodic (30s) detection of network status and network information
+    - Each time, the IP or HTTP address with the smallest delay will be detected first
+    - All IP Ping and HTTP Get delays will be detected when initializing or disconnected
+    - Network status will be detected by IP Ping first. If Ping fails, the network status will be detected by HTTP Get
+    - If the offline counter is greater than 3 (about 90s), the network will be considered disconnected
+    """
     _IP_ADDRESS_LIST: list[str] = [
         '1.2.4.8',          # CNNIC sDNS
         '8.8.8.8',          # Google Public DNS
@@ -90,6 +96,7 @@ class MIoTNetwork:
     ]
     _REFRESH_INTERVAL = 30
     _DETECT_TIMEOUT = 6
+    _DETECT_OFFLINE_COUNT = 3
 
     _main_loop: asyncio.AbstractEventLoop
 
@@ -103,6 +110,7 @@ class MIoTNetwork:
 
     _network_status: bool
     _network_info: dict[str, NetworkInfo]
+    _offline_count: int
 
     _sub_list_network_status: dict[str, Callable[[bool], Coroutine]]
     _sub_list_network_info: dict[str, Callable[[
@@ -131,6 +139,7 @@ class MIoTNetwork:
 
         self._network_status = False
         self._network_info = {}
+        self._offline_count = 0
 
         self._sub_list_network_status = {}
         self._sub_list_network_info = {}
@@ -217,6 +226,7 @@ class MIoTNetwork:
                 ip_ts < self._DETECT_TIMEOUT
                 and await self.ping_multi_async(ip_list=[ip_addr])
             ):
+                self.__offline_count_reset()
                 return True
             url_addr: str = ''
             url_ts: float = self._DETECT_TIMEOUT
@@ -228,11 +238,16 @@ class MIoTNetwork:
                 url_ts < self._DETECT_TIMEOUT
                 and await self.http_multi_async(url_list=[url_addr])
             ):
+                self.__offline_count_reset()
                 return True
             # Detect all addresses
             results = await asyncio.gather(
                 *[self.ping_multi_async(), self.http_multi_async()])
-            return any(results)
+            if any(results):
+                self.__offline_count_reset()
+            else:
+                self.__offline_count_inc()
+            return self.__offline_result()
         except Exception as err:  # pylint: disable=broad-exception-caught
             _LOGGER.error('get network status error, %s', err)
         return False
@@ -380,3 +395,12 @@ class MIoTNetwork:
                 self.__update_status_and_info_async())
         self._refresh_timer = self._main_loop.call_later(
             self._refresh_interval, self.__refresh_timer_handler)
+
+    def __offline_count_reset(self) -> None:
+        self._offline_count = 0
+
+    def __offline_count_inc(self) -> None:
+        self._offline_count += 1
+
+    def __offline_result(self) -> bool:
+        return self._offline_count >= self._DETECT_OFFLINE_COUNT
