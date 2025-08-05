@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.2.0
+### Added
+### Changed
+- 0.2.0 version without any new features
+### Fixed
+
 ## v0.2.0b1
 ### Added
 ### Changed
