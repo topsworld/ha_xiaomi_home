@@ -1,8 +1,19 @@
-# Home Assistant 米家集成
+<H1 align="center">Home Assistant 米家集成</H1>
+<p align="center">
+  <a href="https://trendshift.io/repositories/12491" target="_blank"><img src="https://trendshift.io/api/badge/repositories/12491" alt="XiaoMi/ha_xiaomi_home | Trendshift" style="width: 240px; height: auto;" /></a>
+</p>
+<p align="center">
+  <a href="https://github.com/topsworld/ha_xiaomi_home/releases"><img src="https://img.shields.io/github/v/release/topsworld/ha_xiaomi_home" alt="GitHub release"></a>
+  <a href="https://github.com/topsworld/ha_xiaomi_home"><img src="https://img.shields.io/github/stars/topsworld/ha_xiaomi_home?color=%231890FF&style=flat-square" alt="Stars"></a><br>
+</p>
+<p align="center">
+  <a href="/README.md"><img alt="English" src="https://img.shields.io/badge/English-d9d9d9"></a>
+  <a href="/doc/README_zh.md"><img alt="中文(简体)" src="https://img.shields.io/badge/中文(简体)-d9d9d9"></a>
+</p>
 
-[English](../README.md) | [简体中文](./README_zh.md)
+------------------------------
 
-本仓库米家集成`非小米官方维护版本`，是基于 `v0.1.5` Fork 出来的版本，该版本将会实现更多及更高阶的极客功能。
+本仓库米家集成`非官方维护版本`，是基于 `v0.1.5` Fork 出来的版本，该版本将会实现更多及更高阶的极客功能。
 
 米家集成是一个由小米官方提供支持的 Home Assistant 的集成组件，它可以让您在 Home Assistant 中使用小米 IoT 智能设备。
 
