@@ -858,8 +858,8 @@ class MIoTHttpClient:
             timeout=10)
         if http_res.status != 200:
             _LOGGER.info(
-                f'get urn by model failed, {http_res.status}, '
-                f'{model}, {version}')
+                'get urn by model failed, %s, %s, %s',
+                http_res.status, model, version)
             return None
         res_obj: Dict = await http_res.json()
         if not isinstance(res_obj, Dict):
