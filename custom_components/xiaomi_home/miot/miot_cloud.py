@@ -52,7 +52,7 @@ import json
 import logging
 import re
 import time
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 from urllib.parse import urlencode
 import aiohttp
 
@@ -541,6 +541,7 @@ class MIoTHttpClient:
             raise MIoTHttpError('invalid response result')
         res_obj = res_obj['result']
 
+        urn_buffer = {}
         for device in res_obj.get('list', []) or []:
             did = device.get('did', None)
             name = device.get('name', None)
@@ -550,10 +551,20 @@ class MIoTHttpClient:
                 _LOGGER.info(
                     'invalid device, cloud, %s', device)
                 continue
-            if urn is None or model is None:
+            if model is None:
                 _LOGGER.info(
-                    'missing the urn|model field, cloud, %s', device)
+                    'missing the model field, cloud, %s', device)
                 continue
+            if urn is None:
+                if model in urn_buffer:
+                    urn = urn_buffer[model]
+                else:
+                    urn = await self.get_urn_by_model_async(model=model)
+                    urn_buffer[model] = urn
+                if not urn:
+                    _LOGGER.info(
+                        'missing the urn field, cloud, %s', device)
+                    continue
             if did.startswith('miwifi.'):
                 # The miwifi.* routers defined SPEC functions, but none of them
                 # were implemented.
@@ -833,3 +844,25 @@ class MIoTHttpClient:
             raise MIoTHttpError('invalid response result')
 
         return res_obj['result']
+
+    async def get_urn_by_model_async(
+        self, model: str, version: int = 0
+    ) -> Optional[str]:
+        """Get urn by model."""
+        http_res = await self._session.get(
+            url='https://miot-spec.org/internal/urn-by-model-version',
+            params={
+                'model': model,
+                'version': 0
+            },
+            timeout=10)
+        if http_res.status != 200:
+            _LOGGER.info(
+                'get urn by model failed, %s, %s, %s',
+                http_res.status, model, version)
+            return None
+        res_obj: Dict = await http_res.json()
+        if not isinstance(res_obj, Dict):
+            return None
+        _LOGGER.debug('get urn by model, %s, %s', model, res_obj)
+        return res_obj.get('urn', None)
