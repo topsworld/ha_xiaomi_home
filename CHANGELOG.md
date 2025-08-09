@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.2.1b0
+### Added
+### Changed
+- perf: get device info logic. [#12](https://github.com/topsworld/ha_xiaomi_home/pull/12)
+### Fixed
+
 ## v0.2.0
 ### Added
 ### Changed
